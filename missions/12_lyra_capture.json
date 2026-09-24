@@ -83,8 +83,8 @@
   },
   "reference": {
     "solution": "; Tightening the Knot \u2014 coast to periapsis, then brake there.\n        ORIENT  RETROGRADE\n        WAIT    UNTIL TPERI < 25\n        THROTTLE 1\n        BURN    UNTIL ECC < 0.25\n        THROTTLE 0\n        HALT",
-    "fuel_used": 94.028,
-    "elapsed": 3531.219,
+    "fuel_used": 94.0281798,
+    "elapsed": 3531.21875,
     "ticks": 225998,
     "instructions": 6,
     "state_hash": "d210ff40735f85be",

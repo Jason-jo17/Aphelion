@@ -13,8 +13,9 @@ import math
 import det_math as dm
 import sim
 
-RAD_TO_DEG = 57.295779513082320876798154814105
-DEG_TO_RAD = 0.01745329251994329576923690768489
+# Derived, not written out; see the note in scripts/controller_vm/sensor_bus.gd.
+RAD_TO_DEG = 180.0 / dm.PI_D
+DEG_TO_RAD = dm.PI_D / 180.0
 INF = math.inf
 
 # --- ISA --------------------------------------------------------------------

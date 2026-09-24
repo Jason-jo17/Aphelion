@@ -66,8 +66,8 @@
   },
   "reference": {
     "solution": "; Circular Reasoning \u2014 raise periapsis at apoapsis, then trim apoapsis.\n        ORIENT  PROGRADE\n        WAIT    UNTIL TAPO < 6\n        THROTTLE 0.35\n        BURN    UNTIL PERI > 149500\n        THROTTLE 0\n        ORIENT  RETROGRADE\n        WAIT    UNTIL TPERI < 6\n        THROTTLE 0.35\n        BURN    UNTIL APO < 150500\n        HALT",
-    "fuel_used": 38.406,
-    "elapsed": 2461.781,
+    "fuel_used": 38.4056161,
+    "elapsed": 2461.78125,
     "ticks": 157554,
     "instructions": 10,
     "state_hash": "be37c0347cf11dc0",

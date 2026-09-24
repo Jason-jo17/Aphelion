@@ -65,8 +65,8 @@
   },
   "reference": {
     "solution": "; Thick Air \u2014 brake on the shield, decide at apoapsis, then lift clear.\n        ORIENT  RETROGRADE\ncheck:  WAIT    UNTIL TAPO < 6\n        IF      APO > 200000\n        JMP     again\n        JMP     lift\nagain:  WAIT    120\n        JMP     check\nlift:   ORIENT  PROGRADE\n        THROTTLE 1\n        BURN    UNTIL PERI > 74000\n        HALT",
-    "fuel_used": 5.911,
-    "elapsed": 25736.047,
+    "fuel_used": 5.9113983,
+    "elapsed": 25736.046875,
     "ticks": 1647107,
     "instructions": 11,
     "state_hash": "89a04019d161a270",

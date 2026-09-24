@@ -12,8 +12,13 @@ extends RefCounted
 ## times in one tick reads the same number five times, which is both faster and
 ## less surprising than re-deriving it mid-instruction.
 
-const RAD_TO_DEG := 57.295779513082320876798154814105
-const DEG_TO_RAD := 0.01745329251994329576923690768489
+# Derived rather than written out. Spelling 180/pi as a 32-digit literal looks
+# more precise than a division, but Godot's float parser is not correctly
+# rounded on long mantissas, so the literal landed on a different double than
+# the Python reference did — and every angle the VM reads or writes goes
+# through these. One division of two exact operands cannot drift.
+const RAD_TO_DEG := 180.0 / DetMath.PI_D
+const DEG_TO_RAD := DetMath.PI_D / 180.0
 
 var world: SimWorld = null
 var profile: ShipProfile = null

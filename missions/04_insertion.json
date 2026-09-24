@@ -52,8 +52,8 @@
   },
   "reference": {
     "solution": "; Insertion \u2014 gravity turn to a 100 km apoapsis, coast, circularise.\n        THROTTLE 1\n        POINT   RAD\n        BURN    UNTIL ALT > 600\nturn:   SENSE   R0, ALT\n        DIV     R0, 20000\n        MIN     R0, 1\n        MUL     R0, 84\n        SET     R1, RAD\n        SUB     R1, R0\n        POINT   R1\n        BURN    0.25\n        IF      APO < 105000\n        JMP     turn\n        ORIENT  PROGRADE\n        WAIT    UNTIL TAPO < 22\n        BURN    UNTIL PERI > 95000\n        HALT",
-    "fuel_used": 4375.22,
-    "elapsed": 355.891,
+    "fuel_used": 4375.2198763,
+    "elapsed": 355.890625,
     "ticks": 22777,
     "instructions": 17,
     "state_hash": "d9f5c0640b9b34e4",

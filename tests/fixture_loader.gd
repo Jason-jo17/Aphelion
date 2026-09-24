@@ -3,11 +3,12 @@ extends RefCounted
 
 ## Reads tests/fixtures/*.json, the golden values produced by tools/refsim.
 ##
-## Floats are stored as the shortest string that round-trips exactly, so
-## `to_float()` gives back the identical double and the tests can compare with
-## `==` rather than a tolerance. That is the point: these fixtures exist to
-## prove the shipped GDScript and the Python reference agree *bit for bit*, and
-## a tolerance would hide exactly the drift they are there to catch.
+## Floats arrive as "<decimal>|<hex of the 8 bytes>" and are decoded from the
+## bytes, never from the decimal. Godot's float parser is not correctly rounded
+## — it lands up to 4 ULP away on some 16-digit values — so reading the decimal
+## would let a parser difference masquerade as a physics difference. These
+## fixtures exist to prove the shipped GDScript and the Python reference agree
+## *bit for bit*; the decimal is only there so a human can read a diff.
 
 const DIR := "res://tests/fixtures/"
 
@@ -26,7 +27,24 @@ static func num(v: Variant) -> float:
 		return float(v)
 	var s := String(v).strip_edges()
 	match s:
-		"inf", "+inf", "Infinity": return INF
-		"-inf", "-Infinity": return -INF
-		"nan": return NAN
-	return s.to_float()
+		"inf", "+inf", "Infinity":
+			return INF
+		"-inf", "-Infinity":
+			return -INF
+		"nan":
+			return NAN
+	var bar := s.find("|")
+	if bar == -1:
+		push_error("FixtureLoader: %s carries no bit pattern; regenerate the fixtures" % s)
+		return NAN
+	return from_bits(s.substr(bar + 1))
+
+
+## Decodes 16 hex digits — the eight little-endian bytes of a double — back
+## into the exact value Python wrote out.
+static func from_bits(hex: String) -> float:
+	var bytes := hex.hex_decode()
+	if bytes.size() != 8:
+		push_error("FixtureLoader: %s is not eight bytes" % hex)
+		return NAN
+	return bytes.decode_double(0)

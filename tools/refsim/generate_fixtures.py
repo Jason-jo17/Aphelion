@@ -5,15 +5,19 @@ apart. Both use IEEE-754 doubles and only correctly-rounded primitives, so they
 must agree bit for bit; the fixtures freeze that agreement, and CI checks it on
 every push.
 
-Floats are written with Python's repr, which is the shortest string that
-round-trips exactly. GDScript's String.to_float() goes through strtod and is
-correctly rounded, so the value it reads back is bit-identical — which is why
-the tests can compare with == rather than a tolerance.
+Floats are written as "<repr>|<little-endian hex of the 8 bytes>". The repr is
+there so a human can read a diff; the hex is what the tests actually load.
+Godot's float parser is not correctly rounded — it lands up to 4 ULP away on
+some 16-digit values — so a decimal string is not a safe way to hand a double
+from Python to GDScript, even when it is the shortest round-tripping one. The
+bytes are. That is what lets the tests compare with == rather than a tolerance,
+which is the whole point of these fixtures.
 """
 
 import json
 import math
 import os
+import struct
 
 import det_math as dm
 import runner
@@ -21,16 +25,79 @@ import ships
 import sim
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
-_FIXTURES = os.path.normpath(os.path.join(_HERE, "..", "..", "tests", "fixtures"))
+_ROOT = os.path.normpath(os.path.join(_HERE, "..", ".."))
+_FIXTURES = os.path.join(_ROOT, "tests", "fixtures")
 
 
 def f(x):
-    """Exact, round-trippable representation."""
+    """Readable decimal plus the exact bytes; see the module docstring."""
     if math.isinf(x):
         return "inf" if x > 0 else "-inf"
     if math.isnan(x):
         return "nan"
-    return repr(x)
+    return "%r|%s" % (x, struct.pack("<d", x).hex())
+
+
+def constants_fixture():
+    """Bit patterns for every constant DetMath depends on.
+
+    This exists because of a real bug. `_PIO2_1` was written out to 21
+    significant digits, the way fdlibm prints it — and GDScript's float parser
+    rounded that literal one ULP differently from Python's. The two
+    implementations then disagreed about sin() for every argument above a few
+    hundred radians, silently, while every other test passed.
+
+    Comparing the raw bits of each constant turns "the two parsers agree" from
+    an assumption into something CI checks. Literals are now written in their
+    shortest round-trip form, which both parsers handle identically.
+    """
+    def bits(v):
+        return struct.pack("<d", v).hex()
+
+    out = {"scalars": {}, "arrays": {}}
+    for name in sorted(dir(dm)):
+        value = getattr(dm, name)
+        if isinstance(value, float) and not name.startswith("__"):
+            out["scalars"][name] = {"repr": repr(value), "bits": bits(value)}
+    for name in ("_ATAN_HI", "_ATAN_LO", "_AT"):
+        out["arrays"][name] = [{"repr": repr(v), "bits": bits(v)}
+                               for v in getattr(dm, name)]
+    return out
+
+
+def data_literals_fixture():
+    """Every float literal in data/ and missions/, with the bits Python reads.
+
+    Godot's float parser is not correctly rounded, and on long fractions it is
+    not even close: it read Halcyon's rotation rate, written as
+    0.0002908882086657216, twenty-nine ULP away from the double Python got,
+    which was enough to give four missions a different final state hash while
+    every other test passed.
+
+    Data files are the one place a decimal still has to survive a parser, so
+    this fixture pins what each one must come out as. A literal that fails the
+    matching GUT test should be shortened, or replaced by something the loader
+    derives - store a rotation *period*, not a rate.
+    """
+    import re
+
+    seen = {}
+    for folder in ("data", "missions"):
+        d = os.path.join(_ROOT, folder)
+        for name in sorted(os.listdir(d)):
+            if not name.endswith(".json"):
+                continue
+            text = open(os.path.join(d, name)).read()
+            for mt in re.finditer(r'(?<![\w."])-?\d+(?:\.\d+)?(?:[eE][-+]?\d+)?(?![\w.])',
+                                  text):
+                lit = mt.group(0)
+                if not any(ch in lit for ch in ".eE"):
+                    continue          # plain integers parse exactly everywhere
+                seen.setdefault(lit, set()).add("%s/%s" % (folder, name))
+    return [{"text": lit,
+             "bits": struct.pack("<d", float(lit)).hex(),
+             "files": sorted(seen[lit])}
+            for lit in sorted(seen)]
 
 
 def det_math_fixture():
@@ -109,11 +176,12 @@ def trajectory_fixture():
         w = sim.SimWorld()
         w.add_body(sim.CelestialBody(
             id=hb["id"], mu=hb["mu"], radius=hb["radius"],
-            rotation_rate=hb["rotation_rate"], atmosphere=hb["atmosphere"]))
+            rotation_period=hb["rotation_period"], atmosphere=hb["atmosphere"]))
         lb = universe["bodies"][1]
         w.add_body(sim.CelestialBody(
             id=lb["id"], mu=lb["mu"], radius=lb["radius"],
-            rotation_rate=lb["rotation_rate"], orbit_radius=lb["orbit_radius"],
+            tidally_locked=lb.get("tidally_locked", False),
+            orbit_radius=lb["orbit_radius"],
             orbit_phase0=lb["orbit_phase0"], primary_mu=hb["mu"]))
         return w
 
@@ -191,6 +259,8 @@ def write(name, data):
 
 
 if __name__ == "__main__":
+    write("det_math_constants.json", constants_fixture())
+    write("data_literals.json", data_literals_fixture())
     write("det_math.json", det_math_fixture())
     write("orbital.json", orbital_fixture())
     write("trajectory.json", trajectory_fixture())

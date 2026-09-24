@@ -43,8 +43,8 @@
   },
   "reference": {
     "solution": "; First Light \u2014 straight up, ten kilometres.\n        THROTTLE 1\n        BURN    UNTIL ALT > 10000\n        HALT",
-    "fuel_used": 1711.211,
-    "elapsed": 41.953,
+    "fuel_used": 1711.2112699,
+    "elapsed": 41.953125,
     "ticks": 2685,
     "instructions": 3,
     "state_hash": "245f2aa56009d2c7",

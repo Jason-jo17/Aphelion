@@ -56,8 +56,8 @@
   },
   "reference": {
     "solution": "; Reaching Lyra \u2014 wait for the window, then one long prograde burn.\n        ORIENT  PROGRADE\nwindow: WAIT    2\n        SET     R0, TGTA\n        SUB     R0, RAD\n        IF      R0 < 0\n        ADD     R0, 360\n        IF      R0 > 112\n        JMP     window\n        IF      R0 < 108\n        JMP     window\n        THROTTLE 1\n        BURN    UNTIL APO > 11900000\n        THROTTLE 0\n        WAIT    UNTIL SOI >= 1\n        HALT",
-    "fuel_used": 348.588,
-    "elapsed": 21946.688,
+    "fuel_used": 348.5877706,
+    "elapsed": 21946.6875,
     "ticks": 1404588,
     "instructions": 15,
     "state_hash": "23a37c97e489ef59",

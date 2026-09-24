@@ -65,8 +65,8 @@
   },
   "reference": {
     "solution": "; Higher Ground \u2014 raise apoapsis, coast to it, raise periapsis to match.\n        ORIENT  PROGRADE\n        THROTTLE 1\n        BURN    UNTIL APO > 500000\n        THROTTLE 0\n        WAIT    UNTIL TAPO < 8\n        THROTTLE 0.5\n        BURN    UNTIL PERI > 498000\n        HALT",
-    "fuel_used": 166.073,
-    "elapsed": 1592.672,
+    "fuel_used": 166.073347,
+    "elapsed": 1592.671875,
     "ticks": 101931,
     "instructions": 8,
     "state_hash": "b8c4bccbd582a0cd",

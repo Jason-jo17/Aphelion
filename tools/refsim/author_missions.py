@@ -864,8 +864,12 @@ def main(write=False):
             spec["stars"] = thresholds_for(res)
             spec["reference"] = dict(
                 solution=entry["solution"].strip("\n"),
-                fuel_used=round(res.fuel_used, 3),
-                elapsed=round(res.elapsed, 3),
+                # Seven decimals: the integration test compares these to a
+                # live run within 1e-6, so three was too few — and full
+                # precision was too many, because a 16-digit literal is read
+                # differently by Godot's JSON parser than by Python's.
+                fuel_used=round(res.fuel_used, 7),
+                elapsed=round(res.elapsed, 7),
                 ticks=res.ticks,
                 instructions=res.instruction_count,
                 state_hash=res.state_hash,

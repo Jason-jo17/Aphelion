@@ -65,8 +65,8 @@
   },
   "reference": {
     "solution": "; Homeward \u2014 aim the shield at the air and let Halcyon catch you.\n        ORIENT  RETROGRADE\n        THROTTLE 0.2\n        BURN    UNTIL PERI < 44000\n        THROTTLE 0\n        WAIT    600\nbrake:  WAIT    UNTIL TAPO < 8\n        IF      APO > 900000\n        JMP     again\n        JMP     lift\nagain:  WAIT    120\n        JMP     brake\nlift:   ORIENT  PROGRADE\n        THROTTLE 0.5\n        BURN    UNTIL PERI > 74000\n        HALT",
-    "fuel_used": 33.676,
-    "elapsed": 29286.719,
+    "fuel_used": 33.6764974,
+    "elapsed": 29286.71875,
     "ticks": 1874350,
     "instructions": 15,
     "state_hash": "4af8702a9a4ddc6b",

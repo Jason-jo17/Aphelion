@@ -326,9 +326,11 @@ def _body(d, primary_mu):
     return sim.CelestialBody(
         id=d["id"], name=d.get("name"), mu=d["mu"], radius=d["radius"],
         rotation_rate=d.get("rotation_rate", 0.0),
+        rotation_period=d.get("rotation_period", 0.0),
         orbit_radius=d.get("orbit_radius", 0.0),
         orbit_phase0=d.get("orbit_phase0", 0.0),
         orbit_direction=d.get("orbit_direction", 1),
+        tidally_locked=d.get("tidally_locked", False),
         atmosphere=d.get("atmosphere"), primary_mu=primary_mu)
 
 

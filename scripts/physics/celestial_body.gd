@@ -112,11 +112,11 @@ func density_at_altitude(altitude: float) -> float:
 
 ## Surface (and atmosphere) velocity at a point, from the body's rotation.
 ## A launch from the equator starts with this much eastward speed for free.
-func surface_vel_x(rel_x: float, rel_y: float) -> float:
+func surface_vel_x(_rel_x: float, rel_y: float) -> float:
 	return -rotation_rate * rel_y
 
 
-func surface_vel_y(rel_x: float, rel_y: float) -> float:
+func surface_vel_y(rel_x: float, _rel_y: float) -> float:
 	return rotation_rate * rel_x
 
 
@@ -127,7 +127,13 @@ static func from_dict(d: Dictionary, primary_mu: float) -> CelestialBody:
 	b.display_name = String(d.get("name", b.id))
 	b.mu = float(d.get("mu", 0.0))
 	b.radius = float(d.get("radius", 0.0))
-	b.rotation_rate = float(d.get("rotation_rate", 0.0))
+	# Preferring a period to a rate is deliberate: a period is a round number
+	# that every parser reads identically, while the rate it implies needs
+	# sixteen significant digits. See docs/DETERMINISM.md rule 9.
+	if d.has("rotation_period") and float(d["rotation_period"]) != 0.0:
+		b.rotation_rate = DetMath.TAU_D / float(d["rotation_period"])
+	else:
+		b.rotation_rate = float(d.get("rotation_rate", 0.0))
 	b.surface_phase0 = float(d.get("surface_phase0", 0.0))
 	b.orbit_radius = float(d.get("orbit_radius", 0.0))
 	b.orbit_phase0 = float(d.get("orbit_phase0", 0.0))
@@ -139,6 +145,13 @@ static func from_dict(d: Dictionary, primary_mu: float) -> CelestialBody:
 		var n := sqrt(primary_mu / a3)
 		var dir := 1.0 if float(d.get("orbit_direction", 1.0)) >= 0.0 else -1.0
 		b.orbit_mean_motion = n * dir
+		# A tidally locked body turns once per orbit by definition, so take the
+		# rate from the orbit rather than from a literal. Writing it out would
+		# need 17 significant digits, which Godot's float parser rounds
+		# differently than Python's — and this value moves the surface a lander
+		# is aiming at.
+		if bool(d.get("tidally_locked", false)):
+			b.rotation_rate = b.orbit_mean_motion
 		# Hill sphere: a * (m/M)^(2/5).
 		b.soi_radius = b.orbit_radius * DetMath.pow(b.mu / primary_mu, 0.4)
 	else:

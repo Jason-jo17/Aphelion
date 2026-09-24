@@ -55,8 +55,8 @@
   },
   "reference": {
     "solution": "; The Whole Job \u2014 pad to Lyra, hands off.\n        THROTTLE 1\n        POINT   RAD\n        BURN    UNTIL ALT > 900\nturn:   SENSE   R0, ALT\n        DIV     R0, 34000\n        MIN     R0, 1\n        MUL     R0, 86\n        SET     R1, RAD\n        SUB     R1, R0\n        POINT   R1\n        BURN    0.25\n        IF      APO < 152000\n        JMP     turn\n        THROTTLE 0\n        ORIENT  PROGRADE\n        WAIT    UNTIL TAPO < 25\n        THROTTLE 1\n        BURN    UNTIL PERI > 148000\n        THROTTLE 0\nwindow: WAIT    2\n        SET     R0, TGTA\n        SUB     R0, RAD\n        IF      R0 < 0\n        ADD     R0, 360\n        IF      R0 > 113\n        JMP     window\n        IF      R0 < 107\n        JMP     window\n        ORIENT  PROGRADE\n        THROTTLE 1\n        BURN    UNTIL APO > 11900000\n        THROTTLE 0\n        WAIT    UNTIL SOI >= 1\n        HALT",
-    "fuel_used": 9213.773,
-    "elapsed": 25608.781,
+    "fuel_used": 9213.7733069,
+    "elapsed": 25608.78125,
     "ticks": 1638962,
     "instructions": 34,
     "state_hash": "afe8ec6c14752754",

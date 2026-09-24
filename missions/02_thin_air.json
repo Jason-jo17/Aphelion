@@ -52,8 +52,8 @@
   },
   "reference": {
     "solution": "; Thin Air \u2014 burn until the apoapsis clears the air, then stop and coast.\n        THROTTLE 1\n        BURN    UNTIL APO > 78000\n        HALT",
-    "fuel_used": 2578.607,
-    "elapsed": 158.016,
+    "fuel_used": 2578.6073736,
+    "elapsed": 158.015625,
     "ticks": 10113,
     "instructions": 3,
     "state_hash": "f24d1b6f84ebda25",

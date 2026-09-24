@@ -35,12 +35,16 @@ INF = math.inf
 class CelestialBody:
     def __init__(self, id="", mu=0.0, radius=0.0, rotation_rate=0.0,
                  orbit_radius=0.0, orbit_phase0=0.0, orbit_direction=1.0,
-                 atmosphere=None, primary_mu=0.0, name=None):
+                 atmosphere=None, primary_mu=0.0, name=None,
+                 tidally_locked=False, rotation_period=0.0):
         self.id = id
         self.display_name = name or id
         self.mu = mu
         self.radius = radius
-        self.rotation_rate = rotation_rate
+        # A period, when given, wins: see the note in
+        # scripts/physics/celestial_body.gd.
+        self.rotation_rate = (dm.TAU_D / rotation_period if rotation_period
+                              else rotation_rate)
         self.orbit_radius = orbit_radius
         self.orbit_phase0 = orbit_phase0
         self.atmo_height = 0.0
@@ -55,6 +59,9 @@ class CelestialBody:
             n = math.sqrt(primary_mu / a3)
             self.orbit_mean_motion = n * (1.0 if orbit_direction >= 0 else -1.0)
             self.soi_radius = orbit_radius * dm.pow(mu / primary_mu, 0.4)
+            # See the note in scripts/physics/celestial_body.gd.
+            if tidally_locked:
+                self.rotation_rate = self.orbit_mean_motion
         else:
             self.orbit_mean_motion = 0.0
             self.soi_radius = INF
@@ -278,7 +285,7 @@ def elements(mu, rx, ry, vx, vy):
             nu = dm.TAU_D - nu
     out["nu"] = nu
     if ecc < 1.0 and a > 0.0:
-        n = math.sqrt(mu / (a ** 3))
+        n = math.sqrt(mu / (a * a * a))
         if n > 0.0:
             half = nu * 0.5
             sq1 = math.sqrt(max(0.0, 1.0 - ecc))
@@ -288,7 +295,7 @@ def elements(mu, rx, ry, vx, vy):
             out["t_peri"] = (dm.TAU_D - m) / n if m > 0.0 else 0.0
             out["t_apo"] = dm.wrap_tau(dm.PI_D - m) / n
     elif ecc > 1.0 and a < 0.0:
-        n_h = math.sqrt(mu / ((-a) ** 3))
+        n_h = math.sqrt(mu / (-a * -a * -a))
         if n_h > 0.0:
             half_h = dm.wrap_angle(nu) * 0.5
             c = dm.cos(half_h)

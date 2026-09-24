@@ -6,6 +6,8 @@ Kept in one place so that tuning a constant here and regenerating
 
 import math
 
+import det_math as dm
+
 HALCYON = dict(
     id="halcyon",
     name="Halcyon",
@@ -23,13 +25,24 @@ LYRA = dict(
     radius=200_000.0,
     orbit_radius=12_000_000.0,
     orbit_phase0=0.0,
-    rotation_period=136_000.0,
+    tidally_locked=True,   # spin period == orbital period, derived below
     color="#b9bec9",
 )
 
 
 def rotation_rate(period_s):
-    return 2.0 * math.pi / period_s
+    """Spin rate from a period. Shared by the GDScript loader, which derives it
+    the same way rather than reading a rate out of the data file."""
+    return dm.TAU_D / period_s
+
+
+def mean_motion(primary_mu, a):
+    """Circular mean motion, and so the spin rate of a tidally locked body.
+
+    Repeated multiplication rather than ``a ** 3``: the two differ in the last
+    bit, and this feeds the moon's position for the whole flight.
+    """
+    return math.sqrt(primary_mu / (a * a * a))
 
 
 def summary():
@@ -47,7 +60,7 @@ def summary():
         lines.append(f"  alt {alt/1000:6.0f} km -> r={r/1000:7.1f} km  "
                      f"v_circ={v:7.1f} m/s  T={T:8.1f} s ({T/60:.1f} min)")
     a = LYRA["orbit_radius"]
-    n = math.sqrt(mu / a ** 3)
+    n = math.sqrt(mu / (a * a * a))
     soi = a * (LYRA["mu"] / mu) ** 0.4
     lines.append(f"Lyra: a={a/1e6:.1f} Mm  T={2*math.pi/n/3600:.2f} h  "
                  f"v={a*n:.1f} m/s  SOI={soi/1000:.0f} km  "

@@ -45,8 +45,8 @@
   },
   "reference": {
     "solution": "; Touchdown \u2014 cancel the orbit, then fly a computed throttle all the way down.\n        ORIENT  RETROGRADE\n        THROTTLE 1\n        BURN    UNTIL VEL < 8\n        THROTTLE 0\n        POINT   RADIAL\n        WAIT    UNTIL ALT < 15000\ndescend:\n        SENSE   R0, ALT\n        MUL     R0, 0.09          ; descend at 9% of your altitude per second\n        MIN     R0, 55\n        MAX     R0, 3\n        NEG     R0                ; ...downward\n        SUB     R0, VVEL          ; error\n        MUL     R0, 0.6           ; gain\n        ADD     R0, GRAV          ; plus enough to hover\n        SET     R1, TWR\n        MUL     R1, GRAV          ; the most acceleration this ship has\n        DIV     R0, R1            ; -> throttle\n        MAX     R0, 0\n        MIN     R0, 1\n        THROTTLE R0\n        BURN    0.1\n        IF      ALT > 3\n        JMP     descend\n        THROTTLE 0\n        WAIT    UNTIL LANDED == 1\n        HALT",
-    "fuel_used": 533.926,
-    "elapsed": 555.516,
+    "fuel_used": 533.9263246,
+    "elapsed": 555.515625,
     "ticks": 35553,
     "instructions": 26,
     "state_hash": "85e3012baf74f2ed",

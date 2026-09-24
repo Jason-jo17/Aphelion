@@ -1,0 +1,680 @@
+[
+ {
+  "text": "-1556087.936",
+  "bits": "2db29def77be37c1",
+  "files": [
+   "missions/12_lyra_capture.json"
+  ]
+ },
+ {
+  "text": "0.0",
+  "bits": "0000000000000000",
+  "files": [
+   "data/universe.json",
+   "missions/11_reaching_lyra.json",
+   "missions/12_lyra_capture.json",
+   "missions/15_the_whole_job.json"
+  ]
+ },
+ {
+  "text": "0.0005",
+  "bits": "fca9f1d24d62403f",
+  "files": [
+   "missions/08_station_keeping.json",
+   "missions/09_long_way_round.json"
+  ]
+ },
+ {
+  "text": "0.0008",
+  "bits": "2d431cebe2364a3f",
+  "files": [
+   "missions/09_long_way_round.json"
+  ]
+ },
+ {
+  "text": "0.00714",
+  "bits": "5721e527d53e7d3f",
+  "files": [
+   "missions/08_station_keeping.json"
+  ]
+ },
+ {
+  "text": "0.01",
+  "bits": "7b14ae47e17a843f",
+  "files": [
+   "missions/05_circular_reasoning.json"
+  ]
+ },
+ {
+  "text": "0.02",
+  "bits": "7b14ae47e17a943f",
+  "files": [
+   "missions/06_higher_ground.json"
+  ]
+ },
+ {
+  "text": "0.05",
+  "bits": "9a9999999999a93f",
+  "files": [
+   "missions/08_station_keeping.json"
+  ]
+ },
+ {
+  "text": "0.09",
+  "bits": "0ad7a3703d0ab73f",
+  "files": [
+   "missions/13_touchdown.json"
+  ]
+ },
+ {
+  "text": "0.1",
+  "bits": "9a9999999999b93f",
+  "files": [
+   "missions/13_touchdown.json"
+  ]
+ },
+ {
+  "text": "0.19",
+  "bits": "52b81e85eb51c83f",
+  "files": [
+   "missions/09_long_way_round.json"
+  ]
+ },
+ {
+  "text": "0.2",
+  "bits": "9a9999999999c93f",
+  "files": [
+   "missions/09_long_way_round.json",
+   "missions/14_homeward.json"
+  ]
+ },
+ {
+  "text": "0.25",
+  "bits": "000000000000d03f",
+  "files": [
+   "missions/03_sideways.json",
+   "missions/04_insertion.json",
+   "missions/12_lyra_capture.json",
+   "missions/15_the_whole_job.json"
+  ]
+ },
+ {
+  "text": "0.35",
+  "bits": "666666666666d63f",
+  "files": [
+   "missions/05_circular_reasoning.json"
+  ]
+ },
+ {
+  "text": "0.3971721",
+  "bits": "958d1887446bd93f",
+  "files": [
+   "missions/08_station_keeping.json"
+  ]
+ },
+ {
+  "text": "0.4",
+  "bits": "9a9999999999d93f",
+  "files": [
+   "missions/07_aerobrake.json",
+   "missions/09_long_way_round.json",
+   "missions/12_lyra_capture.json"
+  ]
+ },
+ {
+  "text": "0.5",
+  "bits": "000000000000e03f",
+  "files": [
+   "missions/06_higher_ground.json",
+   "missions/14_homeward.json"
+  ]
+ },
+ {
+  "text": "0.6",
+  "bits": "333333333333e33f",
+  "files": [
+   "missions/13_touchdown.json"
+  ]
+ },
+ {
+  "text": "0.8",
+  "bits": "9a9999999999e93f",
+  "files": [
+   "data/universe.json",
+   "missions/02_thin_air.json"
+  ]
+ },
+ {
+  "text": "0.85",
+  "bits": "333333333333eb3f",
+  "files": [
+   "missions/14_homeward.json"
+  ]
+ },
+ {
+  "text": "1.0",
+  "bits": "000000000000f03f",
+  "files": [
+   "data/parts.json",
+   "missions/10_slip_the_leash.json"
+  ]
+ },
+ {
+  "text": "1.625",
+  "bits": "000000000000fa3f",
+  "files": [
+   "data/universe.json"
+  ]
+ },
+ {
+  "text": "10.0",
+  "bits": "0000000000002440",
+  "files": [
+   "missions/08_station_keeping.json",
+   "missions/09_long_way_round.json"
+  ]
+ },
+ {
+  "text": "100.203125",
+  "bits": "00000000000d5940",
+  "files": [
+   "missions/03_sideways.json"
+  ]
+ },
+ {
+  "text": "110.0",
+  "bits": "0000000000805b40",
+  "files": [
+   "data/parts.json"
+  ]
+ },
+ {
+  "text": "1100.0",
+  "bits": "0000000000309140",
+  "files": [
+   "data/parts.json"
+  ]
+ },
+ {
+  "text": "11627722.772",
+  "bits": "5839b458992d6641",
+  "files": [
+   "missions/12_lyra_capture.json"
+  ]
+ },
+ {
+  "text": "12.0",
+  "bits": "0000000000002840",
+  "files": [
+   "data/parts.json"
+  ]
+ },
+ {
+  "text": "120.0",
+  "bits": "0000000000005e40",
+  "files": [
+   "data/parts.json"
+  ]
+ },
+ {
+  "text": "12000.0",
+  "bits": "000000000070c740",
+  "files": [
+   "data/parts.json"
+  ]
+ },
+ {
+  "text": "120000.0",
+  "bits": "00000000004cfd40",
+  "files": [
+   "data/parts.json"
+  ]
+ },
+ {
+  "text": "12000000.0",
+  "bits": "0000000060e36641",
+  "files": [
+   "data/universe.json",
+   "missions/11_reaching_lyra.json",
+   "missions/15_the_whole_job.json"
+  ]
+ },
+ {
+  "text": "15000.0",
+  "bits": "00000000004ccd40",
+  "files": [
+   "data/parts.json"
+  ]
+ },
+ {
+  "text": "15422.34375",
+  "bits": "000000002c1fce40",
+  "files": [
+   "missions/09_long_way_round.json"
+  ]
+ },
+ {
+  "text": "158.015625",
+  "bits": "0000000080c06340",
+  "files": [
+   "missions/02_thin_air.json"
+  ]
+ },
+ {
+  "text": "1592.671875",
+  "bits": "00000000b0e29840",
+  "files": [
+   "missions/06_higher_ground.json"
+  ]
+ },
+ {
+  "text": "166.073347",
+  "bits": "50c8cedb58c26440",
+  "files": [
+   "missions/06_higher_ground.json"
+  ]
+ },
+ {
+  "text": "1711.2112699",
+  "bits": "84fc2257d8bc9a40",
+  "files": [
+   "missions/01_first_light.json"
+  ]
+ },
+ {
+  "text": "180.0",
+  "bits": "0000000000806640",
+  "files": [
+   "data/parts.json"
+  ]
+ },
+ {
+  "text": "186.2",
+  "bits": "6666666666466740",
+  "files": [
+   "data/universe.json"
+  ]
+ },
+ {
+  "text": "2.0944",
+  "bits": "6ff085c954c10040",
+  "files": [
+   "missions/09_long_way_round.json"
+  ]
+ },
+ {
+  "text": "2.2",
+  "bits": "9a99999999990140",
+  "files": [
+   "missions/02_thin_air.json"
+  ]
+ },
+ {
+  "text": "200000.0",
+  "bits": "00000000006a0841",
+  "files": [
+   "data/universe.json"
+  ]
+ },
+ {
+  "text": "2006.0",
+  "bits": "0000000000589f40",
+  "files": [
+   "missions/08_station_keeping.json"
+  ]
+ },
+ {
+  "text": "21600.0",
+  "bits": "000000000018d540",
+  "files": [
+   "data/universe.json"
+  ]
+ },
+ {
+  "text": "21946.6875",
+  "bits": "00000000ac6ed540",
+  "files": [
+   "missions/11_reaching_lyra.json"
+  ]
+ },
+ {
+  "text": "245.3259",
+  "bits": "8638d6c56daa6e40",
+  "files": [
+   "missions/12_lyra_capture.json"
+  ]
+ },
+ {
+  "text": "2461.78125",
+  "bits": "00000000903ba340",
+  "files": [
+   "missions/05_circular_reasoning.json"
+  ]
+ },
+ {
+  "text": "25608.78125",
+  "bits": "000000003202d940",
+  "files": [
+   "missions/15_the_whole_job.json"
+  ]
+ },
+ {
+  "text": "25736.046875",
+  "bits": "000000000322d940",
+  "files": [
+   "missions/07_aerobrake.json"
+  ]
+ },
+ {
+  "text": "2578.6073736",
+  "bits": "e828acf93625a440",
+  "files": [
+   "missions/02_thin_air.json"
+  ]
+ },
+ {
+  "text": "260.0",
+  "bits": "0000000000407040",
+  "files": [
+   "data/parts.json"
+  ]
+ },
+ {
+  "text": "29286.71875",
+  "bits": "00000000ae99dc40",
+  "files": [
+   "missions/14_homeward.json"
+  ]
+ },
+ {
+  "text": "3.6864e12",
+  "bits": "0000008074d28a42",
+  "files": [
+   "data/universe.json"
+  ]
+ },
+ {
+  "text": "30.0",
+  "bits": "0000000000003e40",
+  "files": [
+   "missions/06_higher_ground.json",
+   "missions/07_aerobrake.json",
+   "missions/14_homeward.json"
+  ]
+ },
+ {
+  "text": "300.0",
+  "bits": "0000000000c07240",
+  "files": [
+   "data/parts.json"
+  ]
+ },
+ {
+  "text": "32.453125",
+  "bits": "00000000003a4040",
+  "files": [
+   "missions/10_slip_the_leash.json"
+  ]
+ },
+ {
+  "text": "33.6764974",
+  "bits": "1e6a807797d64040",
+  "files": [
+   "missions/14_homeward.json"
+  ]
+ },
+ {
+  "text": "345.0",
+  "bits": "0000000000907540",
+  "files": [
+   "data/parts.json"
+  ]
+ },
+ {
+  "text": "348.5877706",
+  "bits": "ce08258267c97540",
+  "files": [
+   "missions/11_reaching_lyra.json"
+  ]
+ },
+ {
+  "text": "3531.21875",
+  "bits": "000000007096ab40",
+  "files": [
+   "missions/12_lyra_capture.json"
+  ]
+ },
+ {
+  "text": "355.890625",
+  "bits": "00000000403e7640",
+  "files": [
+   "missions/04_insertion.json"
+  ]
+ },
+ {
+  "text": "3605.9714581",
+  "bits": "dec1f462f12bac40",
+  "files": [
+   "missions/03_sideways.json"
+  ]
+ },
+ {
+  "text": "37.8",
+  "bits": "6666666666e64240",
+  "files": [
+   "data/universe.json"
+  ]
+ },
+ {
+  "text": "38.4056161",
+  "bits": "941d763aeb334340",
+  "files": [
+   "missions/05_circular_reasoning.json"
+  ]
+ },
+ {
+  "text": "383.6866983",
+  "bits": "804b5bb7fcfa7740",
+  "files": [
+   "missions/10_slip_the_leash.json"
+  ]
+ },
+ {
+  "text": "40.0",
+  "bits": "0000000000004440",
+  "files": [
+   "data/parts.json"
+  ]
+ },
+ {
+  "text": "400.0",
+  "bits": "0000000000007940",
+  "files": [
+   "data/parts.json"
+  ]
+ },
+ {
+  "text": "4000.0",
+  "bits": "000000000040af40",
+  "files": [
+   "data/parts.json"
+  ]
+ },
+ {
+  "text": "40000.0",
+  "bits": "000000000088e340",
+  "files": [
+   "data/parts.json"
+  ]
+ },
+ {
+  "text": "41.953125",
+  "bits": "0000000000fa4440",
+  "files": [
+   "missions/01_first_light.json"
+  ]
+ },
+ {
+  "text": "4375.2198763",
+  "bits": "aa2dd0493817b140",
+  "files": [
+   "missions/04_insertion.json"
+  ]
+ },
+ {
+  "text": "4800.0",
+  "bits": "0000000000c0b240",
+  "files": [
+   "data/parts.json"
+  ]
+ },
+ {
+  "text": "5.9113983",
+  "bits": "1e85909845a51740",
+  "files": [
+   "missions/07_aerobrake.json"
+  ]
+ },
+ {
+  "text": "50.0",
+  "bits": "0000000000004940",
+  "files": [
+   "data/parts.json"
+  ]
+ },
+ {
+  "text": "500.0",
+  "bits": "0000000000407f40",
+  "files": [
+   "data/parts.json"
+  ]
+ },
+ {
+  "text": "533.9263246",
+  "bits": "d833df1c69af8040",
+  "files": [
+   "missions/13_touchdown.json"
+  ]
+ },
+ {
+  "text": "555.515625",
+  "bits": "00000000205c8140",
+  "files": [
+   "missions/13_touchdown.json"
+  ]
+ },
+ {
+  "text": "6.0",
+  "bits": "0000000000001840",
+  "files": [
+   "data/parts.json"
+  ]
+ },
+ {
+  "text": "6.5e10",
+  "bits": "000000949a442e42",
+  "files": [
+   "data/universe.json"
+  ]
+ },
+ {
+  "text": "60.0",
+  "bits": "0000000000004e40",
+  "files": [
+   "data/parts.json",
+   "missions/05_circular_reasoning.json",
+   "missions/12_lyra_capture.json"
+  ]
+ },
+ {
+  "text": "600.0",
+  "bits": "0000000000c08240",
+  "files": [
+   "data/parts.json"
+  ]
+ },
+ {
+  "text": "6000.0",
+  "bits": "000000000070b740",
+  "files": [
+   "data/universe.json"
+  ]
+ },
+ {
+  "text": "640000.0",
+  "bits": "0000000000882341",
+  "files": [
+   "data/universe.json"
+  ]
+ },
+ {
+  "text": "70000.0",
+  "bits": "000000000017f140",
+  "files": [
+   "data/universe.json"
+  ]
+ },
+ {
+  "text": "80.0",
+  "bits": "0000000000005440",
+  "files": [
+   "data/parts.json"
+  ]
+ },
+ {
+  "text": "83.4615553",
+  "bits": "e9b23d1f8add5440",
+  "files": [
+   "missions/09_long_way_round.json"
+  ]
+ },
+ {
+  "text": "840000.0",
+  "bits": "0000000080a22941",
+  "files": [
+   "missions/08_station_keeping.json"
+  ]
+ },
+ {
+  "text": "887.5207",
+  "bits": "38f8c2642abc8b40",
+  "files": [
+   "missions/12_lyra_capture.json"
+  ]
+ },
+ {
+  "text": "9.0",
+  "bits": "0000000000002240",
+  "files": [
+   "data/universe.json"
+  ]
+ },
+ {
+  "text": "90.0",
+  "bits": "0000000000805640",
+  "files": [
+   "data/parts.json"
+  ]
+ },
+ {
+  "text": "9213.7733069",
+  "bits": "a372b8fbe2fec140",
+  "files": [
+   "missions/15_the_whole_job.json"
+  ]
+ },
+ {
+  "text": "94.0281798",
+  "bits": "1adaa5b2cd815740",
+  "files": [
+   "missions/12_lyra_capture.json"
+  ]
+ },
+ {
+  "text": "940000.0",
+  "bits": "00000000c0af2c41",
+  "files": [
+   "missions/09_long_way_round.json"
+  ]
+ }
+]

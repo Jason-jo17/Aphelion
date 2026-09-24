@@ -52,8 +52,8 @@
   },
   "reference": {
     "solution": "; Sideways \u2014 climb, then tip over into a gravity turn.\n        THROTTLE 1\n        POINT   RAD\n        BURN    UNTIL ALT > 1200\nturn:   SENSE   R0, ALT\n        DIV     R0, 30000\n        MIN     R0, 1\n        MUL     R0, 80\n        SET     R1, RAD\n        SUB     R1, R0\n        POINT   R1\n        BURN    0.25\n        IF      HVEL < 1250\n        JMP     turn\n        HALT",
-    "fuel_used": 3605.971,
-    "elapsed": 100.203,
+    "fuel_used": 3605.9714581,
+    "elapsed": 100.203125,
     "ticks": 6413,
     "instructions": 14,
     "state_hash": "86756b0c2ceac605",

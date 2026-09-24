@@ -13,13 +13,13 @@ def build_world(with_moon=True):
     w = sim.SimWorld()
     h = sim.CelestialBody(
         id=U.HALCYON["id"], mu=U.HALCYON["mu"], radius=U.HALCYON["radius"],
-        rotation_rate=U.rotation_rate(U.HALCYON["rotation_period"]),
+        rotation_period=U.HALCYON["rotation_period"],
         atmosphere=U.HALCYON["atmosphere"])
     w.add_body(h)
     if with_moon:
         w.add_body(sim.CelestialBody(
             id=U.LYRA["id"], mu=U.LYRA["mu"], radius=U.LYRA["radius"],
-            rotation_rate=U.rotation_rate(U.LYRA["rotation_period"]),
+            tidally_locked=U.LYRA["tidally_locked"],
             orbit_radius=U.LYRA["orbit_radius"], orbit_phase0=U.LYRA["orbit_phase0"],
             primary_mu=U.HALCYON["mu"]))
     return w

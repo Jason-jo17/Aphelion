@@ -44,8 +44,8 @@
   },
   "reference": {
     "solution": "; Slip the Leash \u2014 burn prograde until the orbit stops being an orbit.\n        ORIENT  PROGRADE\n        THROTTLE 1\n        BURN    UNTIL ECC >= 1\n        HALT",
-    "fuel_used": 383.687,
-    "elapsed": 32.453,
+    "fuel_used": 383.6866983,
+    "elapsed": 32.453125,
     "ticks": 2077,
     "instructions": 4,
     "state_hash": "91b81e12a8190f82",

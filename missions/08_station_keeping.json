@@ -68,7 +68,7 @@
   },
   "reference": {
     "solution": "; Station Keeping \u2014 drop periapsis, coast one lap, re-circularise there.\n        ORIENT  RETROGRADE\n        THROTTLE 0.05\n        BURN    UNTIL PERI < 198700\n        THROTTLE 0\n        ORIENT  PROGRADE\n        WAIT    UNTIL TAPO < 4\n        THROTTLE 0.05\n        BURN    UNTIL ECC < 0.0005\n        HALT",
-    "fuel_used": 0.397,
+    "fuel_used": 0.3971721,
     "elapsed": 2006.0,
     "ticks": 128384,
     "instructions": 9,

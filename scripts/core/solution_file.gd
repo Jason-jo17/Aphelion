@@ -24,14 +24,15 @@ var mission_hash: String = ""
 var ship: Dictionary = {}
 var program: Dictionary = {}
 var seed: int = 0
-var recorded: Dictionary = {}    ## RunResult.to_dict() as it was when exported
+var recorded: Dictionary = {}  ## RunResult.to_dict() as it was when exported
 var author_note: String = ""
 var created_at: String = ""
 var sim_version: int = SIM_VERSION
 
 
-static func from_run(mission: Mission, ship_: Ship, program_: Program,
-		result: RunResult, note: String = "") -> SolutionFile:
+static func from_run(
+	mission: Mission, ship_: Ship, program_: Program, result: RunResult, note: String = ""
+) -> SolutionFile:
 	var s := SolutionFile.new()
 	s.mission_id = mission.id
 	s.mission_hash = result.mission_hash
@@ -45,35 +46,58 @@ static func from_run(mission: Mission, ship_: Ship, program_: Program,
 
 
 func to_json() -> String:
-	return JSON.stringify({
-		"magic": MAGIC,
-		"format_version": FORMAT_VERSION,
-		"sim_version": sim_version,
-		"mission_id": mission_id,
-		"mission_hash": mission_hash,
-		"seed": seed,
-		"ship": ship,
-		"program": program,
-		"recorded": recorded,
-		"note": author_note,
-		"created_at": created_at,
-	}, "  ")
+	return (
+		JSON
+		. stringify(
+			{
+				"magic": MAGIC,
+				"format_version": FORMAT_VERSION,
+				"sim_version": sim_version,
+				"mission_id": mission_id,
+				"mission_hash": mission_hash,
+				"seed": seed,
+				"ship": ship,
+				"program": program,
+				"recorded": recorded,
+				"note": author_note,
+				"created_at": created_at,
+			},
+			"  "
+		)
+	)
 
 
 ## Parses a solution file. Returns null and fills `error` when it cannot.
 static func from_json(text: String, error: Array[String]) -> SolutionFile:
-	var parsed: Variant = JSON.parse_string(text)
-	if typeof(parsed) != TYPE_DICTIONARY:
-		error.append("This is not a solution file — it is not valid JSON.")
+	# JSON.new().parse() rather than JSON.parse_string(): the static helper
+	# pushes an engine error for malformed input, and a player opening the wrong
+	# file is not an engine error — it is a message we want to phrase ourselves.
+	var json := JSON.new()
+	if json.parse(text) != OK:
+		error.append(
+			(
+				"This is not a solution file — it is not valid JSON (line %d: %s)."
+				% [json.get_error_line(), json.get_error_message()]
+			)
+		)
 		return null
-	var d: Dictionary = parsed
+	if typeof(json.data) != TYPE_DICTIONARY:
+		error.append("This is not a solution file — the top level is not an object.")
+		return null
+	var d: Dictionary = json.data
 	if String(d.get("magic", "")) != MAGIC:
 		error.append("This is not an Aphelion solution file.")
 		return null
 	if int(d.get("format_version", 0)) > FORMAT_VERSION:
-		error.append("This solution was written by a newer version of Aphelion "
-			+ "(format %d, this build reads %d)."
-			% [int(d.get("format_version", 0)), FORMAT_VERSION])
+		error.append(
+			(
+				"This solution was written by a newer version of Aphelion "
+				+ (
+					"(format %d, this build reads %d)."
+					% [int(d.get("format_version", 0)), FORMAT_VERSION]
+				)
+			)
+		)
 		return null
 
 	var s := SolutionFile.new()
@@ -149,8 +173,7 @@ func replay(error: Array[String]) -> Dictionary:
 
 	var prog := Program.from_dict(program)
 	if not prog.ok():
-		error.append("The program in this solution does not assemble: %s"
-			% prog.first_error_text())
+		error.append("The program in this solution does not assemble: %s" % prog.first_error_text())
 		return out
 
 	var world := MissionDB.world_for(mission)
@@ -161,22 +184,37 @@ func replay(error: Array[String]) -> Dictionary:
 
 	if sim_version != SIM_VERSION:
 		out["warnings"].append(
-			"Flown against simulation version %d; this build is version %d. "
-			% [sim_version, SIM_VERSION]
-			+ "The numbers below are from replaying it here.")
+			(
+				(
+					"Flown against simulation version %d; this build is version %d. "
+					% [sim_version, SIM_VERSION]
+				)
+				+ "The numbers below are from replaying it here."
+			)
+		)
 	if not mission_hash.is_empty() and mission_hash != result.mission_hash:
 		out["warnings"].append(
-			"Mission '%s' has changed since this solution was recorded — its "
-			% mission_id
-			+ "objectives or star thresholds are not the same.")
+			(
+				"Mission '%s' has changed since this solution was recorded — its " % mission_id
+				+ "objectives or star thresholds are not the same."
+			)
+		)
 
 	var diffs: Array[String] = []
 	_compare(diffs, "success", str(recorded.get("success", false)), str(result.success))
-	_compare(diffs, "fuel used", "%.6f" % float(recorded.get("fuel_used", 0.0)),
-		"%.6f" % result.fuel_used)
+	_compare(
+		diffs,
+		"fuel used",
+		"%.6f" % float(recorded.get("fuel_used", 0.0)),
+		"%.6f" % result.fuel_used
+	)
 	_compare(diffs, "ticks", str(int(recorded.get("ticks", 0))), str(result.ticks))
-	_compare(diffs, "instructions", str(int(recorded.get("instruction_count", 0))),
-		str(result.instruction_count))
+	_compare(
+		diffs,
+		"instructions",
+		str(int(recorded.get("instruction_count", 0))),
+		str(result.instruction_count)
+	)
 	_compare(diffs, "stars", str(int(recorded.get("stars", 0))), str(result.stars))
 	var recorded_hash := String(recorded.get("state_hash", ""))
 	if not recorded_hash.is_empty():

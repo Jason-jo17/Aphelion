@@ -61,9 +61,15 @@ func assembles() -> bool:
 func summary() -> String:
 	if not parse_error.is_empty():
 		return "could not be read: %s" % parse_error
-	return "%d instruction%s, %d assumption%s" % [
-		ops.size(), "" if ops.size() == 1 else "s",
-		assumptions.size(), "" if assumptions.size() == 1 else "s"]
+	return (
+		"%d instruction%s, %d assumption%s"
+		% [
+			ops.size(),
+			"" if ops.size() == 1 else "s",
+			assumptions.size(),
+			"" if assumptions.size() == 1 else "s"
+		]
+	)
 
 
 ## Parses a provider reply.
@@ -73,8 +79,9 @@ func summary() -> String:
 ## finds the outermost JSON object and reads it; if there is none, it falls
 ## back to treating the reply as bare assembly, since a model that ignores the
 ## format instruction and simply writes the program is still being useful.
-static func from_reply(text: String, intent_: String, provider_: String,
-		model_: String) -> Proposal:
+static func from_reply(
+	text: String, intent_: String, provider_: String, model_: String
+) -> Proposal:
 	var p := Proposal.new()
 	p.intent = intent_
 	p.provider = provider_
@@ -82,9 +89,12 @@ static func from_reply(text: String, intent_: String, provider_: String,
 
 	var json_text := _extract_json_object(text)
 	if not json_text.is_empty():
-		var parsed: Variant = JSON.parse_string(json_text)
-		if typeof(parsed) == TYPE_DICTIONARY:
-			var d: Dictionary = parsed
+		# A model can reply with anything at all, so parse through an instance:
+		# JSON.parse_string() would push an engine error for every malformed
+		# reply, which is noise, not a fault in the game.
+		var json := JSON.new()
+		if json.parse(json_text) == OK and typeof(json.data) == TYPE_DICTIONARY:
+			var d: Dictionary = json.data
 			for line in d.get("ops", []):
 				var s := String(line).strip_edges()
 				if not s.is_empty():
@@ -125,10 +135,10 @@ static func _extract_json_object(text: String) -> String:
 				escaped = false
 			elif c == "\\":
 				escaped = true
-			elif c == "\"":
+			elif c == '"':
 				in_string = false
 			continue
-		if c == "\"":
+		if c == '"':
 			in_string = true
 		elif c == "{":
 			depth += 1

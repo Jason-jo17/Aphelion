@@ -153,6 +153,59 @@ jobs:
   # AC1 says the same ship, program and seed must produce the identical
   # trajectory across operating systems. This is the job that proves it: the
   # same fifteen flights on three platforms, compared hash by hash.
+  # Every test in the suite above passes with no frame ever drawn. This is the
+  # job that notices a screen throwing while it builds — which, the first time
+  # it was run, was three screens.
+  ui-smoke:
+    name: every screen builds and draws
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache Godot
+        uses: actions/cache@v4
+        with:
+          path: ~/godot-bin
+          key: godot-${{ env.GODOT_VERSION }}-linux
+
+      - name: Install Godot and a virtual display
+        run: |
+          sudo apt-get update && sudo apt-get install -y xvfb
+          if [ ! -x ~/godot-bin/godot ]; then
+            mkdir -p ~/godot-bin && cd ~/godot-bin
+            curl -fsSL -o godot.zip \
+              "https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+            unzip -q godot.zip && mv Godot_v${GODOT_VERSION}-stable_linux.x86_64 godot
+            chmod +x godot
+          fi
+
+      - name: Import project
+        run: |
+          ~/godot-bin/godot --headless --import --quit-after 200 || true
+          test -d .godot
+
+      - name: Drive every screen
+        run: |
+          xvfb-run -a -s "-screen 0 1600x900x24" \
+            ~/godot-bin/godot --path . --rendering-driver opengl3 \
+            res://tools/capture_screens.tscn 2>&1 | tee ui.log
+
+          # Audio and MSAA complain on a headless runner and neither matters.
+          # A SCRIPT ERROR is GDScript throwing while a screen is being built,
+          # which is the whole point of this job.
+          if grep -q 'SCRIPT ERROR' ui.log; then
+            echo "::error::a screen threw while building; see the log above"
+            grep -B2 -A6 'SCRIPT ERROR' ui.log
+            exit 1
+          fi
+          test "$(ls assets/screenshots/*.png | wc -l)" -eq 5
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: screenshots
+          path: assets/screenshots/*.png
+
   determinism:
     name: determinism (${{ matrix.os }})
     strategy:

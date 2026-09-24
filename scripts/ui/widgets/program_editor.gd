@@ -18,6 +18,14 @@ var _status: Label
 var _timer: Timer
 var _program: Program = null
 
+## Source handed over before the widget entered the tree. A caller that builds
+## the editor and fills it in one breath is the obvious way to use this, so it
+## has to work: the editor screen did exactly that, set_source() wrote to a
+## CodeEdit that _ready() had not created yet, and the flight computer opened
+## blank on every mission — losing the starter program that exists so nobody
+## faces an empty page straight out of a briefing.
+var _pending_source := ""
+
 
 func _ready() -> void:
 	add_theme_constant_override("separation", int(Tokens.space(Tokens.SPACE_2)))
@@ -56,6 +64,10 @@ func _ready() -> void:
 	_errors = UIKit.vbox(Tokens.SPACE_1)
 	add_child(_errors)
 
+	if not _pending_source.is_empty():
+		set_source(_pending_source)
+		_pending_source = ""
+
 
 ## Colours come straight from the ISA tables, so adding an opcode highlights it
 ## without anyone remembering to update a list here.
@@ -88,13 +100,17 @@ func _highlighter() -> CodeHighlighter:
 	return h
 
 
+## Safe to call before the widget is in the tree; the text is held until it is.
 func set_source(text: String) -> void:
+	if editor == null:
+		_pending_source = text
+		return
 	editor.text = text
 	_reassemble()
 
 
 func source() -> String:
-	return editor.text
+	return _pending_source if editor == null else editor.text
 
 
 func program() -> Program:

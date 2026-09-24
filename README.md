@@ -48,6 +48,19 @@ turn:   SENSE   R0, ALT
         HALT
 ```
 
+![The mission list](assets/screenshots/01-menu.png)
+
+| | |
+| --- | --- |
+| ![The assembly bay and the program editor](assets/screenshots/03-editor.png) | ![The flight view](assets/screenshots/04-flight.png) |
+| Build the ship, write the program. Delta-v updates as you place parts, and the assembler tells you about `THROTLE` while you are still looking at it. | Then it flies itself. The map labels every apsis and the instruments are the same thirty sensors the program reads. |
+| ![A mission briefing](assets/screenshots/02-briefing.png) | ![The score for a completed flight](assets/screenshots/05-results.png) |
+| Every mission says what it teaches, in one line. | Three scores that fight each other, and a solution file you can export and re-fly. |
+
+Captured by `tools/capture_screens.gd`, which drives the real screens — so a
+screenshot that looks wrong is the interface looking wrong. Regenerate them with
+`make screenshots`.
+
 ---
 
 ## What makes it different
@@ -94,28 +107,44 @@ explains why and how to add real signing.
 
 ### From source
 
-Aphelion targets **Godot 4.7.x** and needs nothing else to run.
+Aphelion targets **Godot 4.7.x** and needs nothing else to run. Python 3 is used
+only by the reference simulation and the tooling, and has no dependencies.
 
 ```sh
 git clone https://github.com/Jason-jo17/Aphelion
 cd Aphelion
-godot .                       # or open project.godot in the editor
+make setup                    # fetch the test framework, once
+make run                      # play it
 ```
 
-### Tests
+`make` on its own lists everything. If `godot` is not on your PATH, pass it:
+`make run GODOT=~/bin/godot`.
+
+### Testing it
 
 ```sh
-./tools/fetch_gut.sh          # fetch the test framework (not vendored)
-godot --headless -s addons/gut/gut_cmdln.gd -gdir=res://tests -ginclude_subdirs -gexit
+make refsim    # seconds — 13 numerical checks, the ship balance table,
+               #           and all fifteen reference solutions re-flown
+make test      # ~10 minutes — the GUT suite, which flies every mission twice
+make check     # everything CI checks, in CI's order
 ```
 
-And the reference simulation, which is plain Python with no dependencies and
-runs in seconds:
+Start with `make refsim`. It is plain Python, it runs in seconds, and it catches
+most physics mistakes before a Godot process has even started — which is exactly
+why CI runs it first too.
+
+`make test` deliberately fails if GUT *skipped* a script rather than failing it.
+A test file that does not parse is reported as a yellow warning and the run
+still exits zero; that once hid two entire files, including the integrator's.
+
+### Without the editor
+
+Everything works headless, which is how CI does it:
 
 ```sh
-python3 tools/refsim/validate_physics.py     # 13 numerical checks
-python3 tools/refsim/author_missions.py      # fly all fifteen reference solutions
-python3 tools/refsim/ships.py                # stock ship balance table
+make lint          # gdformat --check and gdlint
+make screenshots   # regenerate the README images (uses xvfb for a display)
+make determinism   # fly all fifteen references, write a comparable report
 ```
 
 ---

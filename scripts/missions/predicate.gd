@@ -190,8 +190,10 @@ func _flag_label() -> String:
 	return flag
 
 
+## Objectives text, so coarse: this is the line a player reads in the briefing
+## and watches tick green in flight, not an instrument reading.
 func _format(v: float) -> String:
-	return Fmt.sensor_value(sensor, v)
+	return Fmt.sensor_value(sensor, v, true)
 
 
 # --- parsing ---------------------------------------------------------------

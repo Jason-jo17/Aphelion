@@ -29,8 +29,23 @@ static func distance_coarse(m: float) -> String:
 	if a >= 1.0e6:
 		return "%.1f Mm" % (m / 1.0e6)
 	if a >= 1000.0:
-		return "%g km" % snappedf(m / 1000.0, 0.1)
-	return "%g m" % snappedf(m, 1.0)
+		return "%s km" % _trim_zero(m / 1000.0)
+	return "%s m" % _trim_zero(snappedf(m, 1.0))
+
+
+## One decimal place with a pointless ".0" dropped: 95.0 -> "95", 95.4 -> "95.4".
+##
+## This is what `%g` would do in C, and `%g` is what this used to say — but
+## GDScript's `%` operator has no `g` conversion. It does not fail loudly; it
+## pushes an engine error and returns the literal string "%g", so every apsis
+## marker on the flight map was labelled "%g km" until someone rendered the
+## game and looked at it. `String.num()` is no help either: it keeps the
+## trailing zero.
+static func _trim_zero(v: float) -> String:
+	var s := "%.1f" % v
+	if s.ends_with(".0"):
+		s = s.substr(0, s.length() - 2)
+	return "0" if s == "-0" else s
 
 
 static func speed(mps: float) -> String:
@@ -89,6 +104,23 @@ static func degrees(deg: float) -> String:
 
 
 ## A plain number with a sensible number of digits for its magnitude.
+## A whole number of things — instructions, parts, attempts. Grouped in threes
+## and never given a decimal point: number() is for measurements, where 3665.0
+## means "to one decimal place", and a count has no decimal place to speak of.
+## The results screen read "Instructions executed  3665.0" until someone looked
+## at a screenshot of it.
+static func count(n: int) -> String:
+	var digits := str(absi(n))
+	var out := ""
+	var seen := 0
+	for i in range(digits.length() - 1, -1, -1):
+		out = digits[i] + out
+		seen += 1
+		if seen % 3 == 0 and i > 0:
+			out = "," + out
+	return ("-" + out) if n < 0 else out
+
+
 static func number(v: float, unit: String = "") -> String:
 	if is_inf(v):
 		return "∞" + ("" if unit.is_empty() else " " + unit)
@@ -106,10 +138,14 @@ static func number(v: float, unit: String = "") -> String:
 
 
 ## Formats a sensor reading in the sensor's own unit.
-static func sensor_value(sensor: int, v: float) -> String:
+##
+## `coarse` is for objectives and briefings, where the extra digits are noise
+## and sometimes a lie: "periapsis at least 90.00 km" reads like a tolerance
+## somebody measured, when the mission author simply typed ninety.
+static func sensor_value(sensor: int, v: float, coarse: bool = false) -> String:
 	match sensor:
 		ISA.Sensor.ALT, ISA.Sensor.APO, ISA.Sensor.PERI, ISA.Sensor.SMA, ISA.Sensor.TGTD:
-			return distance(v)
+			return distance_coarse(v) if coarse else distance(v)
 		ISA.Sensor.VEL, ISA.Sensor.VVEL, ISA.Sensor.HVEL, ISA.Sensor.DV, ISA.Sensor.TGTV:
 			return speed(v)
 		ISA.Sensor.TAPO, ISA.Sensor.TPERI, ISA.Sensor.T:

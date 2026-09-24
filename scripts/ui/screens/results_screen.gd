@@ -140,7 +140,7 @@ func _flight_facts() -> Control:
 	if _result.touchdown_speed >= 0.0:
 		column.add_child(UIKit.stat_row("Touchdown", Fmt.speed(_result.touchdown_speed)))
 	column.add_child(
-		UIKit.stat_row("Instructions executed", Fmt.number(float(_result.instructions_executed)))
+		UIKit.stat_row("Instructions executed", Fmt.count(_result.instructions_executed))
 	)
 	column.add_child(UIKit.stat_row("Flight computer", _result.vm_status))
 	return card
@@ -242,7 +242,11 @@ func _actions() -> Control:
 	menu.pressed.connect(func(): App.instance.go_to(App.Screen.MENU))
 	row.add_child(menu)
 
-	again.grab_focus()
+	# Deferred: _actions() builds this row and returns it, so nothing in it is
+	# in the tree yet and grab_focus() would only push an error and do nothing —
+	# leaving the results screen with no keyboard focus at all, which for a
+	# project that promises full keyboard control is the bug, not the error line.
+	again.grab_focus.call_deferred()
 	return row
 
 

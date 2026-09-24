@@ -46,6 +46,14 @@ Everything so far. There is no tagged release yet.
   a Godot install, and to prove the two implementations agree bit for bit.
 - CI: the reference simulation, unit and integration tests, a three-OS
   determinism matrix, and a cross-platform comparison of the results.
+- A `Makefile` — `make setup`, `make run`, `make test`, `make check` — so the
+  headless invocations are not something to remember.
+- `tools/capture_screens.gd`, which drives the real screens under a virtual
+  display to produce the README images. A screenshot nobody can regenerate is a
+  screenshot that goes stale unnoticed.
+- A CI job that runs it and fails on any `SCRIPT ERROR`. Every test in the suite
+  passes without a single frame ever being drawn, which is how three screens
+  came to be broken with the build green; this is the job that notices.
 
 ### Fixed — trajectory-changing
 
@@ -62,6 +70,28 @@ Everything so far. There is no tagged release yet.
   cost about 2 km/s of delta-v on ascent.
 - `TPERI` returned infinity on a hyperbola instead of solving the hyperbolic
   Kepler equation.
+
+### Fixed — visible in the interface
+
+Found by rendering the game under a virtual display for the first time and
+looking at the result. None of these had a test, and none of them showed up in a
+headless run.
+
+- The flight map labelled both apsis markers `%g km`. GDScript's `%` operator
+  has no `g` conversion; it pushes an engine error and substitutes the literal
+  text. `Fmt.distance_coarse()` now trims the trailing zero itself, and a test
+  scans every format string in the project for a conversion GDScript does not
+  have — the same mistake had already been made twice.
+- The flight computer opened **empty on every mission**. `ProgramEditor.set_source()`
+  wrote to a `CodeEdit` that `_ready()` had not created yet, silently losing the
+  starter program that exists so nobody faces a blank page after a briefing.
+- The results screen had no keyboard focus, because `grab_focus()` was called on
+  a button that was not in the tree yet.
+- "Instructions executed  3665.0" — a count formatted as a measurement. `Fmt.count()`
+  now groups digits and never produces a decimal point.
+- Objectives read "periapsis at least 90.00 km", which looks like a tolerance
+  somebody measured rather than a number the mission author typed. Briefings and
+  the in-flight objective list are coarse now; instruments still are not.
 
 ### Fixed
 

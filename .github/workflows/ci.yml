@@ -1,0 +1,232 @@
+name: ci
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+  # release.yml runs this before exporting: a release that fails its own tests
+  # is not a release.
+  workflow_call:
+
+env:
+  GODOT_VERSION: "4.7.2"
+  GUT_VERSION: "9.7.1"
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # The reference simulation is plain Python with no dependencies, so it runs in
+  # seconds and catches most physics mistakes before a Godot job is even started.
+  reference-sim:
+    name: reference simulation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Numerical checks (conservation, closure, accuracy)
+        run: python3 tools/refsim/validate_physics.py
+
+      - name: Stock ships still balance
+        run: python3 tools/refsim/ships.py
+
+      - name: Every reference solution still flies
+        run: python3 tools/refsim/author_missions.py
+
+      - name: Fixtures are up to date with the reference
+        run: |
+          python3 tools/refsim/generate_fixtures.py
+          if ! git diff --quiet -- tests/fixtures; then
+            echo "::error::tests/fixtures is stale. Run tools/refsim/generate_fixtures.py"
+            echo "and commit the result alongside your physics change."
+            git --no-pager diff --stat -- tests/fixtures
+            exit 1
+          fi
+
+      - name: Mission files match the authoring tool
+        run: |
+          python3 tools/refsim/author_missions.py --write
+          if ! git diff --quiet -- missions; then
+            echo "::error::missions/ is stale. Run:"
+            echo "  python3 tools/refsim/author_missions.py --write"
+            git --no-pager diff --stat -- missions
+            exit 1
+          fi
+
+  data:
+    name: data files
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Every JSON file parses
+        run: |
+          fail=0
+          for f in $(git ls-files '*.json'); do
+            python3 -c "import json,sys; json.load(open(sys.argv[1]))" "$f" \
+              || { echo "::error file=$f::invalid JSON"; fail=1; }
+          done
+          exit $fail
+
+  tests:
+    name: unit and integration tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache Godot
+        id: godot-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/godot-bin
+          key: godot-${{ env.GODOT_VERSION }}-linux
+
+      - name: Install Godot
+        if: steps.godot-cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ~/godot-bin && cd ~/godot-bin
+          NAME="Godot_v${GODOT_VERSION}-stable_linux.x86_64"
+          curl -fsSL -o godot.zip \
+            "https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}-stable/${NAME}.zip"
+          unzip -q godot.zip
+          mv "$NAME" godot
+          chmod +x godot
+
+      - name: Fetch GUT
+        run: ./tools/fetch_gut.sh
+
+      - name: Import project
+        # The first headless run builds .godot/; it exits non-zero on some
+        # versions even when the import succeeded, so the result is checked by
+        # looking for the directory rather than by the exit code.
+        run: |
+          ~/godot-bin/godot --headless --import --quit-after 200 || true
+          test -d .godot || { echo "::error::project import produced no .godot/"; exit 1; }
+
+      - name: Run GUT
+        run: |
+          ~/godot-bin/godot --headless \
+            -s addons/gut/gut_cmdln.gd \
+            -gdir=res://tests \
+            -ginclude_subdirs \
+            -gprefix=test_ \
+            -gsuffix=.gd \
+            -gexit \
+            -glog=1 \
+            -gjunit_xml_file=res://gut-results.xml
+
+      - name: Publish test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gut-results
+          path: gut-results.xml
+          if-no-files-found: warn
+
+  # AC1 says the same ship, program and seed must produce the identical
+  # trajectory across operating systems. This is the job that proves it: the
+  # same fifteen flights on three platforms, compared hash by hash.
+  determinism:
+    name: determinism (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            asset: linux.x86_64
+            binary: godot
+          - os: macos-latest
+            asset: macos.universal
+            binary: "Godot.app/Contents/MacOS/Godot"
+          - os: windows-latest
+            asset: win64.exe
+            binary: "Godot_v4.7.2-stable_win64.exe"
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Godot (unix)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          mkdir -p "$HOME/godot-bin" && cd "$HOME/godot-bin"
+          NAME="Godot_v${GODOT_VERSION}-stable_${{ matrix.asset }}"
+          curl -fsSL -o godot.zip \
+            "https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}-stable/${NAME}.zip"
+          unzip -q godot.zip
+          if [ -d "Godot.app" ]; then
+            chmod +x "${{ matrix.binary }}"
+          else
+            mv "$NAME" godot && chmod +x godot
+          fi
+
+      - name: Install Godot (windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path "$HOME/godot-bin" | Out-Null
+          Set-Location "$HOME/godot-bin"
+          $name = "Godot_v$env:GODOT_VERSION-stable_${{ matrix.asset }}"
+          Invoke-WebRequest -Uri "https://github.com/godotengine/godot-builds/releases/download/$env:GODOT_VERSION-stable/$name.zip" -OutFile godot.zip
+          Expand-Archive godot.zip -DestinationPath .
+
+      - name: Import project
+        shell: bash
+        run: |
+          "$HOME/godot-bin/${{ matrix.binary }}" --headless --import --quit-after 200 || true
+          test -d .godot || { echo "::error::project import produced no .godot/"; exit 1; }
+
+      - name: Fly every reference solution
+        shell: bash
+        run: |
+          "$HOME/godot-bin/${{ matrix.binary }}" --headless \
+            --script res://tools/determinism_check.gd \
+            -- --json "$PWD/determinism-${{ matrix.os }}.json" \
+            | tee determinism-${{ matrix.os }}.txt
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: determinism-${{ matrix.os }}
+          path: |
+            determinism-${{ matrix.os }}.json
+            determinism-${{ matrix.os }}.txt
+
+  cross-platform-determinism:
+    name: same bits on every platform
+    needs: determinism
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: determinism-*
+          merge-multiple: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compare the three reports
+        run: python3 tools/compare_determinism.py determinism-*.json
+
+  format:
+    name: gdscript formatting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install "gdtoolkit==4.*"
+      - name: gdformat --check
+        run: gdformat --check $(git ls-files '*.gd')
+      - name: gdlint
+        # Advisory: the linter's defaults disagree with this project's naming in
+        # places, and a style opinion should not block a physics fix.
+        continue-on-error: true
+        run: gdlint $(git ls-files '*.gd')

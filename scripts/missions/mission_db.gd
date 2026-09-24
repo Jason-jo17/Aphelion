@@ -5,9 +5,9 @@ extends Node
 ## errors attached, so a broken mission file is visible in the menu rather than
 ## silently absent.
 
-const UNIVERSE_PATH := "res://data/universe.json"
-const SHIPS_PATH := "res://data/ships.json"
-const MISSIONS_DIR := "res://missions"
+const UNIVERSE_PATH := MissionLoader.UNIVERSE_PATH
+const SHIPS_PATH := MissionLoader.SHIPS_PATH
+const MISSIONS_DIR := MissionLoader.MISSIONS_DIR
 
 var universe: Dictionary = {}
 var missions: Array[Mission] = []
@@ -26,46 +26,18 @@ func reload() -> void:
 	stock_ships.clear()
 	load_errors = PackedStringArray()
 
-	universe = _read_json(UNIVERSE_PATH)
+	universe = MissionLoader.load_universe()
 	if universe.is_empty():
 		load_errors.append("Could not read %s." % UNIVERSE_PATH)
 
-	var ships_doc := _read_json(SHIPS_PATH)
-	for s in ships_doc.get("ships", []):
-		stock_ships[String(s.get("id", ""))] = s
+	stock_ships = MissionLoader.load_stock_ships()
 
-	for path in _mission_files():
-		var d := _read_json(path)
-		if d.is_empty():
-			load_errors.append("Could not read %s." % path)
-			continue
-		var m := Mission.from_dict(d)
-		if m.id.is_empty():
-			load_errors.append("%s has no id." % path)
-			continue
-		missions.append(m)
-		for e in m.errors:
-			load_errors.append("%s: %s" % [m.id, e])
-
-	missions.sort_custom(func(a: Mission, b: Mission) -> bool:
-		if a.order != b.order:
-			return a.order < b.order
-		return a.id < b.id)
-
-
-func _mission_files() -> PackedStringArray:
-	var out := PackedStringArray()
-	var dir := DirAccess.open(MISSIONS_DIR)
-	if dir == null:
-		load_errors.append("No missions directory at %s." % MISSIONS_DIR)
-		return out
-	for f in dir.get_files():
-		# Exported projects rename .json to .json.remap in some configurations.
-		var name := f.trim_suffix(".remap")
-		if name.ends_with(".json"):
-			out.append("%s/%s" % [MISSIONS_DIR, name])
-	out.sort()
-	return out
+	var errors: Array[String] = []
+	missions = MissionLoader.load_missions(errors)
+	for e in errors:
+		load_errors.append(e)
+	if missions.is_empty():
+		load_errors.append("No missions were found in %s." % MISSIONS_DIR)
 
 
 func get_mission(id: String) -> Mission:
@@ -123,12 +95,3 @@ func stock_ship_ids() -> PackedStringArray:
 func world_for(mission: Mission) -> SimWorld:
 	return mission.build_world(universe)
 
-
-static func _read_json(path: String) -> Dictionary:
-	var text := FileAccess.get_file_as_string(path)
-	if text.is_empty():
-		return {}
-	var parsed: Variant = JSON.parse_string(text)
-	if typeof(parsed) != TYPE_DICTIONARY:
-		return {}
-	return parsed

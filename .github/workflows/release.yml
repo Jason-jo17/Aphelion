@@ -1,0 +1,123 @@
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to build (e.g. v0.1.0)"
+        required: true
+
+env:
+  GODOT_VERSION: "4.7.2"
+
+jobs:
+  # A release that fails its own tests is not a release.
+  verify:
+    name: tests must pass first
+    uses: ./.github/workflows/ci.yml
+
+  export:
+    name: export ${{ matrix.preset }}
+    needs: verify
+    runs-on: ubuntu-latest
+    container:
+      # The headless export container ships the editor and the export templates
+      # already matched to each other, which is the fiddly part of doing this by
+      # hand. All three desktop targets cross-compile from Linux.
+      image: barichello/godot-ci:4.7.2
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - preset: "Linux"
+            out: "dist/linux/Aphelion.x86_64"
+            artifact: aphelion-linux
+          - preset: "Windows"
+            out: "dist/windows/Aphelion.exe"
+            artifact: aphelion-windows
+          - preset: "macOS"
+            out: "dist/macos/Aphelion.zip"
+            artifact: aphelion-macos
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Place export templates
+        run: |
+          mkdir -p ~/.local/share/godot/export_templates
+          mv /root/.local/share/godot/export_templates/* \
+             ~/.local/share/godot/export_templates/ 2>/dev/null || true
+
+      - name: Import project
+        run: |
+          godot --headless --import --quit-after 200 || true
+          test -d .godot
+
+      - name: Export
+        run: |
+          mkdir -p "$(dirname "${{ matrix.out }}")"
+          godot --headless --export-release "${{ matrix.preset }}" "${{ matrix.out }}"
+          test -s "${{ matrix.out }}"
+
+      - name: Package
+        run: |
+          cd dist
+          DIRNAME="$(basename "$(dirname "../${{ matrix.out }}")")"
+          cp ../LICENSE ../README.md "$DIRNAME/"
+          [ -f ../ASSETS-LICENSE.md ] && cp ../ASSETS-LICENSE.md "$DIRNAME/"
+          tar -czf "../${{ matrix.artifact }}.tar.gz" "$DIRNAME"
+
+      - name: Checksum
+        run: sha256sum "${{ matrix.artifact }}.tar.gz" > "${{ matrix.artifact }}.sha256"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: |
+            ${{ matrix.artifact }}.tar.gz
+            ${{ matrix.artifact }}.sha256
+
+  publish:
+    name: attach to the release
+    needs: export
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Collect checksums
+        run: cat artifacts/*.sha256 > artifacts/SHA256SUMS.txt
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.version || github.ref_name }}
+          generate_release_notes: true
+          files: |
+            artifacts/*.tar.gz
+            artifacts/SHA256SUMS.txt
+          body: |
+            ## Downloads
+
+            | platform | file |
+            | --- | --- |
+            | Windows | `aphelion-windows.tar.gz` |
+            | macOS | `aphelion-macos.tar.gz` |
+            | Linux | `aphelion-linux.tar.gz` |
+
+            Verify with `sha256sum -c SHA256SUMS.txt`.
+
+            **macOS**: the build is ad-hoc signed, not notarised, so Gatekeeper
+            will refuse it on first launch. Right-click → Open, or
+            `xattr -dr com.apple.quarantine Aphelion.app`. See
+            `docs/PACKAGING.md` for why, and for how to add real signing.
+
+            **Determinism**: every build in this release passed the
+            cross-platform determinism job — the same fifteen reference flights
+            produce identical results on all three operating systems.

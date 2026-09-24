@@ -1,0 +1,87 @@
+[
+ {
+  "id": "sparrow",
+  "dry_mass": "1420.0",
+  "fuel_capacity": "4800.0",
+  "max_thrust": "120000.0",
+  "isp": "300.0",
+  "max_torque": "12000.0",
+  "inertia": "22804.930332261523",
+  "drag_area": "2.0",
+  "delta_v": "4345.659163810581",
+  "burn_time": "117.6798",
+  "twr_halcyon": "2.1436227224008575",
+  "centre_of_mass": [
+   "5.0",
+   "4.241157556270096"
+  ]
+ },
+ {
+  "id": "wren",
+  "dry_mass": "550.0",
+  "fuel_capacity": "1100.0",
+  "max_thrust": "40000.0",
+  "isp": "345.0",
+  "max_torque": "4000.0",
+  "inertia": "4821.424242424242",
+  "drag_area": "1.0",
+  "delta_v": "3716.928639230155",
+  "burn_time": "93.04059187499999",
+  "twr_halcyon": "2.6936026936026938",
+  "centre_of_mass": [
+   "4.5",
+   "3.087878787878788"
+  ]
+ },
+ {
+  "id": "heron",
+  "dry_mass": "670.0",
+  "fuel_capacity": "1100.0",
+  "max_thrust": "40000.0",
+  "isp": "345.0",
+  "max_torque": "4000.0",
+  "inertia": "6263.813559322036",
+  "drag_area": "3.0",
+  "delta_v": "3286.72526515318",
+  "burn_time": "93.04059187499999",
+  "twr_halcyon": "2.5109855618330195",
+  "centre_of_mass": [
+   "4.5",
+   "3.3192090395480225"
+  ]
+ },
+ {
+  "id": "petrel",
+  "dry_mass": "1040.0",
+  "fuel_capacity": "1100.0",
+  "max_thrust": "40000.0",
+  "isp": "345.0",
+  "max_torque": "4000.0",
+  "inertia": "10692.211838006231",
+  "drag_area": "8.0",
+  "delta_v": "2441.334773444007",
+  "burn_time": "93.04059187499999",
+  "twr_halcyon": "2.0768431983385254",
+  "centre_of_mass": [
+   "4.635514018691588",
+   "4.233644859813084"
+  ]
+ },
+ {
+  "id": "albatross",
+  "dry_mass": "1840.0",
+  "fuel_capacity": "9600.0",
+  "max_thrust": "120000.0",
+  "isp": "300.0",
+  "max_torque": "12000.0",
+  "inertia": "95781.35198135197",
+  "drag_area": "4.0",
+  "delta_v": "5376.055782209018",
+  "burn_time": "235.3596",
+  "twr_halcyon": "1.1655011655011656",
+  "centre_of_mass": [
+   "5.0",
+   "6.244755244755245"
+  ]
+ }
+]

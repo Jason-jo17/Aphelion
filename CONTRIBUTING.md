@@ -159,6 +159,12 @@ much like to know.
   feature. If it is unclear *why* it did something, that is a bug worth fixing —
   but "it should have guessed what I meant" is not.
 
+## Credit
+
+Land a change and add yourself to [AUTHORS.md](AUTHORS.md) in the same pull
+request — name, and a link if you want one. No hierarchy and no "core team";
+the list is ordered by when people arrived.
+
 ## Code of conduct
 
 Be decent. Assume the other person is trying. If someone is not, tell a

@@ -231,3 +231,4 @@ carries the fdlibm notice that the constants in `DetMath` come with.
 - [SECURITY.md](SECURITY.md) — what the attack surface actually is, and how to
   report something privately
 - [CHANGELOG.md](CHANGELOG.md) — what changed, and when
+- [AUTHORS.md](AUTHORS.md) — who made it, and what it is built on

@@ -1,8 +1,9 @@
 # Third-party notices
 
 Aphelion's own code is [MIT](LICENSE) and its own assets, missions and data are
-[CC0](ASSETS-LICENSE.md). This file covers everything else: the work of other
-people that Aphelion either builds on, ships alongside, or borrows numbers from.
+[CC0](ASSETS-LICENSE.md), copyright Jason Joseph — see [AUTHORS.md](AUTHORS.md).
+This file covers everything else: the work of other people that Aphelion either
+builds on, ships alongside, or borrows numbers from.
 
 Nothing here is vendored into the repository. Two of the four are nevertheless
 present in a **released build**, because exporting a Godot game embeds the

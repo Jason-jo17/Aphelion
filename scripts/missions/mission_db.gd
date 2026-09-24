@@ -5,9 +5,11 @@ extends Node
 ## errors attached, so a broken mission file is visible in the menu rather than
 ## silently absent.
 
-const UNIVERSE_PATH := MissionLoader.UNIVERSE_PATH
-const SHIPS_PATH := MissionLoader.SHIPS_PATH
-const MISSIONS_DIR := MissionLoader.MISSIONS_DIR
+# Kept as literals rather than aliases of MissionLoader's: a const initialised
+# from another class's const makes the parse order matter, for no benefit.
+const UNIVERSE_PATH := "res://data/universe.json"
+const SHIPS_PATH := "res://data/ships.json"
+const MISSIONS_DIR := "res://missions"
 
 var universe: Dictionary = {}
 var missions: Array[Mission] = []

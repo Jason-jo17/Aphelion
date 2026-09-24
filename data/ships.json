@@ -1,0 +1,67 @@
+{
+  "$comment": "Stock ships. Missions may hand the player one of these to fly, or let them build their own. Layouts use the 9x14 assembly grid; x,y is the part's top-left cell, y increasing downward.",
+  "schema_version": 1,
+  "ships": [
+    {
+      "id": "sparrow",
+      "name": "Sparrow",
+      "summary": "The standard launcher. Heavy, loud, and just barely enough to reach orbit.",
+      "placements": [
+        { "part_id": "pod_mk1", "x": 4, "y": 0 },
+        { "part_id": "tank_large", "x": 4, "y": 2 },
+        { "part_id": "wheel_large", "x": 4, "y": 6 },
+        { "part_id": "engine_main", "x": 4, "y": 7 }
+      ]
+    },
+    {
+      "id": "wren",
+      "name": "Wren",
+      "summary": "An orbital tug: no lift capability at all, but efficient and quick to turn.",
+      "placements": [
+        { "part_id": "probe_core", "x": 4, "y": 0 },
+        { "part_id": "tank_medium", "x": 4, "y": 1 },
+        { "part_id": "wheel_small", "x": 4, "y": 4 },
+        { "part_id": "engine_vacuum", "x": 4, "y": 5 }
+      ]
+    },
+    {
+      "id": "heron",
+      "name": "Heron",
+      "summary": "A Wren with legs. Rated for touchdown up to 12 m/s.",
+      "placements": [
+        { "part_id": "probe_core", "x": 4, "y": 0 },
+        { "part_id": "tank_medium", "x": 4, "y": 1 },
+        { "part_id": "wheel_small", "x": 4, "y": 4 },
+        { "part_id": "engine_vacuum", "x": 4, "y": 5 },
+        { "part_id": "landing_legs", "x": 3, "y": 6 },
+        { "part_id": "landing_legs", "x": 5, "y": 6 }
+      ]
+    },
+    {
+      "id": "petrel",
+      "name": "Petrel",
+      "summary": "Shielded for atmospheric entry. Four times the drag area, and it wants to be pointed retrograde.",
+      "placements": [
+        { "part_id": "heat_shield", "x": 4, "y": 0 },
+        { "part_id": "pod_mk1", "x": 4, "y": 1 },
+        { "part_id": "tank_medium", "x": 4, "y": 3 },
+        { "part_id": "wheel_small", "x": 4, "y": 6 },
+        { "part_id": "engine_vacuum", "x": 4, "y": 7 }
+      ]
+    },
+    {
+      "id": "albatross",
+      "name": "Albatross",
+      "summary": "Two large tanks and a booster. Enough delta-v to reach Lyra and come home, if you fly it well.",
+      "placements": [
+        { "part_id": "pod_mk1", "x": 4, "y": 0 },
+        { "part_id": "tank_large", "x": 4, "y": 2 },
+        { "part_id": "tank_large", "x": 4, "y": 6 },
+        { "part_id": "wheel_large", "x": 4, "y": 10 },
+        { "part_id": "engine_main", "x": 4, "y": 11 },
+        { "part_id": "landing_legs", "x": 3, "y": 11 },
+        { "part_id": "landing_legs", "x": 6, "y": 11 }
+      ]
+    }
+  ]
+}

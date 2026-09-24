@@ -1,0 +1,169 @@
+{
+  "$comment": "Ship part catalogue. Masses in kg, thrust in N, Isp in s, torque in N*m. Sizes are in grid cells; one cell is 1 metre. Drag is derived from the ship's frontal width, so only parts that deliberately add drag carry extra_drag_area. Balanced against tools/refsim - see docs/BALANCE.md.",
+  "schema_version": 1,
+  "grid": {
+    "width": 9,
+    "height": 14,
+    "cell_size": 1.0
+  },
+  "parts": [
+    {
+      "id": "pod_mk1",
+      "name": "Corvid Mk1 Capsule",
+      "category": "command",
+      "size": [
+        2,
+        2
+      ],
+      "mass": 400.0,
+      "command": true,
+      "description": "Houses the flight computer. Every ship needs exactly one."
+    },
+    {
+      "id": "probe_core",
+      "name": "Wren Probe Core",
+      "category": "command",
+      "size": [
+        1,
+        1
+      ],
+      "mass": 90.0,
+      "command": true,
+      "description": "A capsule with the crew, windows and most of the mass removed. Lighter, and no less clever."
+    },
+    {
+      "id": "tank_small",
+      "name": "FT-05 Tank",
+      "category": "fuel",
+      "size": [
+        1,
+        2
+      ],
+      "mass": 60.0,
+      "fuel_capacity": 500.0,
+      "description": "Propellant, in the smallest useful quantity."
+    },
+    {
+      "id": "tank_medium",
+      "name": "FT-11 Tank",
+      "category": "fuel",
+      "size": [
+        1,
+        3
+      ],
+      "mass": 110.0,
+      "fuel_capacity": 1100.0,
+      "description": "The workhorse. Better dry-to-wet ratio than two smalls."
+    },
+    {
+      "id": "tank_large",
+      "name": "FT-32 Tank",
+      "category": "fuel",
+      "size": [
+        2,
+        4
+      ],
+      "mass": 300.0,
+      "fuel_capacity": 4000.0,
+      "description": "4 tonnes of propellant, and the best dry-to-wet ratio in the bay. Enough to reach orbit and argue about it afterwards."
+    },
+    {
+      "id": "engine_main",
+      "name": "Kestrel Booster",
+      "category": "engine",
+      "size": [
+        2,
+        2
+      ],
+      "mass": 600.0,
+      "thrust": 120000.0,
+      "isp": 300.0,
+      "description": "Heavy, thirsty, and the only thing here that will lift you off Halcyon. 120 kN at 300 s."
+    },
+    {
+      "id": "engine_vacuum",
+      "name": "Halo Vacuum Engine",
+      "category": "engine",
+      "size": [
+        1,
+        2
+      ],
+      "mass": 300.0,
+      "thrust": 40000.0,
+      "isp": 345.0,
+      "description": "Efficient but weak: 40 kN at 345 s. Wonderful in orbit, useless on the pad."
+    },
+    {
+      "id": "engine_vernier",
+      "name": "Pip Vernier",
+      "category": "engine",
+      "size": [
+        1,
+        1
+      ],
+      "mass": 80.0,
+      "thrust": 15000.0,
+      "isp": 260.0,
+      "description": "For the small, precise corrections that decide a rendezvous."
+    },
+    {
+      "id": "wheel_small",
+      "name": "RW-4 Reaction Wheel",
+      "category": "control",
+      "size": [
+        1,
+        1
+      ],
+      "mass": 50.0,
+      "torque": 4000.0,
+      "description": "Turns the ship without spending propellant."
+    },
+    {
+      "id": "wheel_large",
+      "name": "RW-12 Reaction Wheel",
+      "category": "control",
+      "size": [
+        2,
+        1
+      ],
+      "mass": 120.0,
+      "torque": 12000.0,
+      "description": "Three times the authority. Worth it on anything long and heavy."
+    },
+    {
+      "id": "structure_beam",
+      "name": "Strut Section",
+      "category": "structure",
+      "size": [
+        1,
+        1
+      ],
+      "mass": 40.0,
+      "description": "Connects things. Adds mass and inertia, which is sometimes the point."
+    },
+    {
+      "id": "heat_shield",
+      "name": "Ablative Shield",
+      "category": "structure",
+      "size": [
+        2,
+        1
+      ],
+      "mass": 180.0,
+      "description": "Quadruples the ship's drag area. Pointed the right way it turns an atmosphere into a brake; pointed the wrong way it is ballast.",
+      "extra_drag_area": 6.0
+    },
+    {
+      "id": "landing_legs",
+      "name": "Landing Legs",
+      "category": "structure",
+      "size": [
+        1,
+        1
+      ],
+      "mass": 60.0,
+      "max_landing_speed": 12.0,
+      "description": "Survives touchdown up to 12 m/s. Without them, any contact is a crash."
+    }
+  ]
+}

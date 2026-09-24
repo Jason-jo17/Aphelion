@@ -1,0 +1,36 @@
+{
+  "$comment": "The Aphelion system. Shared by every mission; missions reference bodies by id. Mirrored by tools/refsim/universe.py — change both together.",
+  "schema_version": 1,
+  "bodies": [
+    {
+      "id": "halcyon",
+      "name": "Halcyon",
+      "mu": 3.6864e12,
+      "radius": 640000.0,
+      "rotation_rate": 0.0002908882086657216,
+      "$rotation_note": "6-hour sidereal day; the equator carries you 186.2 m/s eastward for free.",
+      "atmosphere": {
+        "height": 70000.0,
+        "sea_level_density": 0.8,
+        "scale_height": 6000.0
+      },
+      "color": "#3f6fa8",
+      "surface_gravity": 9.0,
+      "description": "A temperate world with a shallow but grabby atmosphere. Low orbit begins around 90 km; below 70 km the air will find you."
+    },
+    {
+      "id": "lyra",
+      "name": "Lyra",
+      "mu": 6.5e10,
+      "radius": 200000.0,
+      "rotation_rate": 4.6188021535170056e-05,
+      "$rotation_note": "Tidally locked: spin period equals the 37.787 h orbital period.",
+      "orbit_radius": 12000000.0,
+      "orbit_phase0": 0.0,
+      "orbit_direction": 1,
+      "color": "#b9bec9",
+      "surface_gravity": 1.625,
+      "description": "Halcyon's single airless moon, tidally locked, 37.8 hours to the revolution. No atmosphere means no aerobraking and no parachutes — you land on thrust alone."
+    }
+  ]
+}

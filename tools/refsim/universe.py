@@ -12,7 +12,7 @@ HALCYON = dict(
     mu=3.6864e12,          # surface gravity 9.0 m/s^2 at r = 640 km
     radius=640_000.0,
     rotation_period=21_600.0,   # 6 hours
-    atmosphere=dict(height=70_000.0, sea_level_density=1.2, scale_height=6_500.0),
+    atmosphere=dict(height=70_000.0, sea_level_density=0.8, scale_height=6_000.0),
     color="#3f6fa8",
 )
 

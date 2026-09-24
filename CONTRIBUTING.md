@@ -47,6 +47,13 @@ python3 tools/refsim/author_missions.py
 
 The Python side has no dependencies and takes seconds; run it first.
 
+One thing to watch for in GUT's output: a test script that fails to *parse* is
+reported as a yellow `Ignoring script ...` warning and the run still exits zero.
+It looks green. Calling `assert_le()` — GUT spells it `assert_lte()` — once hid
+two entire files this way, including the integrator's. CI fails the build on
+that warning now, but if you are reading the output yourself, check that the
+`Scripts` count at the bottom matches the number of `tests/**/test_*.gd` files.
+
 ## The rules that are not negotiable
 
 ### 1. Determinism
@@ -61,6 +68,12 @@ two that catch people:
   that compounds into a different orbit. Rendering code may use whatever it
   likes.
 - **Never accumulate time.** `t = tick * DT_BASE`, not `t += dt`.
+- **Never write a precise constant as a decimal.** Godot's float parser is not
+  correctly rounded — it read Halcyon's rotation rate 29 ULP away from Python
+  and quietly changed four missions. Derive the value (store a rotation
+  *period*, not a rate), or write it as an exact ratio the way
+  `scripts/core/det_math.gd` does. Numbers in `data/` and `missions/` are pinned
+  by `tests/fixtures/data_literals.json`.
 
 CI runs all fifteen reference flights on Windows, macOS and Linux and compares
 the results field by field, so a mistake here is caught rather than shipped.
@@ -75,8 +88,13 @@ If you change one, change the other, and regenerate the fixtures **in the same
 commit**:
 
 ```sh
-python3 tools/refsim/generate_fixtures.py
+python3 tools/refsim/author_missions.py --write   # first: missions/
+python3 tools/refsim/generate_fixtures.py         # then: tests/fixtures/
 ```
+
+In that order — one of the fixtures is a scan of `missions/`. Editing a mission
+or anything in `data/` needs the second command too, even when no physics
+changed, because the fixture pins how every number in those files must parse.
 
 CI regenerates them too and fails if what you committed is stale, so forgetting
 is impossible rather than merely discouraged.

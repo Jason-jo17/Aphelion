@@ -55,8 +55,10 @@ func _pump(vm: ControllerVM, ticks: int) -> void:
 
 # --- data ------------------------------------------------------------------
 
+
 func test_arithmetic() -> void:
-	var vm := _vm("""
+	var vm := _vm(
+		"""
         SET R0, 10
         ADD R0, 5
         MUL R0, 2
@@ -73,7 +75,8 @@ func test_arithmetic() -> void:
         SET R5, 17
         MOD R5, 5
         HALT
-""")
+"""
+	)
 	_pump(vm, 1)
 	assert_eq(vm.registers[0], 5.0, "((10+5)*2-10)/4")
 	assert_eq(vm.registers[1], 3.0)
@@ -90,11 +93,15 @@ func test_sense_reads_a_live_value() -> void:
 
 
 func test_angles_reach_the_program_in_degrees() -> void:
-	_state.angle = DetMath.PI_2   # 90 degrees
+	_state.angle = DetMath.PI_2  # 90 degrees
 	var vm := _vm("SENSE R0, HDG\nHALT")
 	_pump(vm, 1)
-	assert_almost_eq(vm.registers[0], 90.0, 1.0e-9,
-		"the ISA is documented in degrees, so HDG must read 90 not 1.57")
+	assert_almost_eq(
+		vm.registers[0],
+		90.0,
+		1.0e-9,
+		"the ISA is documented in degrees, so HDG must read 90 not 1.57"
+	)
 
 
 func test_divide_by_zero_faults_with_the_line_number() -> void:
@@ -107,6 +114,7 @@ func test_divide_by_zero_faults_with_the_line_number() -> void:
 
 
 # --- flow ------------------------------------------------------------------
+
 
 func test_if_skips_the_next_instruction_when_false() -> void:
 	var vm := _vm("SET R0, 1\nIF R0 > 5\nSET R0, 99\nHALT")
@@ -142,11 +150,15 @@ func test_falling_off_the_end_halts() -> void:
 
 # --- thrust ----------------------------------------------------------------
 
+
 func test_throttle_alone_does_not_light_the_engine() -> void:
 	var vm := _vm("THROTTLE 1\nWAIT 10\nHALT")
 	_pump(vm, 1)
-	assert_eq(_ctrl.throttle, 0.0,
-		"thrust is applied only during BURN; this is what makes a program readable")
+	assert_eq(
+		_ctrl.throttle,
+		0.0,
+		"thrust is applied only during BURN; this is what makes a program readable"
+	)
 
 
 func test_burn_applies_the_set_throttle_for_the_stated_time() -> void:
@@ -184,8 +196,11 @@ func test_burn_until_ends_at_empty_rather_than_hanging() -> void:
 	var vm := _vm("BURN UNTIL ALT > 999999999\nLOG 1\nHALT")
 	_state.fuel = 0.0
 	_pump(vm, 3)
-	assert_eq(vm.status, ControllerVM.Status.HALTED,
-		"an unsatisfiable BURN UNTIL must end when the tanks do")
+	assert_eq(
+		vm.status,
+		ControllerVM.Status.HALTED,
+		"an unsatisfiable BURN UNTIL must end when the tanks do"
+	)
 
 
 func test_wait_blocks_for_exactly_the_right_number_of_ticks() -> void:
@@ -200,20 +215,27 @@ func test_vm_slack_lets_the_simulation_skip_a_long_wait() -> void:
 	var vm := _vm("WAIT 100\nHALT")
 	_pump(vm, 1)
 	var slack := vm.vm_slack(_state.tick)
-	assert_almost_eq(slack, 100.0 - SimWorld.DT_BASE, 0.02,
-		"a timed wait should declare how long it can be left alone")
+	assert_almost_eq(
+		slack,
+		100.0 - SimWorld.DT_BASE,
+		0.02,
+		"a timed wait should declare how long it can be left alone"
+	)
 
 
 func test_a_condition_block_is_watched_rather_than_polled() -> void:
 	var vm := _vm("WAIT UNTIL ALT > 999999\nHALT")
 	_pump(vm, 1)
 	assert_true(vm.has_watched_condition())
-	assert_true(is_inf(vm.vm_slack(_state.tick)),
-		"the runner refines these with rollback instead of stepping at full rate")
+	assert_true(
+		is_inf(vm.vm_slack(_state.tick)),
+		"the runner refines these with rollback instead of stepping at full rate"
+	)
 	assert_false(vm.watched_condition_holds(_bus))
 
 
 # --- attitude --------------------------------------------------------------
+
 
 func test_orient_blocks_until_it_is_pointing_there() -> void:
 	_state.angle = 0.0
@@ -249,6 +271,7 @@ func test_orient_with_no_reaction_wheel_faults_instead_of_hanging() -> void:
 
 # --- bounds on runaway programs (AC3) --------------------------------------
 
+
 func test_a_tight_loop_yields_rather_than_faulting() -> void:
 	# A polling loop is a legitimate way to fly a landing. It must not be
 	# punished — just run at tick rate.
@@ -261,19 +284,20 @@ func test_a_tight_loop_yields_rather_than_faulting() -> void:
 func test_the_per_tick_budget_is_respected() -> void:
 	var vm := _vm("loop:\nSENSE R0, ALT\nJMP loop")
 	_pump(vm, 1)
-	assert_le(vm.instructions_executed, vm.tick_budget,
-		"one tick must not execute more than the budget allows")
+	assert_lte(
+		vm.instructions_executed,
+		vm.tick_budget,
+		"one tick must not execute more than the budget allows"
+	)
 
 
 func test_a_runaway_program_ends_as_a_reported_fault() -> void:
 	var vm := _vm("loop:\nSENSE R0, ALT\nJMP loop")
 	vm.total_budget = 500
 	_pump(vm, 60)
-	assert_eq(vm.status, ControllerVM.Status.FAULTED,
-		"the total cap must eventually stop it")
+	assert_eq(vm.status, ControllerVM.Status.FAULTED, "the total cap must eventually stop it")
 	assert_eq(vm.fault_code, "instruction_cap")
-	assert_string_contains(vm.fault_hint.to_lower(), "loop",
-		"and say what it probably is")
+	assert_string_contains(vm.fault_hint.to_lower(), "loop", "and say what it probably is")
 
 
 func test_spin_ticks_stay_zero_for_a_well_behaved_program() -> void:
@@ -283,6 +307,7 @@ func test_spin_ticks_stay_zero_for_a_well_behaved_program() -> void:
 
 
 # --- metrics ---------------------------------------------------------------
+
 
 func test_the_scored_instruction_count_is_program_size_not_executions() -> void:
 	var program := Assembler.assemble("SET R0, 0\nloop:\nADD R0, 1\nIF R0 < 50\nJMP loop\nHALT")

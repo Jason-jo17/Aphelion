@@ -11,7 +11,10 @@ own tells you nothing about which part of the physics drifted.
 import json
 import sys
 
-FIELDS = ["success", "ticks", "fuel_used", "instructions", "stars", "state_hash"]
+# fuel_bits, not fuel_used: the bits catch a one-ULP difference that any
+# decimal rendering would round away, and rounding it away is exactly the
+# failure this script exists to find.
+FIELDS = ["success", "ticks", "fuel_bits", "instructions", "stars", "state_hash"]
 
 
 def load(path):

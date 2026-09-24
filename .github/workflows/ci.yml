@@ -38,16 +38,6 @@ jobs:
       - name: Every reference solution still flies
         run: python3 tools/refsim/author_missions.py
 
-      - name: Fixtures are up to date with the reference
-        run: |
-          python3 tools/refsim/generate_fixtures.py
-          if ! git diff --quiet -- tests/fixtures; then
-            echo "::error::tests/fixtures is stale. Run tools/refsim/generate_fixtures.py"
-            echo "and commit the result alongside your physics change."
-            git --no-pager diff --stat -- tests/fixtures
-            exit 1
-          fi
-
       - name: Mission files match the authoring tool
         run: |
           python3 tools/refsim/author_missions.py --write
@@ -55,6 +45,16 @@ jobs:
             echo "::error::missions/ is stale. Run:"
             echo "  python3 tools/refsim/author_missions.py --write"
             git --no-pager diff --stat -- missions
+            exit 1
+          fi
+
+      - name: Fixtures are up to date with the reference
+        run: |
+          python3 tools/refsim/generate_fixtures.py
+          if ! git diff --quiet -- tests/fixtures; then
+            echo "::error::tests/fixtures is stale. Run tools/refsim/generate_fixtures.py"
+            echo "and commit the result alongside your physics change."
+            git --no-pager diff --stat -- tests/fixtures
             exit 1
           fi
 
@@ -112,6 +112,7 @@ jobs:
 
       - name: Run GUT
         run: |
+          set -o pipefail
           ~/godot-bin/godot --headless \
             -s addons/gut/gut_cmdln.gd \
             -gdir=res://tests \
@@ -120,7 +121,26 @@ jobs:
             -gsuffix=.gd \
             -gexit \
             -glog=1 \
-            -gjunit_xml_file=res://gut-results.xml
+            -gjunit_xml_file=res://gut-results.xml | tee gut.log
+
+          # GUT only *warns* when a test script fails to parse, and still exits
+          # zero. That once hid two whole files — test_integrator.gd and
+          # test_controller_vm.gd called assert_le(), which GUT spells
+          # assert_lte() — so the suite reported green while the integrator was
+          # not being tested at all. A skipped file is a failure here.
+          if grep -qE 'Ignoring script|Failed to load script' gut.log; then
+            echo "::error::GUT skipped a test script; see the log above."
+            grep -E 'Ignoring script|Failed to load script' gut.log
+            exit 1
+          fi
+
+          # Likewise: every tests/**/test_*.gd must have been collected.
+          on_disk=$(find tests -name 'test_*.gd' | wc -l)
+          collected=$(grep -oE '^Scripts +[0-9]+' gut.log | grep -oE '[0-9]+')
+          if [ "$on_disk" != "$collected" ]; then
+            echo "::error::$on_disk test scripts on disk but GUT ran $collected."
+            exit 1
+          fi
 
       - name: Publish test results
         if: always()
@@ -226,7 +246,8 @@ jobs:
       - name: gdformat --check
         run: gdformat --check $(git ls-files '*.gd')
       - name: gdlint
-        # Advisory: the linter's defaults disagree with this project's naming in
-        # places, and a style opinion should not block a physics fix.
+        # Advisory on purpose: a style opinion should not block a physics fix.
+        # It is clean as of this writing — `.gdlintrc` relaxes the handful of
+        # defaults that disagree with this project's house style, and says why.
         continue-on-error: true
         run: gdlint $(git ls-files '*.gd')

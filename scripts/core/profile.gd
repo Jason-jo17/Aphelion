@@ -10,7 +10,7 @@ extends Node
 ## boundary is this file alone, so moving to SQLite later touches nothing else.
 
 signal record_saved(mission_id: String, result: RunResult, is_new_best: bool)
-signal progress_changed()
+signal progress_changed
 
 const PATH := "user://profile.json"
 const BACKUP_PATH := "user://profile.backup.json"
@@ -98,9 +98,7 @@ func is_unlocked(mission_id: String) -> bool:
 
 ## Files a completed run. Returns true if it became the overall personal best.
 func record(mission_id: String, result: RunResult) -> bool:
-	var rec: Dictionary = records.get(mission_id, {
-		"attempts": 0, "history": [],
-	})
+	var rec: Dictionary = records.get(mission_id, {"attempts": 0, "history": []})
 	rec["attempts"] = int(rec.get("attempts", 0)) + 1
 
 	var history: Array = rec.get("history", [])
@@ -113,9 +111,11 @@ func record(mission_id: String, result: RunResult) -> bool:
 	if result.success:
 		var incumbent := best_for(mission_id)
 		if Scoring.is_better(result, incumbent):
-			rec["best"] = result.to_dict(true)   # keep the trajectory, for replay
+			rec["best"] = result.to_dict(true)  # keep the trajectory, for replay
 			is_best = true
-		for metric in [Scoring.METRIC_FUEL, Scoring.METRIC_TIME, Scoring.METRIC_INSTRUCTIONS]:
+		for metric: String in [
+			Scoring.METRIC_FUEL, Scoring.METRIC_TIME, Scoring.METRIC_INSTRUCTIONS
+		]:
 			var key := "best_" + metric
 			var current: RunResult = null
 			if rec.has(key):
@@ -177,8 +177,9 @@ func load_profile() -> void:
 		return
 	var d: Dictionary = parsed
 	if int(d.get("schema_version", 0)) > SCHEMA_VERSION:
-		push_warning("Profile was written by a newer version of Aphelion; "
-			+ "loading what is recognisable.")
+		push_warning(
+			"Profile was written by a newer version of Aphelion; " + "loading what is recognisable."
+		)
 	records = d.get("records", {})
 	drafts = d.get("drafts", {})
 
@@ -199,12 +200,23 @@ func save_profile() -> void:
 	if f == null:
 		push_error("Profile: cannot write %s" % PATH)
 		return
-	f.store_string(JSON.stringify({
-		"schema_version": SCHEMA_VERSION,
-		"saved_at": Time.get_datetime_string_from_system(true),
-		"records": records,
-		"drafts": drafts,
-	}, "  "))
+	(
+		f
+		. store_string(
+			(
+				JSON
+				. stringify(
+					{
+						"schema_version": SCHEMA_VERSION,
+						"saved_at": Time.get_datetime_string_from_system(true),
+						"records": records,
+						"drafts": drafts,
+					},
+					"  "
+				)
+			)
+		)
+	)
 	f.close()
 	_dirty = false
 

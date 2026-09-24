@@ -21,8 +21,7 @@ func _ready() -> void:
 	var margin := MarginContainer.new()
 	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	for side in ["left", "right", "top", "bottom"]:
-		margin.add_theme_constant_override("margin_" + side,
-			int(Tokens.space(Tokens.SPACE_5)))
+		margin.add_theme_constant_override("margin_" + side, int(Tokens.space(Tokens.SPACE_5)))
 	add_child(margin)
 
 	var column := UIKit.vbox(Tokens.SPACE_3)
@@ -114,15 +113,19 @@ func _palette_column() -> Control:
 			continue
 		column.add_child(UIKit.small(category.capitalize(), "text_faint"))
 		for def in parts:
-			var b := UIKit.button(def.display_name, "ghost",
-				"%s\n%s\n%s" % [def.display_name, def.description,
-					_part_summary(def)])
+			var b := UIKit.button(
+				def.display_name,
+				"ghost",
+				"%s\n%s\n%s" % [def.display_name, def.description, _part_summary(def)]
+			)
 			b.alignment = HORIZONTAL_ALIGNMENT_LEFT
-			b.pressed.connect(func():
-				_ship_view.selected_part = def.id
-				_ship_view.grab_focus()
-				_ship_view.queue_redraw()
-				App.instance.toast("%s selected — Enter places it" % def.display_name))
+			b.pressed.connect(
+				func():
+					_ship_view.selected_part = def.id
+					_ship_view.grab_focus()
+					_ship_view.queue_redraw()
+					App.instance.toast("%s selected — Enter places it" % def.display_name)
+			)
 			column.add_child(b)
 	return scroll
 
@@ -151,23 +154,27 @@ func _program_column() -> Control:
 	_program_editor.program_changed.connect(_on_program_changed)
 	card.add_child(_program_editor)
 	column.add_child(card)
-	_program_editor.set_source(App.instance.active_program.source
-		if App.instance.active_program != null else "")
+	_program_editor.set_source(
+		App.instance.active_program.source if App.instance.active_program != null else ""
+	)
 
 	var ai_card := UIKit.card(Tokens.SPACE_3)
 	var panel := MissionControlPanel.new()
 	panel.context_provider = _ai_context
-	panel.apply_requested.connect(func(source: String):
-		_program_editor.set_source(source)
-		App.instance.toast("Proposal loaded. Read it before you fly it."))
+	panel.apply_requested.connect(
+		func(source: String):
+			_program_editor.set_source(source)
+			App.instance.toast("Proposal loaded. Read it before you fly it.")
+	)
 	ai_card.add_child(panel)
 	column.add_child(ai_card)
 	return column
 
 
 func _ai_context() -> Dictionary:
-	return MissionControl.build_context(_mission, App.instance.active_ship, null,
-		_program_editor.program())
+	return MissionControl.build_context(
+		_mission, App.instance.active_ship, null, _program_editor.program()
+	)
 
 
 func _on_program_changed(program: Program) -> void:
@@ -191,19 +198,26 @@ func _refresh_stats() -> void:
 	_stats.add_child(UIKit.heading("Numbers", 3))
 	_stats.add_child(UIKit.stat_row("Mass, fuelled", Fmt.mass(p.wet_mass())))
 	_stats.add_child(UIKit.stat_row("Dry mass", Fmt.mass(p.dry_mass)))
-	_stats.add_child(UIKit.stat_row("Delta-v", Fmt.speed(p.delta_v()),
-		"success" if p.delta_v() > 0.0 else "danger"))
+	_stats.add_child(
+		UIKit.stat_row(
+			"Delta-v", Fmt.speed(p.delta_v()), "success" if p.delta_v() > 0.0 else "danger"
+		)
+	)
 	_stats.add_child(UIKit.stat_row("Thrust", Fmt.force(p.max_thrust)))
 	_stats.add_child(UIKit.stat_row("Burn time", Fmt.duration(p.burn_time())))
 	var twr := p.twr(9.0)
-	_stats.add_child(UIKit.stat_row("Thrust-to-weight, Halcyon", "%.2f" % twr,
-		"success" if twr >= 1.0 else "warning"))
-	_stats.add_child(UIKit.stat_row("90° turn",
-		Fmt.duration(AttitudeController.slew_time(p, DetMath.PI_2))))
+	_stats.add_child(
+		UIKit.stat_row(
+			"Thrust-to-weight, Halcyon", "%.2f" % twr, "success" if twr >= 1.0 else "warning"
+		)
+	)
+	_stats.add_child(
+		UIKit.stat_row("90° turn", Fmt.duration(AttitudeController.slew_time(p, DetMath.PI_2)))
+	)
 	_stats.add_child(UIKit.stat_row("Drag area", Fmt.number(p.drag_area, "m²")))
 
 	for f in ship.validate():
-		var role := {"error": "danger", "warning": "warning"}.get(f["level"], "text_muted")
+		var role: String = {"error": "danger", "warning": "warning"}.get(f["level"], "text_muted")
 		var box := UIKit.vbox(Tokens.SPACE_1)
 		var msg := UIKit.small(String(f["message"]), role)
 		msg.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART

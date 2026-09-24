@@ -9,7 +9,7 @@ extends Control
 ## puzzle game that locks people out at the first screen has failed before it
 ## started.
 
-signal ship_changed()
+signal ship_changed
 
 const CELL := 34.0
 
@@ -23,8 +23,10 @@ var _hover := Vector2i(-1, -1)
 func _ready() -> void:
 	focus_mode = Control.FOCUS_ALL
 	mouse_filter = Control.MOUSE_FILTER_STOP
-	tooltip_text = ("Assembly bay. Arrow keys move the cursor, Enter places the "
-		+ "selected part, Delete removes one, Tab cycles the palette.")
+	tooltip_text = (
+		"Assembly bay. Arrow keys move the cursor, Enter places the "
+		+ "selected part, Delete removes one, Tab cycles the palette."
+	)
 	_update_minimum_size()
 
 
@@ -32,7 +34,8 @@ func _update_minimum_size() -> void:
 	var catalog := PartCatalog.shared()
 	custom_minimum_size = Vector2(
 		float(catalog.grid_width) * Tokens.space(CELL),
-		float(catalog.grid_height) * Tokens.space(CELL))
+		float(catalog.grid_height) * Tokens.space(CELL)
+	)
 
 
 func _cell_size() -> float:
@@ -137,12 +140,20 @@ func _draw() -> void:
 	var grid_colour := Color(Tokens.color("border"), 0.6)
 	for x in catalog.grid_width + 1:
 		var fx := origin.x + float(x) * cell
-		draw_line(Vector2(fx, origin.y),
-			Vector2(fx, origin.y + float(catalog.grid_height) * cell), grid_colour, 1.0)
+		draw_line(
+			Vector2(fx, origin.y),
+			Vector2(fx, origin.y + float(catalog.grid_height) * cell),
+			grid_colour,
+			1.0
+		)
 	for y in catalog.grid_height + 1:
 		var fy := origin.y + float(y) * cell
-		draw_line(Vector2(origin.x, fy),
-			Vector2(origin.x + float(catalog.grid_width) * cell, fy), grid_colour, 1.0)
+		draw_line(
+			Vector2(origin.x, fy),
+			Vector2(origin.x + float(catalog.grid_width) * cell, fy),
+			grid_colour,
+			1.0
+		)
 
 	if ship == null:
 		return
@@ -158,14 +169,19 @@ func _draw() -> void:
 		var pl: Dictionary = ship.placements[i]
 		var rect := Rect2(
 			origin + Vector2(float(pl["x"]) * cell, float(pl["y"]) * cell),
-			Vector2(float(def.size_w) * cell, float(def.size_h) * cell))
+			Vector2(float(def.size_w) * cell, float(def.size_h) * cell)
+		)
 		_draw_part(rect, def, loose.has(i))
 
 	# The centre of mass, because a ship that pitches when it burns is usually a
 	# ship whose engine is not under its centre of mass.
 	if ship.part_count() > 0:
-		var com := ship.centre_of_mass() / catalog.cell_size
-		var p := origin + Vector2(com.x, com.y) * cell
+		# The rendering boundary: doubles become a Vector2 here, and only here.
+		var com := ship.centre_of_mass()
+		var p := (
+			origin
+			+ Vector2(float(com[0] / catalog.cell_size), float(com[1] / catalog.cell_size)) * cell
+		)
 		var c := Tokens.color("focus")
 		draw_arc(p, 6.0, 0.0, TAU, 20, c, 1.5, true)
 		draw_line(p + Vector2(-9, 0), p + Vector2(9, 0), c, 1.0)
@@ -178,26 +194,35 @@ func _draw() -> void:
 			var ok := ship.can_place(selected_part, _cursor.x, _cursor.y)
 			var rect := Rect2(
 				origin + Vector2(float(_cursor.x) * cell, float(_cursor.y) * cell),
-				Vector2(float(def.size_w) * cell, float(def.size_h) * cell))
+				Vector2(float(def.size_w) * cell, float(def.size_h) * cell)
+			)
 			var c := Tokens.color("success" if ok else "danger")
 			draw_rect(rect, Color(c, 0.18))
 			draw_rect(rect, c, false, 2.0)
 
 	var cursor_rect := Rect2(
-		origin + Vector2(float(_cursor.x) * cell, float(_cursor.y) * cell),
-		Vector2(cell, cell))
+		origin + Vector2(float(_cursor.x) * cell, float(_cursor.y) * cell), Vector2(cell, cell)
+	)
 	draw_rect(cursor_rect, Tokens.color("focus"), false, 2.0)
 
 	if has_focus():
-		draw_rect(Rect2(Vector2.ONE, size - Vector2.ONE * 2.0),
-			Tokens.color("focus"), false, Tokens.BORDER_FOCUS)
+		draw_rect(
+			Rect2(Vector2.ONE, size - Vector2.ONE * 2.0),
+			Tokens.color("focus"),
+			false,
+			Tokens.BORDER_FOCUS
+		)
 
 
 func _draw_part(rect: Rect2, def: PartDef, disconnected: bool) -> void:
 	var colour := _category_colour(def.category)
 	draw_rect(rect.grow(-2.0), Color(colour, 0.35))
-	draw_rect(rect.grow(-2.0), colour if not disconnected else Tokens.color("danger"),
-		false, 2.0 if disconnected else 1.5)
+	draw_rect(
+		rect.grow(-2.0),
+		colour if not disconnected else Tokens.color("danger"),
+		false,
+		2.0 if disconnected else 1.5
+	)
 
 	var font := get_theme_default_font()
 	if font == null:
@@ -206,8 +231,15 @@ func _draw_part(rect: Rect2, def: PartDef, disconnected: bool) -> void:
 	var initials := _initials(def.display_name)
 	var size_px := Tokens.font_size(Tokens.FONT_SM)
 	var text_size := font.get_string_size(initials, HORIZONTAL_ALIGNMENT_LEFT, -1, size_px)
-	draw_string(font, rect.get_center() + Vector2(-text_size.x * 0.5, size_px * 0.35),
-		initials, HORIZONTAL_ALIGNMENT_LEFT, -1, size_px, Tokens.color("text"))
+	draw_string(
+		font,
+		rect.get_center() + Vector2(-text_size.x * 0.5, size_px * 0.35),
+		initials,
+		HORIZONTAL_ALIGNMENT_LEFT,
+		-1,
+		size_px,
+		Tokens.color("text")
+	)
 
 
 static func _initials(name: String) -> String:
@@ -221,8 +253,12 @@ static func _initials(name: String) -> String:
 
 static func _category_colour(category: String) -> Color:
 	match category:
-		PartDef.CAT_COMMAND: return Tokens.trajectory_color("current")
-		PartDef.CAT_ENGINE: return Tokens.trajectory_color("danger")
-		PartDef.CAT_FUEL: return Tokens.trajectory_color("transfer")
-		PartDef.CAT_CONTROL: return Tokens.trajectory_color("projected")
+		PartDef.CAT_COMMAND:
+			return Tokens.trajectory_color("current")
+		PartDef.CAT_ENGINE:
+			return Tokens.trajectory_color("danger")
+		PartDef.CAT_FUEL:
+			return Tokens.trajectory_color("transfer")
+		PartDef.CAT_CONTROL:
+			return Tokens.trajectory_color("projected")
 	return Tokens.trajectory_color("target")

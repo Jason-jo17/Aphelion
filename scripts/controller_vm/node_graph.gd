@@ -26,10 +26,20 @@ extends RefCounted
 ## Node types that take `lhs`, `cmp` and `rhs`.
 const CONDITION_TYPES := ["branch", "burn_until", "wait_until"]
 
+## Where dangling edges land.
+const END_LABEL := "__end"
+
 ## Node type -> the mnemonic it emits, for the straightforward arithmetic cases.
 const ARITH_TYPES := {
-	"set": "SET", "add": "ADD", "sub": "SUB", "mul": "MUL", "div": "DIV",
-	"mod": "MOD", "min": "MIN", "max": "MAX", "sense": "SENSE",
+	"set": "SET",
+	"add": "ADD",
+	"sub": "SUB",
+	"mul": "MUL",
+	"div": "DIV",
+	"mod": "MOD",
+	"min": "MIN",
+	"max": "MAX",
+	"sense": "SENSE",
 }
 
 
@@ -56,12 +66,22 @@ static func emit_source(graph: Dictionary) -> Dictionary:
 	for n in graph.get("nodes", []):
 		var id := String(n.get("id", ""))
 		if id.is_empty():
-			errors.append({"node": "?", "message": "A node has no id.",
-				"hint": "Every node needs a unique id."})
+			errors.append(
+				{
+					"node": "?",
+					"message": "A node has no id.",
+					"hint": "Every node needs a unique id."
+				}
+			)
 			continue
 		if by_id.has(id):
-			errors.append({"node": id, "message": "Duplicate node id '%s'." % id,
-				"hint": "Node ids must be unique."})
+			errors.append(
+				{
+					"node": id,
+					"message": "Duplicate node id '%s'." % id,
+					"hint": "Node ids must be unique."
+				}
+			)
 			continue
 		by_id[id] = n
 		order.append(id)
@@ -71,9 +91,13 @@ static func emit_source(graph: Dictionary) -> Dictionary:
 
 	var entry := String(graph.get("entry", order[0]))
 	if not by_id.has(entry):
-		errors.append({"node": entry,
-			"message": "The entry node '%s' does not exist." % entry,
-			"hint": "Point the start marker at a node that is in the graph."})
+		errors.append(
+			{
+				"node": entry,
+				"message": "The entry node '%s' does not exist." % entry,
+				"hint": "Point the start marker at a node that is in the graph."
+			}
+		)
 		entry = order[0]
 
 	# Depth-first from the entry, so the emitted order follows the flow the
@@ -95,9 +119,13 @@ static func emit_source(graph: Dictionary) -> Dictionary:
 
 	for id in order:
 		if not seen.has(id):
-			errors.append({"node": id,
-				"message": "Node '%s' cannot be reached from the start." % id,
-				"hint": "Connect it, or delete it. Unreachable nodes are not compiled."})
+			errors.append(
+				{
+					"node": id,
+					"message": "Node '%s' cannot be reached from the start." % id,
+					"hint": "Connect it, or delete it. Unreachable nodes are not compiled."
+				}
+			)
 
 	# Node ids are whatever the player typed; labels have to be unique and
 	# valid. Derive them from position so neither can collide.
@@ -110,6 +138,7 @@ static func emit_source(graph: Dictionary) -> Dictionary:
 	lines.append("; the next time the graph is changed.")
 	lines.append("")
 
+	var needs_end := false
 	for i in layout.size():
 		var id: String = layout[i]
 		var node: Dictionary = by_id[id]
@@ -118,11 +147,16 @@ static func emit_source(graph: Dictionary) -> Dictionary:
 		var body := _emit_node(id, node, next_in_layout, label_of, errors)
 		for b in body:
 			lines.append("        " + b)
+			if b.ends_with(END_LABEL):
+				needs_end = true
 
-	# Every dangling edge lands here, so a graph can always be compiled even
-	# while the player is still wiring it up.
-	lines.append("__end:")
-	lines.append("        HALT")
+	# A landing pad for dangling edges, so a half-wired graph still compiles.
+	# Only emitted when something actually jumps to it: an unconditional HALT
+	# here would cost the player an instruction on the scoreboard for a node
+	# they never placed.
+	if needs_end:
+		lines.append("%s:" % END_LABEL)
+		lines.append("        HALT")
 
 	return {"source": "\n".join(lines), "errors": errors}
 
@@ -138,8 +172,11 @@ static func _successors(node: Dictionary) -> Array[String]:
 
 
 static func _emit_node(
-	id: String, node: Dictionary, next_in_layout: String,
-	label_of: Dictionary, errors: Array[Dictionary]
+	id: String,
+	node: Dictionary,
+	next_in_layout: String,
+	label_of: Dictionary,
+	errors: Array[Dictionary]
 ) -> PackedStringArray:
 	var out := PackedStringArray()
 	var type := String(node.get("type", "")).to_lower()
@@ -157,8 +194,12 @@ static func _emit_node(
 			out.append("POINT %s" % _value(node, "target", "PROGRADE"))
 		"orient":
 			if node.has("tolerance"):
-				out.append("ORIENT %s, %s" % [_value(node, "target", "PROGRADE"),
-					_value(node, "tolerance", "0.5")])
+				out.append(
+					(
+						"ORIENT %s, %s"
+						% [_value(node, "target", "PROGRADE"), _value(node, "tolerance", "0.5")]
+					)
+				)
 			else:
 				out.append("ORIENT %s" % _value(node, "target", "PROGRADE"))
 		"burn":
@@ -185,12 +226,24 @@ static func _emit_node(
 			return out
 		_:
 			if ARITH_TYPES.has(type):
-				out.append("%s %s, %s" % [ARITH_TYPES[type],
-					_value(node, "register", "R0"), _value(node, "value", "0")])
+				out.append(
+					(
+						"%s %s, %s"
+						% [
+							ARITH_TYPES[type],
+							_value(node, "register", "R0"),
+							_value(node, "value", "0")
+						]
+					)
+				)
 			else:
-				errors.append({"node": id,
-					"message": "Unknown node type '%s'." % type,
-					"hint": "Delete the node and place it again from the palette."})
+				errors.append(
+					{
+						"node": id,
+						"message": "Unknown node type '%s'." % type,
+						"hint": "Delete the node and place it again from the palette."
+					}
+				)
 				return out
 
 	if nxt.is_empty():
@@ -204,9 +257,13 @@ static func _emit_node(
 static func _condition(id: String, node: Dictionary, errors: Array[Dictionary]) -> String:
 	var cmp := String(node.get("cmp", ">"))
 	if not ISA.CMP_FROM_TEXT.has(cmp):
-		errors.append({"node": id,
-			"message": "'%s' is not a comparison." % cmp,
-			"hint": "Use one of <  <=  >  >=  ==  !="})
+		errors.append(
+			{
+				"node": id,
+				"message": "'%s' is not a comparison." % cmp,
+				"hint": "Use one of <  <=  >  >=  ==  !="
+			}
+		)
 		cmp = ">"
 	return "%s %s %s" % [_value(node, "lhs", "ALT"), cmp, _value(node, "rhs", "0")]
 
@@ -223,7 +280,7 @@ static func _value(node: Dictionary, key: String, fallback: String) -> String:
 
 static func _label_or_end(id: String, label_of: Dictionary) -> String:
 	if id.is_empty() or not label_of.has(id):
-		return "__end"
+		return END_LABEL
 	return String(label_of[id])
 
 

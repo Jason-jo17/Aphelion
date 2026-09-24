@@ -23,9 +23,9 @@ const DRAG_COEFFICIENT := 0.35
 const HULL_DEPTH := 1.0
 
 ## Severity levels used by validate().
-const LEVEL_ERROR := "error"      ## cannot fly
+const LEVEL_ERROR := "error"  ## cannot fly
 const LEVEL_WARNING := "warning"  ## will fly, probably badly
-const LEVEL_INFO := "info"        ## worth knowing for some missions
+const LEVEL_INFO := "info"  ## worth knowing for some missions
 
 var display_name: String = "Untitled"
 
@@ -49,7 +49,12 @@ func placement_blocked_reason(part_id: String, x: int, y: int, ignore_index: int
 	var def := catalog.get_part(part_id)
 	if def == null:
 		return "Unknown part '%s'." % part_id
-	if x < 0 or y < 0 or x + def.size_w > catalog.grid_width or y + def.size_h > catalog.grid_height:
+	if (
+		x < 0
+		or y < 0
+		or x + def.size_w > catalog.grid_width
+		or y + def.size_h > catalog.grid_height
+	):
 		return "That does not fit inside the assembly bay."
 	var occ := _occupancy(ignore_index)
 	for dx in def.size_w:
@@ -124,7 +129,7 @@ func to_profile() -> ShipProfile:
 	var dry := 0.0
 	var fuel := 0.0
 	var thrust := 0.0
-	var flow := 0.0          # sum of thrust_i / isp_i, for the effective Isp
+	var flow := 0.0  # sum of thrust_i / isp_i, for the effective Isp
 	var torque := 0.0
 	var extra_drag := 0.0
 	var landing := 0.0
@@ -176,8 +181,15 @@ func frontal_width() -> float:
 
 
 ## Centre of mass with full tanks, in metres, in grid coordinates
-## (+x right, +y down). Returns Vector2.ZERO for an empty ship.
-func centre_of_mass() -> Vector2:
+## (+x right, +y down), as [x, y]. Empty ship gives [0, 0].
+##
+## Returns doubles, not a Vector2. Vector2 is single-precision in standard
+## Godot builds, and this value feeds the moment of inertia, which sets how the
+## ship turns, which changes where it ends up — so a 32-bit rounding here would
+## put single precision directly into the trajectory. docs/DETERMINISM.md rule 5.
+## The conversion to Vector2 happens in the editor's drawing code and nowhere
+## else.
+func centre_of_mass() -> PackedFloat64Array:
 	var cell := catalog.cell_size
 	var total := 0.0
 	var cx := 0.0
@@ -196,8 +208,8 @@ func centre_of_mass() -> Vector2:
 		cy += m * py
 		total += m
 	if total <= 0.0:
-		return Vector2.ZERO
-	return Vector2(cx / total, cy / total)
+		return PackedFloat64Array([0.0, 0.0])
+	return PackedFloat64Array([cx / total, cy / total])
 
 
 ## Moment of inertia about the centre of mass, kg*m^2.
@@ -219,8 +231,8 @@ func moment_of_inertia() -> float:
 		var px := (float(p["x"]) + float(def.size_w) * 0.5) * cell
 		var py := (float(p["y"]) + float(def.size_h) * 0.5) * cell
 		var own := m * (w * w + hgt * hgt) / 12.0
-		var dx := px - com.x
-		var dy := py - com.y
+		var dx := px - com[0]
+		var dy := py - com[1]
 		total += own + m * (dx * dx + dy * dy)
 	return total
 
@@ -268,45 +280,111 @@ func validate() -> Array[Dictionary]:
 			legs += 1
 
 	if placements.is_empty():
-		out.append(_finding(LEVEL_ERROR, "empty", "There is no ship yet.",
-			"Start with a Corvid Mk1 Capsule, then hang a tank and an engine below it."))
+		out.append(
+			_finding(
+				LEVEL_ERROR,
+				"empty",
+				"There is no ship yet.",
+				"Start with a Corvid Mk1 Capsule, then hang a tank and an engine below it."
+			)
+		)
 		return out
 
 	if commands == 0:
-		out.append(_finding(LEVEL_ERROR, "no_command", "No command part.",
-			"Add a Corvid Mk1 Capsule or a Wren Probe Core — something has to run the flight computer."))
+		(
+			out
+			. append(
+				_finding(
+					LEVEL_ERROR,
+					"no_command",
+					"No command part.",
+					"Add a Corvid Mk1 Capsule or a Wren Probe Core — something has to run the flight computer."
+				)
+			)
+		)
 	elif commands > 1:
-		out.append(_finding(LEVEL_ERROR, "multiple_command",
-			"%d command parts." % commands,
-			"A ship takes exactly one flight computer. Remove the extras."))
+		out.append(
+			_finding(
+				LEVEL_ERROR,
+				"multiple_command",
+				"%d command parts." % commands,
+				"A ship takes exactly one flight computer. Remove the extras."
+			)
+		)
 
 	if engines == 0:
-		out.append(_finding(LEVEL_ERROR, "no_engine", "No engine.",
-			"Without thrust this ship cannot change its own orbit. Add a Kestrel Booster."))
+		out.append(
+			_finding(
+				LEVEL_ERROR,
+				"no_engine",
+				"No engine.",
+				"Without thrust this ship cannot change its own orbit. Add a Kestrel Booster."
+			)
+		)
 	elif prof.fuel_capacity <= 0.0:
-		out.append(_finding(LEVEL_ERROR, "no_fuel", "Engines, but no propellant.",
-			"Add a fuel tank. Delta-v is currently zero, so BURN would do nothing."))
+		out.append(
+			_finding(
+				LEVEL_ERROR,
+				"no_fuel",
+				"Engines, but no propellant.",
+				"Add a fuel tank. Delta-v is currently zero, so BURN would do nothing."
+			)
+		)
 
 	var loose := disconnected_indices()
 	if not loose.is_empty():
-		out.append(_finding(LEVEL_ERROR, "disconnected",
-			"%d part%s not attached to the ship." % [loose.size(), "" if loose.size() == 1 else "s"],
-			"Every part must touch the command part through its neighbours. Drag the floating pieces back."))
+		(
+			out
+			. append(
+				_finding(
+					LEVEL_ERROR,
+					"disconnected",
+					(
+						"%d part%s not attached to the ship."
+						% [loose.size(), "" if loose.size() == 1 else "s"]
+					),
+					"Every part must touch the command part through its neighbours. Drag the floating pieces back."
+				)
+			)
+		)
 
 	if wheels == 0 and engines > 0:
-		out.append(_finding(LEVEL_WARNING, "no_wheel", "No reaction wheel.",
-			"ORIENT will have nothing to turn the ship with, so your heading is frozen wherever it starts."))
+		(
+			out
+			. append(
+				_finding(
+					LEVEL_WARNING,
+					"no_wheel",
+					"No reaction wheel.",
+					"ORIENT will have nothing to turn the ship with, so your heading is frozen wherever it starts."
+				)
+			)
+		)
 
 	if prof.max_thrust > 0.0:
 		var t := prof.twr(9.0)
 		if t < 1.0:
-			out.append(_finding(LEVEL_WARNING, "low_twr",
-				"Thrust-to-weight on Halcyon is %.2f." % t,
-				"Below 1.0 the ship cannot lift off. It is fine for a ship that starts in orbit."))
+			(
+				out
+				. append(
+					_finding(
+						LEVEL_WARNING,
+						"low_twr",
+						"Thrust-to-weight on Halcyon is %.2f." % t,
+						"Below 1.0 the ship cannot lift off. It is fine for a ship that starts in orbit."
+					)
+				)
+			)
 
 	if legs == 0:
-		out.append(_finding(LEVEL_INFO, "no_legs", "No landing legs.",
-			"Any surface contact counts as a crash. Landing missions will need a pair."))
+		out.append(
+			_finding(
+				LEVEL_INFO,
+				"no_legs",
+				"No landing legs.",
+				"Any surface contact counts as a crash. Landing missions will need a pair."
+			)
+		)
 
 	return out
 
@@ -407,11 +485,17 @@ static func from_dict(d: Dictionary, cat: PartCatalog = null) -> Ship:
 	var s := Ship.new(cat)
 	s.display_name = String(d.get("name", "Untitled"))
 	for entry in d.get("placements", []):
-		s.placements.append({
-			"part_id": String(entry.get("part_id", "")),
-			"x": int(entry.get("x", 0)),
-			"y": int(entry.get("y", 0)),
-		})
+		(
+			s
+			. placements
+			. append(
+				{
+					"part_id": String(entry.get("part_id", "")),
+					"x": int(entry.get("x", 0)),
+					"y": int(entry.get("y", 0)),
+				}
+			)
+		)
 	return s
 
 

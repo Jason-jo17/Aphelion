@@ -15,7 +15,7 @@ const MAX_VISIBLE := 12
 
 var _scrim: ColorRect
 var _panel: PanelContainer
-var _input: LineEdit
+var _query: LineEdit
 var _list: VBoxContainer
 var _entries: Array[Dictionary] = []
 var _filtered: Array[Dictionary] = []
@@ -44,11 +44,11 @@ func _ready() -> void:
 	var column := UIKit.vbox(Tokens.SPACE_2)
 	_panel.add_child(column)
 
-	_input = LineEdit.new()
-	_input.placeholder_text = "Type to search — Enter to run, Esc to close"
-	_input.custom_minimum_size = Vector2(0, Tokens.space(36.0))
-	_input.text_changed.connect(_on_text_changed)
-	column.add_child(_input)
+	_query = LineEdit.new()
+	_query.placeholder_text = "Type to search — Enter to run, Esc to close"
+	_query.custom_minimum_size = Vector2(0, Tokens.space(36.0))
+	_query.text_changed.connect(_on_text_changed)
+	column.add_child(_query)
 
 	var scroll := UIKit.scroll()
 	scroll.custom_minimum_size = Vector2(0, Tokens.space(340.0))
@@ -65,10 +65,10 @@ func is_open() -> bool:
 
 func open(entries: Array[Dictionary]) -> void:
 	_entries = entries
-	_input.text = ""
+	_query.text = ""
 	visible = true
 	_refresh("")
-	_input.grab_focus()
+	_query.grab_focus()
 	UIKit.fade_in(self)
 
 
@@ -165,8 +165,9 @@ func _rebuild() -> void:
 		var title := Label.new()
 		title.text = String(entry.get("title", ""))
 		title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		title.add_theme_color_override("font_color",
-			Tokens.color("accent_text") if i == _selected else Tokens.color("text"))
+		title.add_theme_color_override(
+			"font_color", Tokens.color("accent_text") if i == _selected else Tokens.color("text")
+		)
 		title.add_theme_font_size_override("font_size", Tokens.font_size(Tokens.FONT_MD))
 		row.add_child(title)
 
@@ -175,8 +176,10 @@ func _rebuild() -> void:
 			var h := Label.new()
 			h.text = hint
 			h.add_theme_font_size_override("font_size", Tokens.font_size(Tokens.FONT_SM))
-			h.add_theme_color_override("font_color",
-				Tokens.color("accent_text") if i == _selected else Tokens.color("text_muted"))
+			h.add_theme_color_override(
+				"font_color",
+				Tokens.color("accent_text") if i == _selected else Tokens.color("text_muted")
+			)
 			h.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 			h.custom_minimum_size = Vector2(Tokens.space(260.0), 0)
 			h.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART

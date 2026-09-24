@@ -336,6 +336,17 @@ static func angle_delta(from: float, to: float) -> float:
 	return wrap_angle(to - from)
 
 
+## Floating-point remainder, x - trunc(x/y)*y.
+##
+## Unlike the transcendentals above, `fmod` needs no reimplementation: it is an
+## *exact* operation — the result is always representable and no rounding
+## occurs — so every conforming platform returns identical bits. It is wrapped
+## here anyway so that the "no libm in the simulation" rule stays a clean grep,
+## and so this reasoning lives somewhere rather than in a reviewer's memory.
+static func fmod_exact(x: float, y: float) -> float:
+	return fmod(x, y)
+
+
 ## Hypotenuse without the intermediate overflow of sqrt(x*x + y*y).
 static func hypot(x: float, y: float) -> float:
 	var ax := absf(x)

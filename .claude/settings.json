@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "_comment": [
+    "Hooks for working on Aphelion. The Stop hook runs the fast Python checks",
+    "rather than the Godot suite: the reference sim covers the physics in",
+    "seconds with no dependencies, while a headless Godot run needs GUT fetched",
+    "and takes long enough to be annoying on every stop. Run the full suite",
+    "before opening a pull request — CONTRIBUTING.md has the command."
+  ],
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "f=\"$CLAUDE_TOOL_FILE_PATH\"; case \"$f\" in *.gd) command -v gdformat >/dev/null 2>&1 && gdformat \"$f\" >/dev/null 2>&1 ;; esac; exit 0"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"$CLAUDE_PROJECT_DIR\" 2>/dev/null || exit 0; command -v python3 >/dev/null 2>&1 || exit 0; python3 tools/refsim/validate_physics.py >/dev/null 2>&1 || echo 'Aphelion: tools/refsim/validate_physics.py is failing — the physics changed and the numerical checks no longer pass.'; python3 tools/refsim/author_missions.py 2>&1 | tail -1 | grep -q '^15/15' || echo 'Aphelion: not all fifteen reference solutions still fly. Run tools/refsim/author_missions.py.'; exit 0"
+          }
+        ]
+      }
+    ]
+  }
+}

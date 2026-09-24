@@ -281,7 +281,7 @@ func _execute_one(bus: SensorBus, state: ShipState, profile: ShipProfile) -> voi
 				_fault("divide_by_zero", "MOD by zero.",
 					"Guard the divisor with an IF before using it.", ins.line)
 				return
-			_write(ins.a, fmod(_read(ins.a, bus), m))
+			_write(ins.a, DetMath.fmod_exact(_read(ins.a, bus), m))
 		ISA.Op.MIN:
 			_write(ins.a, minf(_read(ins.a, bus), _read(ins.b, bus)))
 		ISA.Op.MAX:

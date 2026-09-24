@@ -712,7 +712,7 @@ class ControllerVM:
             m = rd(ins.b, bus)
             if m == 0.0:
                 return self._fault("divide_by_zero", "MOD by zero.", "", ins.line)
-            self._write(ins.a, math.fmod(rd(ins.a, bus), m))
+            self._write(ins.a, dm.fmod_exact(rd(ins.a, bus), m))
         elif op == "MIN":
             self._write(ins.a, min(rd(ins.a, bus), rd(ins.b, bus)))
         elif op == "MAX":

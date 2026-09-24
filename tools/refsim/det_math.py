@@ -342,6 +342,10 @@ def angle_delta(frm, to):
     return wrap_angle(to - frm)
 
 
+def fmod_exact(x, y):
+    return math.fmod(x, y)
+
+
 def hypot(x, y):
     ax = abs(x)
     ay = abs(y)

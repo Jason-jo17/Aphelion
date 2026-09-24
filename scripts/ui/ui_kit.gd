@@ -7,6 +7,7 @@ extends RefCounted
 ## palette and the UI scale slider reach the whole game rather than the bits
 ## somebody remembered to wire up.
 
+
 ## A heading. `level` 1 is a screen title, 2 a section, 3 a label above a group.
 static func heading(text: String, level: int = 2) -> Label:
 	var l := Label.new()
@@ -28,8 +29,9 @@ static func body(text: String, muted: bool = false) -> Label:
 	l.text = text
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	l.add_theme_font_size_override("font_size", Tokens.font_size(Tokens.FONT_MD))
-	l.add_theme_color_override("font_color",
-		Tokens.color("text_muted") if muted else Tokens.color("text"))
+	l.add_theme_color_override(
+		"font_color", Tokens.color("text_muted") if muted else Tokens.color("text")
+	)
 	return l
 
 
@@ -88,8 +90,7 @@ static func separator() -> HSeparator:
 ##
 ## The accessible name matters as much as the label: a keyboard or screen-reader
 ## user meets `tooltip_text` before they meet the pixels.
-static func button(text: String, kind: String = "secondary",
-		tooltip: String = "") -> Button:
+static func button(text: String, kind: String = "secondary", tooltip: String = "") -> Button:
 	var b := Button.new()
 	b.text = text
 	b.tooltip_text = tooltip if not tooltip.is_empty() else text
@@ -159,11 +160,11 @@ static func stat_row(label: String, value: String, role: String = "text") -> HBo
 ## to count at a glance and impossible for a screen reader to describe.
 static func stars_label(earned: int, total: int = 3) -> Label:
 	var l := Label.new()
-	l.text = "%s  %d/%d" % ["★".repeat(earned) + "☆".repeat(maxi(0, total - earned)),
-		earned, total]
+	l.text = "%s  %d/%d" % ["★".repeat(earned) + "☆".repeat(maxi(0, total - earned)), earned, total]
 	l.tooltip_text = "%d of %d stars" % [earned, total]
-	l.add_theme_color_override("font_color",
-		Tokens.color("warning") if earned > 0 else Tokens.color("text_faint"))
+	l.add_theme_color_override(
+		"font_color", Tokens.color("warning") if earned > 0 else Tokens.color("text_faint")
+	)
 	l.add_theme_font_size_override("font_size", Tokens.font_size(Tokens.FONT_MD))
 	return l
 

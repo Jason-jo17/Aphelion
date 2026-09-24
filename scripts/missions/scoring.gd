@@ -25,27 +25,56 @@ static func apply(mission: Mission, result: RunResult) -> void:
 	result.star_fuel = result.fuel_used <= mission.star_fuel
 	result.star_time = result.elapsed <= mission.star_time
 	result.star_instructions = result.instruction_count <= mission.star_instructions
-	result.stars = (1 if result.star_fuel else 0) \
-		+ (1 if result.star_time else 0) \
+	result.stars = (
+		(1 if result.star_fuel else 0)
+		+ (1 if result.star_time else 0)
 		+ (1 if result.star_instructions else 0)
+	)
 
 
 ## Per-metric detail for the results screen: what you scored, what was needed,
 ## and how close you were.
 static func breakdown(mission: Mission, result: RunResult) -> Array[Dictionary]:
 	return [
-		_row(METRIC_FUEL, "Fuel", result.fuel_used, mission.star_fuel,
-			result.star_fuel, Fmt.mass(result.fuel_used), Fmt.mass(mission.star_fuel)),
-		_row(METRIC_TIME, "Time", result.elapsed, mission.star_time,
-			result.star_time, Fmt.duration(result.elapsed), Fmt.duration(mission.star_time)),
-		_row(METRIC_INSTRUCTIONS, "Instructions", float(result.instruction_count),
-			float(mission.star_instructions), result.star_instructions,
-			str(result.instruction_count), str(mission.star_instructions)),
+		_row(
+			METRIC_FUEL,
+			"Fuel",
+			result.fuel_used,
+			mission.star_fuel,
+			result.star_fuel,
+			Fmt.mass(result.fuel_used),
+			Fmt.mass(mission.star_fuel)
+		),
+		_row(
+			METRIC_TIME,
+			"Time",
+			result.elapsed,
+			mission.star_time,
+			result.star_time,
+			Fmt.duration(result.elapsed),
+			Fmt.duration(mission.star_time)
+		),
+		_row(
+			METRIC_INSTRUCTIONS,
+			"Instructions",
+			float(result.instruction_count),
+			float(mission.star_instructions),
+			result.star_instructions,
+			str(result.instruction_count),
+			str(mission.star_instructions)
+		),
 	]
 
 
-static func _row(metric: String, label: String, value: float, target: float,
-		earned: bool, value_text: String, target_text: String) -> Dictionary:
+static func _row(
+	metric: String,
+	label: String,
+	value: float,
+	target: float,
+	earned: bool,
+	value_text: String,
+	target_text: String
+) -> Dictionary:
 	var over := 0.0
 	if target > 0.0 and not is_inf(target):
 		over = (value - target) / target

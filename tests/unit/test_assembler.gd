@@ -11,17 +11,21 @@ func test_a_minimal_program_assembles() -> void:
 
 
 func test_comments_labels_and_blank_lines_are_free() -> void:
-	var p := Assembler.assemble("""
+	var p := (
+		Assembler
+		. assemble(
+			"""
 ; a comment
         THROTTLE 1     ; trailing comment
 
 loop:
         BURN 1
         JMP loop
-""")
+"""
+		)
+	)
 	assert_true(p.ok(), p.first_error_text())
-	assert_eq(p.instruction_count(), 3,
-		"formatting a program readably must not cost instructions")
+	assert_eq(p.instruction_count(), 3, "formatting a program readably must not cost instructions")
 	assert_true(p.labels.has("LOOP"))
 
 
@@ -53,8 +57,14 @@ func test_burn_and_wait_have_both_forms() -> void:
 
 
 func test_orient_accepts_keywords_registers_numbers_and_a_tolerance() -> void:
-	for src in ["ORIENT PROGRADE", "ORIENT RETROGRADE, 2", "ORIENT 90", "ORIENT R0",
-			"ORIENT TARGET", "POINT RADIAL"]:
+	for src in [
+		"ORIENT PROGRADE",
+		"ORIENT RETROGRADE, 2",
+		"ORIENT 90",
+		"ORIENT R0",
+		"ORIENT TARGET",
+		"POINT RADIAL"
+	]:
 		var p := Assembler.assemble(src)
 		assert_true(p.ok(), "%s should assemble: %s" % [src, p.first_error_text()])
 
@@ -74,13 +84,15 @@ func test_named_constants() -> void:
 
 # --- diagnostics -----------------------------------------------------------
 
+
 func test_an_unknown_instruction_is_named_and_a_guess_offered() -> void:
 	var p := Assembler.assemble("THROTLE 1")
 	assert_false(p.ok())
 	assert_eq(p.errors.size(), 1)
 	assert_string_contains(String(p.errors[0]["message"]), "THROTLE")
-	assert_string_contains(String(p.errors[0]["hint"]), "THROTTLE",
-		"a one-character typo should get a suggestion")
+	assert_string_contains(
+		String(p.errors[0]["hint"]), "THROTTLE", "a one-character typo should get a suggestion"
+	)
 
 
 func test_a_misspelled_sensor_gets_a_suggestion() -> void:
@@ -145,6 +157,7 @@ func test_an_empty_program_is_not_ok_but_is_not_an_error_either() -> void:
 
 # --- round trip ------------------------------------------------------------
 
+
 func test_disassembly_reassembles_to_the_same_program() -> void:
 	var source := """
         THROTTLE 0.5
@@ -169,12 +182,18 @@ turn:   SENSE   R0, ALT
 	var second := Assembler.assemble(first.to_text())
 	assert_true(second.ok(), second.first_error_text())
 	assert_eq(second.instruction_count(), first.instruction_count())
-	assert_eq(second.content_hash(), first.content_hash(),
-		"a program's identity must survive a round trip through text")
+	assert_eq(
+		second.content_hash(),
+		first.content_hash(),
+		"a program's identity must survive a round trip through text"
+	)
 
 
 func test_reformatting_does_not_change_the_hash() -> void:
 	var a := Assembler.assemble("THROTTLE 1\nBURN 5\nHALT")
 	var b := Assembler.assemble("; a comment\n\n   THROTTLE   1   ; why\n   BURN 5\n   HALT\n")
-	assert_eq(a.content_hash(), b.content_hash(),
-		"recommenting a program must not invalidate a recorded run")
+	assert_eq(
+		a.content_hash(),
+		b.content_hash(),
+		"recommenting a program must not invalidate a recorded run"
+	)

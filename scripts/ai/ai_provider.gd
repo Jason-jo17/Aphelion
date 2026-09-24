@@ -28,7 +28,8 @@ const OLLAMA := "ollama"
 ## model to save the player money: it is their key and their decision, and the
 ## setting is one click away.
 const SPECS := {
-	ANTHROPIC: {
+	ANTHROPIC:
+	{
 		"label": "Anthropic",
 		"url": "https://api.anthropic.com/v1/messages",
 		"models_url": "https://api.anthropic.com/v1/models",
@@ -37,7 +38,8 @@ const SPECS := {
 		"key_hint": "Starts with sk-ant-. Create one at console.anthropic.com.",
 		"suggested_models": ["claude-opus-5", "claude-sonnet-5", "claude-haiku-4-5"],
 	},
-	OPENAI: {
+	OPENAI:
+	{
 		"label": "OpenAI",
 		"url": "https://api.openai.com/v1/chat/completions",
 		"models_url": "https://api.openai.com/v1/models",
@@ -46,7 +48,8 @@ const SPECS := {
 		"key_hint": "Starts with sk-. Create one at platform.openai.com.",
 		"suggested_models": [],
 	},
-	GEMINI: {
+	GEMINI:
+	{
 		"label": "Google Gemini",
 		"url": "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent",
 		"models_url": "https://generativelanguage.googleapis.com/v1beta/models",
@@ -55,7 +58,8 @@ const SPECS := {
 		"key_hint": "Create one at aistudio.google.com.",
 		"suggested_models": [],
 	},
-	OLLAMA: {
+	OLLAMA:
+	{
 		"label": "Ollama (local)",
 		"url": "http://127.0.0.1:11434/api/chat",
 		"models_url": "http://127.0.0.1:11434/api/tags",
@@ -132,7 +136,8 @@ static func build_body(provider: String, model: String, system: String, user: St
 			body = {
 				"model": model,
 				"max_completion_tokens": MAX_OUTPUT_TOKENS,
-				"messages": [
+				"messages":
+				[
 					{"role": "system", "content": system},
 					{"role": "user", "content": user},
 				],
@@ -147,7 +152,8 @@ static func build_body(provider: String, model: String, system: String, user: St
 			body = {
 				"model": model,
 				"stream": false,
-				"messages": [
+				"messages":
+				[
 					{"role": "system", "content": system},
 					{"role": "user", "content": user},
 				],
@@ -165,8 +171,12 @@ static func extract_text(provider: String, response: Dictionary) -> Dictionary:
 			# reading content or the panel shows an empty proposal.
 			if String(response.get("stop_reason", "")) == "refusal":
 				var det: Dictionary = response.get("stop_details", {})
-				return _err("The model declined this request%s."
-					% ("" if det.is_empty() else " (%s)" % String(det.get("category", ""))))
+				return _err(
+					(
+						"The model declined this request%s."
+						% ("" if det.is_empty() else " (%s)" % String(det.get("category", "")))
+					)
+				)
 			var parts := PackedStringArray()
 			for block in response.get("content", []):
 				if typeof(block) == TYPE_DICTIONARY and String(block.get("type", "")) == "text":
@@ -190,8 +200,7 @@ static func extract_text(provider: String, response: Dictionary) -> Dictionary:
 			if cands.is_empty():
 				var fb: Dictionary = response.get("promptFeedback", {})
 				if fb.has("blockReason"):
-					return _err("The model declined this request (%s)."
-						% String(fb["blockReason"]))
+					return _err("The model declined this request (%s)." % String(fb["blockReason"]))
 				return _err("The reply contained no candidates.")
 			var gparts: Array = cands[0].get("content", {}).get("parts", [])
 			var gtext := PackedStringArray()
@@ -222,22 +231,34 @@ static func describe_error(provider: String, status: int, body: Dictionary) -> S
 
 	match status:
 		0:
-			return "Could not reach %s.%s" % [label(provider),
-				" Is Ollama running?" if provider == OLLAMA else " Check your connection."]
+			return (
+				"Could not reach %s.%s"
+				% [
+					label(provider),
+					" Is Ollama running?" if provider == OLLAMA else " Check your connection."
+				]
+			)
 		401, 403:
-			return "%s rejected the key. Check it in Settings → Mission Control." \
-				% label(provider)
+			return "%s rejected the key. Check it in Settings → Mission Control." % label(provider)
 		404:
-			return "%s does not have a model called '%s'. Pick a different one in " \
-				% [label(provider), Settings.ai_model] \
+			return (
+				(
+					"%s does not have a model called '%s'. Pick a different one in "
+					% [label(provider), Settings.ai_model]
+				)
 				+ "Settings → Mission Control."
+			)
 		429:
 			return "%s is rate-limiting you. Wait a moment and try again." % label(provider)
 		400:
 			if _looks_like_model_error(provider_message):
-				return "%s rejected the model '%s': %s Change it in Settings → " \
-					% [label(provider), Settings.ai_model, provider_message] \
+				return (
+					(
+						"%s rejected the model '%s': %s Change it in Settings → "
+						% [label(provider), Settings.ai_model, provider_message]
+					)
 					+ "Mission Control."
+				)
 			return "%s rejected the request: %s" % [label(provider), provider_message]
 		500, 502, 503, 529:
 			return "%s is having trouble (%d). Try again shortly." % [label(provider), status]
@@ -248,8 +269,16 @@ static func describe_error(provider: String, status: int, body: Dictionary) -> S
 
 static func _looks_like_model_error(message: String) -> bool:
 	var m := message.to_lower()
-	return m.contains("model") and (m.contains("not found") or m.contains("does not exist")
-		or m.contains("unknown") or m.contains("invalid") or m.contains("deprecat"))
+	return (
+		m.contains("model")
+		and (
+			m.contains("not found")
+			or m.contains("does not exist")
+			or m.contains("unknown")
+			or m.contains("invalid")
+			or m.contains("deprecat")
+		)
+	)
 
 
 static func _provider_message(provider: String, body: Dictionary) -> String:

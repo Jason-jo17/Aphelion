@@ -4,13 +4,13 @@ extends RefCounted
 ## One assembled instruction.
 
 var op: int = ISA.Op.NOP
-var a: Operand = null       ## first operand: destination register, value, or condition LHS
-var b: Operand = null       ## second operand: value, tolerance, or condition RHS
-var cmp: int = ISA.Cmp.LT   ## comparison, for IF / BURN UNTIL / WAIT UNTIL
-var target: int = -1        ## resolved jump destination, for JMP
-var label_name: String = "" ## unresolved jump destination, kept for error messages
+var a: Operand = null  ## first operand: destination register, value, or condition LHS
+var b: Operand = null  ## second operand: value, tolerance, or condition RHS
+var cmp: int = ISA.Cmp.LT  ## comparison, for IF / BURN UNTIL / WAIT UNTIL
+var target: int = -1  ## resolved jump destination, for JMP
+var label_name: String = ""  ## unresolved jump destination, kept for error messages
 
-var line: int = 0           ## 1-based source line
+var line: int = 0  ## 1-based source line
 var source_text: String = ""
 
 

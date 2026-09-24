@@ -132,23 +132,24 @@ func _show_errors() -> void:
 		_status.add_theme_color_override("font_color", Tokens.color("text_faint"))
 		return
 
-	_status.text = "%d problem%s" % [_program.errors.size(),
-		"" if _program.errors.size() == 1 else "s"]
+	_status.text = (
+		"%d problem%s" % [_program.errors.size(), "" if _program.errors.size() == 1 else "s"]
+	)
 	_status.add_theme_color_override("font_color", Tokens.color("danger"))
 
 	for e in _program.errors:
 		var line := int(e["line"])
 		if line >= 1 and line <= editor.get_line_count():
-			editor.set_line_background_color(line - 1,
-				Color(Tokens.color("danger"), 0.14))
+			editor.set_line_background_color(line - 1, Color(Tokens.color("danger"), 0.14))
 
 		var row := UIKit.hbox(Tokens.SPACE_2)
-		var jump := UIKit.button("line %d" % line, "ghost",
-			"Jump to line %d" % line)
+		var jump := UIKit.button("line %d" % line, "ghost", "Jump to line %d" % line)
 		jump.custom_minimum_size = Vector2(Tokens.space(76.0), 0)
-		jump.pressed.connect(func():
-			editor.set_caret_line(maxi(0, line - 1))
-			editor.grab_focus())
+		jump.pressed.connect(
+			func():
+				editor.set_caret_line(maxi(0, line - 1))
+				editor.grab_focus()
+		)
 		row.add_child(jump)
 
 		var text := UIKit.small(String(e["message"]), "danger")

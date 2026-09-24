@@ -121,7 +121,9 @@ func elements_for(body_index: int, t: float, st: ShipState) -> Dictionary:
 ##
 ## `vm_slack` is how many seconds the flight computer is certain it does not
 ## need to be consulted for; pass 0.0 whenever it must run every tick.
-func step_scale_for(t: float, st: ShipState, ctrl: ControlInput, prof: ShipProfile, vm_slack: float) -> int:
+func step_scale_for(
+	t: float, st: ShipState, ctrl: ControlInput, _prof: ShipProfile, vm_slack: float
+) -> int:
 	# Anything actively happening: full rate, no exceptions.
 	if ctrl.throttle > 0.0 or st.landed or st.crashed:
 		return 1
@@ -144,8 +146,10 @@ func step_scale_for(t: float, st: ShipState, ctrl: ControlInput, prof: ShipProfi
 	# Never coarser than MIN_STEPS_PER_ORBIT per revolution.
 	var per := Orbital.period_of_state(
 		body.mu,
-		st.px - body.pos_x(t), st.py - body.pos_y(t),
-		st.vx - body.vel_x(t), st.vy - body.vel_y(t)
+		st.px - body.pos_x(t),
+		st.py - body.pos_y(t),
+		st.vx - body.vel_x(t),
+		st.vy - body.vel_y(t)
 	)
 	if not is_inf(per) and per > 0.0:
 		limit = minf(limit, per / (MIN_STEPS_PER_ORBIT * DT_BASE))

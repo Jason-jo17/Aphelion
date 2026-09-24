@@ -1,0 +1,22 @@
+# gdlint, tuned to this project. CI runs it advisory-only (the `format` job in
+# .github/workflows/ci.yml), but it is clean, and the point of tuning it is that
+# the output should be worth reading. Anything not listed here is the default.
+
+# GUT discovers tests by public method name, so a thorough test script has one
+# public method per behaviour and no way to have fewer.
+max-public-methods: 60
+
+# A `match` that dispatches with one return per case is the clearest way to
+# write a lookup, and several here are exactly that: the ISA tables, the DetMath
+# constant table, the orbital element accessor.
+max-returns: 60
+
+# A trailing underscore on a setup argument that fills the field of the same
+# name. `setup(mission_, world_, profile_)` beats inventing a second name for
+# each, and it is used consistently.
+function-argument-name: _?[a-z][a-z0-9]*(_[a-z0-9]+)*_?
+
+disable:
+  # Enums read better beside the constants that describe them (tokens.gd,
+  # app.gd) than hoisted above every const in the file.
+  - class-definitions-order

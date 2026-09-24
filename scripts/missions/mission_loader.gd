@@ -66,10 +66,12 @@ static func load_missions(errors: Array[String] = []) -> Array[Mission]:
 		out.append(m)
 		for e in m.errors:
 			errors.append("%s: %s" % [m.id, e])
-	out.sort_custom(func(a: Mission, b: Mission) -> bool:
-		if a.order != b.order:
-			return a.order < b.order
-		return a.id < b.id)
+	out.sort_custom(
+		func(a: Mission, b: Mission) -> bool:
+			if a.order != b.order:
+				return a.order < b.order
+			return a.id < b.id
+	)
 	return out
 
 

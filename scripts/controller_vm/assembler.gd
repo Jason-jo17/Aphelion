@@ -30,9 +30,12 @@ static func assemble(source: String) -> Program:
 		var line_no := li + 1
 		var raw: String = lines[li]
 		if raw.length() > MAX_LINE_LENGTH:
-			prog.add_error(line_no, raw.substr(0, 40),
+			prog.add_error(
+				line_no,
+				raw.substr(0, 40),
 				"Line is longer than %d characters." % MAX_LINE_LENGTH,
-				"Break it into several instructions.")
+				"Break it into several instructions."
+			)
 			continue
 
 		var tokens := _tokenize(raw)
@@ -43,16 +46,26 @@ static func assemble(source: String) -> Program:
 		while not tokens.is_empty() and tokens[0].ends_with(":"):
 			var name: String = tokens[0].substr(0, tokens[0].length() - 1)
 			if name.is_empty():
-				prog.add_error(line_no, tokens[0], "A label needs a name before the colon.",
-					"Write something like `loop:`.")
+				prog.add_error(
+					line_no,
+					tokens[0],
+					"A label needs a name before the colon.",
+					"Write something like `loop:`."
+				)
 			elif not _is_identifier(name):
-				prog.add_error(line_no, tokens[0],
+				prog.add_error(
+					line_no,
+					tokens[0],
 					"'%s' is not a valid label name." % name,
-					"Labels start with a letter and contain letters, digits or underscores.")
+					"Labels start with a letter and contain letters, digits or underscores."
+				)
 			elif prog.labels.has(name.to_upper()):
-				prog.add_error(line_no, tokens[0],
+				prog.add_error(
+					line_no,
+					tokens[0],
 					"Label '%s' is already defined." % name,
-					"Every label must be unique.")
+					"Every label must be unique."
+				)
 			else:
 				pending_labels.append(name.to_upper())
 			tokens.remove_at(0)
@@ -140,12 +153,17 @@ static func _is_alpha(c: String) -> bool:
 # --- instruction parsing ---------------------------------------------------
 
 
-static func _parse_instruction(prog: Program, line_no: int, raw: String, tokens: Array[String]) -> Instruction:
+static func _parse_instruction(
+	prog: Program, line_no: int, raw: String, tokens: Array[String]
+) -> Instruction:
 	var mnemonic: String = tokens[0].to_upper()
 	if not ISA.OPS.has(mnemonic):
-		prog.add_error(line_no, tokens[0],
+		prog.add_error(
+			line_no,
+			tokens[0],
 			"Unknown instruction '%s'." % tokens[0],
-			_suggest(mnemonic, ISA.op_names_ordered(), "instruction"))
+			_suggest(mnemonic, ISA.op_names_ordered(), "instruction")
+		)
 		return null
 
 	var spec: Dictionary = ISA.OPS[mnemonic]
@@ -156,7 +174,11 @@ static func _parse_instruction(prog: Program, line_no: int, raw: String, tokens:
 	ins.source_text = raw
 
 	# BURN and WAIT each have a timed form and an UNTIL form.
-	if (mnemonic == "BURN" or mnemonic == "WAIT") and not args.is_empty() and args[0].to_upper() == "UNTIL":
+	if (
+		(mnemonic == "BURN" or mnemonic == "WAIT")
+		and not args.is_empty()
+		and args[0].to_upper() == "UNTIL"
+	):
 		ins.op = ISA.Op.BURN_UNTIL if mnemonic == "BURN" else ISA.Op.WAIT_UNTIL
 		if not _parse_condition(prog, ins, line_no, args.slice(1), mnemonic + " UNTIL"):
 			return null
@@ -165,48 +187,70 @@ static func _parse_instruction(prog: Program, line_no: int, raw: String, tokens:
 	match spec["form"]:
 		ISA.Form.NONE:
 			if not args.is_empty():
-				prog.add_error(line_no, raw,
+				prog.add_error(
+					line_no,
+					raw,
 					"%s takes no operands." % mnemonic,
-					"Remove '%s'." % " ".join(args))
+					"Remove '%s'." % " ".join(args)
+				)
 				return null
 		ISA.Form.REG:
 			if args.size() != 1:
-				prog.add_error(line_no, raw,
+				prog.add_error(
+					line_no,
+					raw,
 					"%s takes exactly one register." % mnemonic,
-					"Write `%s R0`." % mnemonic)
+					"Write `%s R0`." % mnemonic
+				)
 				return null
 			ins.a = _parse_operand(prog, line_no, args[0], false)
 			if ins.a == null:
 				return null
 			if not ins.a.is_writable():
-				prog.add_error(line_no, args[0],
+				prog.add_error(
+					line_no,
+					args[0],
 					"%s can only be applied to a register." % mnemonic,
-					"R0 to R7 are the writable registers.")
+					"R0 to R7 are the writable registers."
+				)
 				return null
 		ISA.Form.REG_VALUE:
 			if args.size() != 2:
-				prog.add_error(line_no, raw,
+				prog.add_error(
+					line_no,
+					raw,
 					"%s takes a register and a value." % mnemonic,
-					"Write `%s R0, 100` or `%s R0, ALT`." % [mnemonic, mnemonic])
+					"Write `%s R0, 100` or `%s R0, ALT`." % [mnemonic, mnemonic]
+				)
 				return null
 			ins.a = _parse_operand(prog, line_no, args[0], false)
 			ins.b = _parse_operand(prog, line_no, args[1], false)
 			if ins.a == null or ins.b == null:
 				return null
 			if not ins.a.is_writable():
-				prog.add_error(line_no, args[0],
+				prog.add_error(
+					line_no,
+					args[0],
 					"'%s' cannot be written to." % args[0],
-					"The first operand of %s must be R0 to R7." % mnemonic)
+					"The first operand of %s must be R0 to R7." % mnemonic
+				)
 				return null
 			if mnemonic == "SENSE" and ins.b.kind != Operand.Kind.SENSOR:
-				prog.add_error(line_no, args[1],
+				prog.add_error(
+					line_no,
+					args[1],
 					"SENSE reads a sensor, and '%s' is not one." % args[1],
-					_suggest(args[1].to_upper(), ISA.sensor_names_ordered(), "sensor"))
+					_suggest(args[1].to_upper(), ISA.sensor_names_ordered(), "sensor")
+				)
 				return null
 		ISA.Form.LABEL:
 			if args.size() != 1:
-				prog.add_error(line_no, raw, "%s takes one label." % mnemonic,
-					"Write `%s loop`, where `loop:` appears somewhere in the program." % mnemonic)
+				prog.add_error(
+					line_no,
+					raw,
+					"%s takes one label." % mnemonic,
+					"Write `%s loop`, where `loop:` appears somewhere in the program." % mnemonic
+				)
 				return null
 			ins.label_name = args[0]
 		ISA.Form.CONDITION:
@@ -214,17 +258,21 @@ static func _parse_instruction(prog: Program, line_no: int, raw: String, tokens:
 				return null
 		ISA.Form.VALUE:
 			if args.size() != 1:
-				prog.add_error(line_no, raw, "%s takes one value." % mnemonic,
-					_value_hint(mnemonic))
+				prog.add_error(
+					line_no, raw, "%s takes one value." % mnemonic, _value_hint(mnemonic)
+				)
 				return null
 			ins.a = _parse_operand(prog, line_no, args[0], mnemonic in ["ORIENT", "POINT"])
 			if ins.a == null:
 				return null
 		ISA.Form.VALUE_OPT:
 			if args.size() < 1 or args.size() > 2:
-				prog.add_error(line_no, raw,
+				prog.add_error(
+					line_no,
+					raw,
 					"%s takes a target and an optional tolerance in degrees." % mnemonic,
-					"Write `ORIENT PROGRADE` or `ORIENT 90, 2`.")
+					"Write `ORIENT PROGRADE` or `ORIENT 90, 2`."
+				)
 				return null
 			ins.a = _parse_operand(prog, line_no, args[0], true)
 			if ins.a == null:
@@ -236,17 +284,25 @@ static func _parse_instruction(prog: Program, line_no: int, raw: String, tokens:
 	return ins
 
 
-static func _parse_condition(prog: Program, ins: Instruction, line_no: int, args: Array, what: String) -> bool:
+static func _parse_condition(
+	prog: Program, ins: Instruction, line_no: int, args: Array, what: String
+) -> bool:
 	if args.size() != 3:
-		prog.add_error(line_no, what + " " + " ".join(args),
+		prog.add_error(
+			line_no,
+			what + " " + " ".join(args),
 			"%s needs a comparison: a value, an operator, and another value." % what,
-			"For example `%s APO > 100000`." % what)
+			"For example `%s APO > 100000`." % what
+		)
 		return false
 	var op_text: String = args[1]
 	if not ISA.CMP_FROM_TEXT.has(op_text):
-		prog.add_error(line_no, op_text,
+		prog.add_error(
+			line_no,
+			op_text,
 			"'%s' is not a comparison operator." % op_text,
-			"Use one of <  <=  >  >=  ==  !=")
+			"Use one of <  <=  >  >=  ==  !="
+		)
 		return false
 	ins.cmp = ISA.CMP_FROM_TEXT[op_text]
 	ins.a = _parse_operand(prog, line_no, args[0], false)
@@ -265,9 +321,12 @@ static func _parse_operand(prog: Program, line_no: int, token: String, allow_goa
 	if up.length() >= 2 and up[0] == "R" and up.substr(1).is_valid_int():
 		var idx := int(up.substr(1))
 		if idx < 0 or idx >= ISA.REGISTER_COUNT:
-			prog.add_error(line_no, token,
+			prog.add_error(
+				line_no,
+				token,
 				"There is no register %s." % token,
-				"The flight computer has R0 to R%d." % (ISA.REGISTER_COUNT - 1))
+				"The flight computer has R0 to R%d." % (ISA.REGISTER_COUNT - 1)
+			)
 			return null
 		return Operand.register(idx, up)
 
@@ -291,20 +350,29 @@ static func _parse_operand(prog: Program, line_no: int, token: String, allow_goa
 			candidates.append(g)
 	for c in ISA.CONSTANTS:
 		candidates.append(c)
-	prog.add_error(line_no, token,
+	prog.add_error(
+		line_no,
+		token,
 		"'%s' is not a number, a register or a sensor." % token,
-		_suggest(up, candidates, "value"))
+		_suggest(up, candidates, "value")
+	)
 	return null
 
 
 static func _value_hint(mnemonic: String) -> String:
 	match mnemonic:
-		"THROTTLE": return "Write `THROTTLE 1` for full thrust or `THROTTLE 0.5` for half."
-		"BURN": return "Write `BURN 30` for thirty seconds, or `BURN UNTIL APO > 100000`."
-		"WAIT": return "Write `WAIT 60`, or `WAIT UNTIL TAPO < 20`."
-		"POINT": return "Write `POINT PROGRADE` or `POINT 90`."
-		"LOG": return "Write `LOG ALT` or `LOG R0`."
-		_: return "Give it a single value."
+		"THROTTLE":
+			return "Write `THROTTLE 1` for full thrust or `THROTTLE 0.5` for half."
+		"BURN":
+			return "Write `BURN 30` for thirty seconds, or `BURN UNTIL APO > 100000`."
+		"WAIT":
+			return "Write `WAIT 60`, or `WAIT UNTIL TAPO < 20`."
+		"POINT":
+			return "Write `POINT PROGRADE` or `POINT 90`."
+		"LOG":
+			return "Write `LOG ALT` or `LOG R0`."
+		_:
+			return "Give it a single value."
 
 
 ## Closest match by edit distance, phrased as a suggestion. Returns a generic
@@ -355,9 +423,15 @@ static func _resolve_jumps(prog: Program) -> void:
 			var names := PackedStringArray()
 			for k in prog.labels:
 				names.append(k)
-			prog.add_error(ins.line, ins.label_name,
+			prog.add_error(
+				ins.line,
+				ins.label_name,
 				"No label called '%s'." % ins.label_name,
-				_suggest(key, names, "label") if names.size() > 0
-					else "Define it by writing `%s:` on a line of its own." % ins.label_name)
+				(
+					_suggest(key, names, "label")
+					if names.size() > 0
+					else "Define it by writing `%s:` on a line of its own." % ins.label_name
+				)
+			)
 			continue
 		ins.target = prog.labels[key]

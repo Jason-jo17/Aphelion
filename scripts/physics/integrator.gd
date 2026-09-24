@@ -49,7 +49,9 @@ var _ay: float = 0.0
 ##
 ## Mutates `st` in place. `st.tick` is advanced by `scale`, so mission time
 ## stays an exact integer multiple of the base tick.
-func step(world: SimWorld, st: ShipState, ctrl: ControlInput, prof: ShipProfile, scale: int = 1) -> void:
+func step(
+	world: SimWorld, st: ShipState, ctrl: ControlInput, prof: ShipProfile, scale: int = 1
+) -> void:
 	if st.crashed:
 		return
 
@@ -142,7 +144,7 @@ func _advance_attitude(st: ShipState, h: float, scale: int) -> void:
 
 
 ## Can a ship sitting on the ground push itself off it this step?
-func _can_lift_off(world: SimWorld, st: ShipState, prof: ShipProfile, t: float) -> bool:
+func _can_lift_off(world: SimWorld, st: ShipState, _prof: ShipProfile, t: float) -> bool:
 	if _thrust <= 0.0:
 		return false
 	var soi := world.dominant_body_index(t, st.px, st.py)
@@ -164,9 +166,14 @@ func _can_lift_off(world: SimWorld, st: ShipState, prof: ShipProfile, t: float) 
 ## times per step for the whole flight and allocation here dominates everything
 ## else the simulation does.
 func _accel(
-	world: SimWorld, prof: ShipProfile,
-	t: float, s: float,
-	px: float, py: float, vx: float, vy: float
+	world: SimWorld,
+	prof: ShipProfile,
+	t: float,
+	s: float,
+	px: float,
+	py: float,
+	vx: float,
+	vy: float
 ) -> void:
 	_ax = 0.0
 	_ay = 0.0

@@ -56,7 +56,7 @@ var throttle_setting: float = 1.0
 # --- blocking state ---
 var _block: int = Block.NONE
 var _block_thrusting: bool = false
-var _block_end_tick: int = 0     ## exact tick a timed block ends on
+var _block_end_tick: int = 0  ## exact tick a timed block ends on
 var _cond_a: Operand = null
 var _cond_b: Operand = null
 var _cond_cmp: int = ISA.Cmp.LT
@@ -95,10 +95,16 @@ func reset() -> void:
 	fault_hint = ""
 	fault_line = 0
 	if program == null or not program.ok():
-		status = Status.FAULTED if program != null and not program.errors.is_empty() else Status.READY
+		status = (
+			Status.FAULTED if program != null and not program.errors.is_empty() else Status.READY
+		)
 		if program != null and program.instructions.is_empty() and program.errors.is_empty():
-			_fault("no_program", "The flight computer has no program.",
-				"Write at least one instruction, even if it is just HALT.", 0)
+			_fault(
+				"no_program",
+				"The flight computer has no program.",
+				"Write at least one instruction, even if it is just HALT.",
+				0
+			)
 	else:
 		status = Status.RUNNING
 
@@ -116,7 +122,9 @@ func is_finished() -> bool:
 
 ## Advances the program and writes this step's control outputs into `ctrl`.
 ## `dt` is the duration of the step that is about to be integrated.
-func tick(bus: SensorBus, state: ShipState, profile: ShipProfile, ctrl: ControlInput, dt: float) -> void:
+func tick(
+	bus: SensorBus, state: ShipState, profile: ShipProfile, ctrl: ControlInput, dt: float
+) -> void:
 	total_ticks += 1
 	ctrl.throttle = 0.0
 
@@ -133,11 +141,15 @@ func tick(bus: SensorBus, state: ShipState, profile: ShipProfile, ctrl: ControlI
 				spin_ticks += 1
 				break
 			if instructions_executed >= total_budget:
-				_fault("instruction_cap",
+				_fault(
+					"instruction_cap",
 					"The program has executed %s instructions." % _commify(total_budget),
-					"That is almost always an unintended loop. Check that every path "
-					+ "through your program reaches a WAIT, a BURN or a HALT.",
-					_current_line())
+					(
+						"That is almost always an unintended loop. Check that every path "
+						+ "through your program reaches a WAIT, a BURN or a HALT."
+					),
+					_current_line()
+				)
 				break
 			_execute_one(bus, state, profile)
 			budget -= 1
@@ -185,7 +197,7 @@ func watched_condition_holds(bus: SensorBus) -> bool:
 
 
 ## Returns true when the block has cleared and execution may continue.
-func _try_unblock(bus: SensorBus, state: ShipState, profile: ShipProfile) -> bool:
+func _try_unblock(bus: SensorBus, state: ShipState, _profile: ShipProfile) -> bool:
 	match _block:
 		Block.TIMER:
 			if _block_thrusting and state.fuel <= 0.0:
@@ -210,11 +222,18 @@ func _try_unblock(bus: SensorBus, state: ShipState, profile: ShipProfile) -> boo
 				_clear_block()
 				return true
 			if state.tick >= _orient_deadline_tick:
-				_fault("orient_timeout",
-					"ORIENT did not settle within %d seconds." % int(AttitudeController.CONVERGENCE_TIMEOUT),
-					"The tolerance may be tighter than the reaction wheels can hold, "
-					+ "or the goal may be moving faster than the ship can turn.",
-					_block_line)
+				_fault(
+					"orient_timeout",
+					(
+						"ORIENT did not settle within %d seconds."
+						% int(AttitudeController.CONVERGENCE_TIMEOUT)
+					),
+					(
+						"The tolerance may be tighter than the reaction wheels can hold, "
+						+ "or the goal may be moving faster than the ship can turn."
+					),
+					_block_line
+				)
 				_clear_block()
 				return false
 			return false
@@ -271,15 +290,23 @@ func _execute_one(bus: SensorBus, state: ShipState, profile: ShipProfile) -> voi
 		ISA.Op.DIV:
 			var d := _read(ins.b, bus)
 			if d == 0.0:
-				_fault("divide_by_zero", "Division by zero.",
-					"Guard the divisor with an IF before dividing by it.", ins.line)
+				_fault(
+					"divide_by_zero",
+					"Division by zero.",
+					"Guard the divisor with an IF before dividing by it.",
+					ins.line
+				)
 				return
 			_write(ins.a, _read(ins.a, bus) / d)
 		ISA.Op.MOD:
 			var m := _read(ins.b, bus)
 			if m == 0.0:
-				_fault("divide_by_zero", "MOD by zero.",
-					"Guard the divisor with an IF before using it.", ins.line)
+				_fault(
+					"divide_by_zero",
+					"MOD by zero.",
+					"Guard the divisor with an IF before using it.",
+					ins.line
+				)
 				return
 			_write(ins.a, DetMath.fmod_exact(_read(ins.a, bus), m))
 		ISA.Op.MIN:
@@ -292,8 +319,12 @@ func _execute_one(bus: SensorBus, state: ShipState, profile: ShipProfile) -> voi
 			_write(ins.a, -_read(ins.a, bus))
 		ISA.Op.JMP:
 			if ins.target < 0:
-				_fault("bad_jump", "Jump to an undefined label '%s'." % ins.label_name,
-					"Define it with `%s:` somewhere in the program." % ins.label_name, ins.line)
+				_fault(
+					"bad_jump",
+					"Jump to an undefined label '%s'." % ins.label_name,
+					"Define it with `%s:` somewhere in the program." % ins.label_name,
+					ins.line
+				)
 				return
 			pc = ins.target
 		ISA.Op.IF:
@@ -309,9 +340,15 @@ func _execute_one(bus: SensorBus, state: ShipState, profile: ShipProfile) -> voi
 			_apply_goal(ins.a, bus)
 		ISA.Op.ORIENT:
 			if profile.max_torque <= 0.0:
-				_fault("no_attitude_control", "ORIENT with no reaction wheel.",
-					"This ship has no way to turn itself. Add a reaction wheel in the "
-					+ "editor, or remove the ORIENT.", ins.line)
+				_fault(
+					"no_attitude_control",
+					"ORIENT with no reaction wheel.",
+					(
+						"This ship has no way to turn itself. Add a reaction wheel in the "
+						+ "editor, or remove the ORIENT."
+					),
+					ins.line
+				)
 				return
 			_apply_goal(ins.a, bus)
 			if ins.b != null:
@@ -322,8 +359,9 @@ func _execute_one(bus: SensorBus, state: ShipState, profile: ShipProfile) -> voi
 				_block = Block.ORIENT
 				_block_thrusting = false
 				_block_line = ins.line
-				_orient_deadline_tick = state.tick + int(
-					AttitudeController.CONVERGENCE_TIMEOUT / SimWorld.DT_BASE)
+				_orient_deadline_tick = (
+					state.tick + int(AttitudeController.CONVERGENCE_TIMEOUT / SimWorld.DT_BASE)
+				)
 		ISA.Op.BURN:
 			_begin_timer(_read(ins.a, bus), true, state, ins.line)
 		ISA.Op.WAIT:
@@ -363,42 +401,62 @@ func _read(o: Operand, bus: SensorBus) -> float:
 
 func _goal_heading(goal: int, bus: SensorBus) -> float:
 	match goal:
-		ISA.Goal.PROGRADE: return bus.prograde_rad()
-		ISA.Goal.RETROGRADE: return bus.prograde_rad() + DetMath.PI_D
-		ISA.Goal.RADIAL: return bus.radial_rad()
-		ISA.Goal.ANTIRADIAL: return bus.radial_rad() + DetMath.PI_D
-		ISA.Goal.TARGET: return bus.target_rad()
+		ISA.Goal.PROGRADE:
+			return bus.prograde_rad()
+		ISA.Goal.RETROGRADE:
+			return bus.prograde_rad() + DetMath.PI_D
+		ISA.Goal.RADIAL:
+			return bus.radial_rad()
+		ISA.Goal.ANTIRADIAL:
+			return bus.radial_rad() + DetMath.PI_D
+		ISA.Goal.TARGET:
+			return bus.target_rad()
 	return 0.0
 
 
 func _write(o: Operand, v: float) -> void:
 	if o == null or o.kind != Operand.Kind.REGISTER:
-		_fault("bad_register", "Tried to write to something that is not a register.",
-			"Only R0 to R%d can be written." % (ISA.REGISTER_COUNT - 1), _current_line())
+		_fault(
+			"bad_register",
+			"Tried to write to something that is not a register.",
+			"Only R0 to R%d can be written." % (ISA.REGISTER_COUNT - 1),
+			_current_line()
+		)
 		return
 	registers[o.index] = v
 
 
 static func _compare(a: float, cmp: int, b: float) -> bool:
 	match cmp:
-		ISA.Cmp.LT: return a < b
-		ISA.Cmp.LE: return a <= b
-		ISA.Cmp.GT: return a > b
-		ISA.Cmp.GE: return a >= b
-		ISA.Cmp.EQ: return a == b
-		ISA.Cmp.NE: return a != b
+		ISA.Cmp.LT:
+			return a < b
+		ISA.Cmp.LE:
+			return a <= b
+		ISA.Cmp.GT:
+			return a > b
+		ISA.Cmp.GE:
+			return a >= b
+		ISA.Cmp.EQ:
+			return a == b
+		ISA.Cmp.NE:
+			return a != b
 	return false
 
 
 func _append_log(ins: Instruction, value: float, bus: SensorBus) -> void:
 	if log_entries.size() >= MAX_LOG_ENTRIES:
 		return
-	log_entries.append({
-		"t": bus.read(ISA.Sensor.T),
-		"line": ins.line,
-		"label": ins.a.to_text() if ins.a != null else "",
-		"value": value,
-	})
+	(
+		log_entries
+		. append(
+			{
+				"t": bus.read(ISA.Sensor.T),
+				"line": ins.line,
+				"label": ins.a.to_text() if ins.a != null else "",
+				"value": value,
+			}
+		)
+	)
 
 
 func _fault(code: String, message: String, hint: String, line: int) -> void:
@@ -433,8 +491,12 @@ static func _commify(n: int) -> String:
 ## A short description of why the run ended, for the results screen.
 func status_text() -> String:
 	match status:
-		Status.READY: return "not started"
-		Status.RUNNING: return "still running"
-		Status.HALTED: return "program finished"
-		Status.FAULTED: return "fault: %s" % fault_message
+		Status.READY:
+			return "not started"
+		Status.RUNNING:
+			return "still running"
+		Status.HALTED:
+			return "program finished"
+		Status.FAULTED:
+			return "fault: %s" % fault_message
 	return "?"

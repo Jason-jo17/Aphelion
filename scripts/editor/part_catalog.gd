@@ -69,10 +69,12 @@ func by_category(category: String) -> Array[PartDef]:
 
 func categories() -> PackedStringArray:
 	# Fixed order so the editor palette never reshuffles itself between runs.
-	return PackedStringArray([
-		PartDef.CAT_COMMAND,
-		PartDef.CAT_ENGINE,
-		PartDef.CAT_FUEL,
-		PartDef.CAT_CONTROL,
-		PartDef.CAT_STRUCTURE,
-	])
+	return PackedStringArray(
+		[
+			PartDef.CAT_COMMAND,
+			PartDef.CAT_ENGINE,
+			PartDef.CAT_FUEL,
+			PartDef.CAT_CONTROL,
+			PartDef.CAT_STRUCTURE,
+		]
+	)

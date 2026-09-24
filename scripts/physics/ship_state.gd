@@ -76,10 +76,15 @@ func copy_from(o: ShipState) -> void:
 func to_dict() -> Dictionary:
 	return {
 		"tick": tick,
-		"px": px, "py": py, "vx": vx, "vy": vy,
-		"angle": angle, "ang_vel": ang_vel,
+		"px": px,
+		"py": py,
+		"vx": vx,
+		"vy": vy,
+		"angle": angle,
+		"ang_vel": ang_vel,
 		"fuel": fuel,
-		"landed": landed, "crashed": crashed,
+		"landed": landed,
+		"crashed": crashed,
 		"soi_index": soi_index,
 	}
 

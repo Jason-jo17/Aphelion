@@ -45,9 +45,14 @@ func test_every_stock_ship_is_flyable() -> void:
 		for f in findings:
 			if f["level"] == Ship.LEVEL_ERROR:
 				errors.append("%s: %s" % [f["code"], f["message"]])
-		assert_eq(errors.size(), 0,
-			"stock ship '%s' must pass the same validation the editor applies: %s"
-			% [id, ", ".join(errors)])
+		assert_eq(
+			errors.size(),
+			0,
+			(
+				"stock ship '%s' must pass the same validation the editor applies: %s"
+				% [id, ", ".join(errors)]
+			)
+		)
 
 
 func test_mass_and_thrust_are_the_sum_of_the_parts() -> void:
@@ -56,9 +61,11 @@ func test_mass_and_thrust_are_the_sum_of_the_parts() -> void:
 	ship.place("tank_medium", 4, 1)
 	ship.place("engine_vacuum", 4, 4)
 	var p := ship.to_profile()
-	var expected_dry := _catalog.get_part("probe_core").mass \
-		+ _catalog.get_part("tank_medium").mass \
+	var expected_dry := (
+		_catalog.get_part("probe_core").mass
+		+ _catalog.get_part("tank_medium").mass
 		+ _catalog.get_part("engine_vacuum").mass
+	)
 	assert_eq(p.dry_mass, expected_dry)
 	assert_eq(p.fuel_capacity, _catalog.get_part("tank_medium").fuel_capacity)
 	assert_eq(p.max_thrust, _catalog.get_part("engine_vacuum").thrust)
@@ -74,16 +81,21 @@ func test_mixed_engines_give_a_thrust_weighted_isp() -> void:
 	var a := _catalog.get_part("engine_vacuum")
 	var b := _catalog.get_part("engine_vernier")
 	var expected := (a.thrust + b.thrust) / (a.thrust / a.isp + b.thrust / b.isp)
-	assert_almost_eq(p.isp, expected, 1.0e-9,
-		"two engines burning from one tank give the harmonic mean, not the average")
+	assert_almost_eq(
+		p.isp,
+		expected,
+		1.0e-9,
+		"two engines burning from one tank give the harmonic mean, not the average"
+	)
 	assert_lt(p.isp, maxf(a.isp, b.isp))
 	assert_gt(p.isp, minf(a.isp, b.isp))
 
 
 func test_delta_v_follows_tsiolkovsky() -> void:
 	var p := _sparrow().to_profile()
-	var expected := p.isp * ShipProfile.G0 \
-		* DetMath.log((p.dry_mass + p.fuel_capacity) / p.dry_mass)
+	var expected := (
+		p.isp * ShipProfile.G0 * DetMath.log((p.dry_mass + p.fuel_capacity) / p.dry_mass)
+	)
 	assert_almost_eq(p.delta_v(), expected, 1.0e-9)
 
 
@@ -107,8 +119,11 @@ func test_inertia_grows_when_mass_moves_away_from_the_centre() -> void:
 	stretched.place("tank_medium", 4, 4)
 	stretched.place("engine_vacuum", 4, 7)
 
-	assert_gt(stretched.moment_of_inertia(), compact.moment_of_inertia(),
-		"a longer ship is harder to turn")
+	assert_gt(
+		stretched.moment_of_inertia(),
+		compact.moment_of_inertia(),
+		"a longer ship is harder to turn"
+	)
 
 
 func test_drag_area_comes_from_the_frontal_width() -> void:
@@ -122,33 +137,32 @@ func test_drag_area_comes_from_the_frontal_width() -> void:
 	wide.place("tank_large", 4, 1)
 	wide.place("engine_vacuum", 4, 5)
 
-	assert_gt(wide.to_profile().drag_area, narrow.to_profile().drag_area,
-		"a wider ship catches more air")
+	assert_gt(
+		wide.to_profile().drag_area, narrow.to_profile().drag_area, "a wider ship catches more air"
+	)
 
 
 func test_a_heat_shield_adds_drag_on_purpose() -> void:
 	var plain := MissionDB.stock_ship("wren").to_profile()
 	var shielded := MissionDB.stock_ship("petrel").to_profile()
-	assert_gt(shielded.drag_area, plain.drag_area * 3.0,
-		"the shield is the point of the Petrel")
+	assert_gt(shielded.drag_area, plain.drag_area * 3.0, "the shield is the point of the Petrel")
 
 
 # --- placement -------------------------------------------------------------
+
 
 func test_parts_cannot_overlap() -> void:
 	var ship := Ship.new(_catalog)
 	assert_ne(ship.place("tank_medium", 4, 0), -1)
 	assert_eq(ship.place("tank_medium", 4, 1), -1, "that cell is taken")
-	assert_string_contains(ship.placement_blocked_reason("tank_medium", 4, 1).to_lower(),
-		"overlap")
+	assert_string_contains(ship.placement_blocked_reason("tank_medium", 4, 1).to_lower(), "overlap")
 
 
 func test_parts_cannot_hang_off_the_grid() -> void:
 	var ship := Ship.new(_catalog)
 	assert_eq(ship.place("tank_medium", -1, 0), -1)
 	assert_eq(ship.place("tank_medium", 4, _catalog.grid_height - 1), -1)
-	assert_string_contains(ship.placement_blocked_reason("tank_medium", 99, 0).to_lower(),
-		"fit")
+	assert_string_contains(ship.placement_blocked_reason("tank_medium", 99, 0).to_lower(), "fit")
 
 
 func test_moving_a_part_ignores_its_own_cells() -> void:
@@ -166,6 +180,7 @@ func test_index_at_cell_finds_the_part_under_a_click() -> void:
 
 # --- validation (AC5) ------------------------------------------------------
 
+
 func _codes(ship: Ship) -> PackedStringArray:
 	var out := PackedStringArray()
 	for f in ship.validate():
@@ -177,8 +192,10 @@ func test_every_finding_carries_a_hint() -> void:
 	var ship := Ship.new(_catalog)
 	ship.place("tank_medium", 4, 0)
 	for f in ship.validate():
-		assert_false(String(f["hint"]).is_empty(),
-			"'%s' must say what to do about it, not just that it is wrong" % f["code"])
+		assert_false(
+			String(f["hint"]).is_empty(),
+			"'%s' must say what to do about it, not just that it is wrong" % f["code"]
+		)
 
 
 func test_an_empty_ship_says_where_to_start() -> void:
@@ -223,7 +240,7 @@ func test_a_floating_part_is_found_and_counted() -> void:
 	ship.place("probe_core", 4, 0)
 	ship.place("tank_medium", 4, 1)
 	ship.place("engine_vacuum", 4, 4)
-	ship.place("structure_beam", 0, 10)    # nowhere near the rest
+	ship.place("structure_beam", 0, 10)  # nowhere near the rest
 	assert_true("disconnected" in _codes(ship))
 	assert_eq(ship.disconnected_indices().size(), 1)
 
@@ -249,6 +266,7 @@ func test_low_thrust_to_weight_is_flagged_but_allowed() -> void:
 
 # --- serialisation ---------------------------------------------------------
 
+
 func test_a_ship_round_trips_through_a_dictionary() -> void:
 	var ship := _sparrow()
 	var copy := Ship.from_dict(ship.to_dict(), _catalog)
@@ -268,10 +286,14 @@ func test_the_hash_ignores_the_order_parts_were_placed_in() -> void:
 	b.place("tank_medium", 4, 1)
 	b.place("probe_core", 4, 0)
 
-	assert_eq(a.content_hash(), b.content_hash(),
-		"the same ship is the same ship however it was assembled")
+	assert_eq(
+		a.content_hash(),
+		b.content_hash(),
+		"the same ship is the same ship however it was assembled"
+	)
 
 
 func test_different_ships_hash_differently() -> void:
-	assert_ne(MissionDB.stock_ship("sparrow").content_hash(),
-		MissionDB.stock_ship("wren").content_hash())
+	assert_ne(
+		MissionDB.stock_ship("sparrow").content_hash(), MissionDB.stock_ship("wren").content_hash()
+	)

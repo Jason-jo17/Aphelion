@@ -54,8 +54,14 @@ var _escape_distance: float = INF
 
 
 ## Prepares a run. `ship_hash` identifies the assembly that produced `profile`.
-func setup(mission_: Mission, world_: SimWorld, profile_: ShipProfile,
-		program: Program, ship_hash: String = "", seed: int = 0) -> void:
+func setup(
+	mission_: Mission,
+	world_: SimWorld,
+	profile_: ShipProfile,
+	program: Program,
+	ship_hash: String = "",
+	seed: int = 0
+) -> void:
 	mission = mission_
 	world = world_
 	profile = profile_
@@ -136,9 +142,13 @@ func step() -> bool:
 	if not finished:
 		_check_mission(dt)
 	if _steps >= MAX_STEPS and not finished:
-		_fail("The flight ran too long to finish.",
-			"This usually means the program never reached a HALT and the ship "
-			+ "never reached the objective.")
+		_fail(
+			"The flight ran too long to finish.",
+			(
+				"This usually means the program never reached a HALT and the ship "
+				+ "never reached the objective."
+			)
+		)
 	return not finished
 
 
@@ -190,7 +200,7 @@ func _check_surface() -> void:
 	# Legs only help if they are pointing down. Forty-five degrees is generous,
 	# but landing sideways at speed is still landing sideways at speed.
 	var sc := DetMath.sincos(state.angle)
-	var upright := (sc[1] * rx + sc[0] * ry) / r   # cos of the angle from vertical
+	var upright := (sc[1] * rx + sc[0] * ry) / r  # cos of the angle from vertical
 
 	var gear := profile.max_landing_speed
 	if gear > 0.0 and impact <= gear and upright >= 0.7071:
@@ -224,13 +234,22 @@ func _check_limits() -> void:
 		return
 	var elapsed := SimWorld.time_for_tick(state.tick)
 	if elapsed > mission.time_limit:
-		_fail("Out of time.",
-			"The mission window is %s and the flight is still going."
-			% Fmt.duration(mission.time_limit))
+		_fail(
+			"Out of time.",
+			(
+				"The mission window is %s and the flight is still going."
+				% Fmt.duration(mission.time_limit)
+			)
+		)
 		return
 	if DetMath.hypot(state.px, state.py) > _escape_distance:
-		_fail("Lost.", "The ship is %s from %s and is not coming back."
-			% [Fmt.distance(DetMath.hypot(state.px, state.py)), world.primary.display_name])
+		_fail(
+			"Lost.",
+			(
+				"The ship is %s from %s and is not coming back."
+				% [Fmt.distance(DetMath.hypot(state.px, state.py)), world.primary.display_name]
+			)
+		)
 
 
 func _check_mission(dt: float) -> void:
@@ -267,8 +286,10 @@ func _finalise() -> void:
 	result.elapsed = SimWorld.time_for_tick(state.tick)
 	result.fuel_remaining = state.fuel
 	result.fuel_used = maxf(0.0, profile.fuel_capacity * mission.start_fuel_fraction - state.fuel)
-	result.delta_v_used = profile.delta_v(profile.fuel_capacity * mission.start_fuel_fraction) \
+	result.delta_v_used = (
+		profile.delta_v(profile.fuel_capacity * mission.start_fuel_fraction)
 		- profile.delta_v(state.fuel)
+	)
 	result.instructions_executed = vm.instructions_executed
 	result.spin_ticks = vm.spin_ticks
 	result.vm_ticks = vm.total_ticks
@@ -293,11 +314,24 @@ func _observe() -> void:
 func _record_sample(force: bool) -> void:
 	if not force and (_steps % _sample_stride) != 0:
 		return
-	result.trajectory.append_array(PackedFloat64Array([
-		SimWorld.time_for_tick(state.tick),
-		state.px, state.py, state.vx, state.vy,
-		state.fuel, state.angle, ctrl.throttle,
-	]))
+	(
+		result
+		. trajectory
+		. append_array(
+			PackedFloat64Array(
+				[
+					SimWorld.time_for_tick(state.tick),
+					state.px,
+					state.py,
+					state.vx,
+					state.vy,
+					state.fuel,
+					state.angle,
+					ctrl.throttle,
+				]
+			)
+		)
+	)
 	if result.sample_count() > MAX_TRAJECTORY_SAMPLES:
 		_decimate()
 
@@ -319,10 +353,17 @@ func _decimate() -> void:
 ## Bit-exact hash of the final state. Two runs of identical inputs must produce
 ## the same string; CI compares it across Windows, macOS and Linux.
 func state_hash() -> String:
-	var nums := PackedFloat64Array([
-		state.px, state.py, state.vx, state.vy,
-		state.angle, state.ang_vel, state.fuel,
-	])
+	var nums := PackedFloat64Array(
+		[
+			state.px,
+			state.py,
+			state.vx,
+			state.vy,
+			state.angle,
+			state.ang_vel,
+			state.fuel,
+		]
+	)
 	var bytes := nums.to_byte_array()
 	bytes.append_array(PackedInt64Array([state.tick]).to_byte_array())
 	var ctx := HashingContext.new()
@@ -334,10 +375,14 @@ func state_hash() -> String:
 ## Identity of the mission's rules, so a recorded run can prove it was scored
 ## against the same mission file.
 func mission_hash() -> String:
-	var parts := PackedStringArray([
-		mission.id,
-		str(mission.star_fuel), str(mission.star_time), str(mission.star_instructions),
-		mission.success.describe() if mission.success != null else "",
-		str(mission.time_limit),
-	])
+	var parts := PackedStringArray(
+		[
+			mission.id,
+			str(mission.star_fuel),
+			str(mission.star_time),
+			str(mission.star_instructions),
+			mission.success.describe() if mission.success != null else "",
+			str(mission.time_limit),
+		]
+	)
 	return String("|").join(parts).sha256_text().substr(0, 16)

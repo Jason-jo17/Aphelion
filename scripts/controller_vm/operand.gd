@@ -10,11 +10,11 @@ extends RefCounted
 enum Kind { LITERAL, REGISTER, SENSOR, GOAL }
 
 var kind: int = Kind.LITERAL
-var value: float = 0.0   ## LITERAL: the number. GOAL: the absolute heading, in radians.
-var index: int = 0       ## REGISTER: 0-7
+var value: float = 0.0  ## LITERAL: the number. GOAL: the absolute heading, in radians.
+var index: int = 0  ## REGISTER: 0-7
 var sensor: int = ISA.Sensor.NONE
 var goal: int = ISA.Goal.ABSOLUTE
-var text: String = ""    ## as the player wrote it, for error messages and the disassembler
+var text: String = ""  ## as the player wrote it, for error messages and the disassembler
 
 
 static func literal(v: float, src: String = "") -> Operand:

@@ -58,8 +58,7 @@ func _build() -> void:
 	var margin := MarginContainer.new()
 	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	for side in ["left", "right", "top", "bottom"]:
-		margin.add_theme_constant_override("margin_" + side,
-			int(Tokens.space(Tokens.SPACE_4)))
+		margin.add_theme_constant_override("margin_" + side, int(Tokens.space(Tokens.SPACE_4)))
 	add_child(margin)
 
 	var column := UIKit.vbox(Tokens.SPACE_3)
@@ -95,10 +94,12 @@ func _toolbar() -> Control:
 	row.add_child(_play_button)
 
 	var step := UIKit.button("Step", "ghost", "Advance one simulation step — period key")
-	step.pressed.connect(func():
-		_running = false
-		_play_button.text = "Play"
-		_advance(1))
+	step.pressed.connect(
+		func():
+			_running = false
+			_play_button.text = "Play"
+			_advance(1)
+	)
 	row.add_child(step)
 
 	var slower := UIKit.button("−", "ghost", "Slower")
@@ -170,8 +171,9 @@ func _timeline_row() -> Control:
 	_timeline.step = 0.001
 	_timeline.value = 1.0
 	_timeline.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_timeline.tooltip_text = ("Scrub back through the flight. Pauses the simulation; "
-		+ "drag to the end to resume.")
+	_timeline.tooltip_text = (
+		"Scrub back through the flight. Pauses the simulation; " + "drag to the end to resume."
+	)
 	_timeline.value_changed.connect(_on_scrub)
 	row.add_child(_timeline)
 	return row
@@ -212,8 +214,9 @@ func _refresh_readouts() -> void:
 	for child in _instruments.get_children():
 		child.queue_free()
 	_instruments.add_child(UIKit.heading("Instruments", 3))
-	for name in ["ALT", "VEL", "VVEL", "HVEL", "APO", "PERI", "ECC", "TAPO",
-			"FUEL", "DV", "TWR", "Q"]:
+	for name in [
+		"ALT", "VEL", "VVEL", "HVEL", "APO", "PERI", "ECC", "TAPO", "FUEL", "DV", "TWR", "Q"
+	]:
 		var sid: int = ISA.SENSORS[name]["id"]
 		var value := bus.read(sid)
 		var role := "text"
@@ -225,8 +228,7 @@ func _refresh_readouts() -> void:
 	if _map.target_index >= 0:
 		for name in ["TGTD", "TGTV"]:
 			var sid2: int = ISA.SENSORS[name]["id"]
-			_instruments.add_child(UIKit.stat_row(name,
-				Fmt.sensor_value(sid2, bus.read(sid2))))
+			_instruments.add_child(UIKit.stat_row(name, Fmt.sensor_value(sid2, bus.read(sid2))))
 
 	for child in _objectives.get_children():
 		child.queue_free()
@@ -255,9 +257,18 @@ func _refresh_readouts() -> void:
 		for child in _log_list.get_children():
 			child.queue_free()
 		for entry in runner.vm.log_entries:
-			_log_list.add_child(UIKit.small("%s  %s = %s" % [
-				Fmt.clock(float(entry["t"])), String(entry["label"]),
-				Fmt.number(float(entry["value"]))]))
+			_log_list.add_child(
+				UIKit.small(
+					(
+						"%s  %s = %s"
+						% [
+							Fmt.clock(float(entry["t"])),
+							String(entry["label"]),
+							Fmt.number(float(entry["value"]))
+						]
+					)
+				)
+			)
 
 
 func _on_finished() -> void:
@@ -269,8 +280,9 @@ func _on_finished() -> void:
 	Profile.record(_mission.id, result)
 
 	_status.text = result.outcome
-	_status.add_theme_color_override("font_color",
-		Tokens.color("success" if result.success else "danger"))
+	_status.add_theme_color_override(
+		"font_color", Tokens.color("success" if result.success else "danger")
+	)
 
 	# A beat to see the final frame before the results screen takes over; with
 	# reduced motion, no beat at all.
@@ -354,8 +366,13 @@ func palette_commands() -> Array[Dictionary]:
 
 func on_palette_command(id: String) -> void:
 	match id:
-		"pause": _toggle_play()
-		"step": _advance(1)
-		"follow": _map.frame_ship()
-		"frame_all": _map.frame_all()
-		"abort": App.instance.go_to(App.Screen.EDITOR)
+		"pause":
+			_toggle_play()
+		"step":
+			_advance(1)
+		"follow":
+			_map.frame_ship()
+		"frame_all":
+			_map.frame_all()
+		"abort":
+			App.instance.go_to(App.Screen.EDITOR)

@@ -31,7 +31,7 @@ const CONVERGENCE_TIMEOUT := 300.0
 const RATE_EPSILON := 1.0e-6
 
 var goal_kind: int = ISA.Goal.ABSOLUTE
-var goal_angle: float = 0.0          ## radians, used when goal_kind is ABSOLUTE
+var goal_angle: float = 0.0  ## radians, used when goal_kind is ABSOLUTE
 var tolerance: float = DEFAULT_TOLERANCE_DEG * SensorBus.DEG_TO_RAD
 
 ## True once a goal has been set; before that the wheels stay idle.

@@ -65,16 +65,24 @@ func _refresh_availability() -> void:
 		note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		_body.add_child(note)
 		var open := UIKit.button("Set it up", "secondary", "Open the settings")
-		open.pressed.connect(func():
-			var dialog := SettingsDialog.new()
-			App.instance.add_child(dialog)
-			dialog.popup_centered()
-			dialog.close_requested.connect(_refresh_availability))
+		open.pressed.connect(
+			func():
+				var dialog := SettingsDialog.new()
+				App.instance.add_child(dialog)
+				dialog.popup_centered()
+				dialog.close_requested.connect(_refresh_availability)
+		)
 		_body.add_child(open)
 	else:
-		_body.add_child(UIKit.small(
-			"It translates what you say, not what you meant. Anything you leave "
-			+ "unstated it decides for itself — and tells you it did.", "text_faint"))
+		_body.add_child(
+			UIKit.small(
+				(
+					"It translates what you say, not what you meant. Anything you leave "
+					+ "unstated it decides for itself — and tells you it did."
+				),
+				"text_faint"
+			)
+		)
 
 
 func _send() -> void:
@@ -116,8 +124,7 @@ func _on_proposal(proposal: Proposal) -> void:
 	# The assumptions go first. They are the interesting part: a vague order
 	# produces a long list here, and a manoeuvre wrong in exactly that way.
 	if proposal.assumptions.is_empty():
-		_body.add_child(UIKit.small("It made no assumptions — you were specific.",
-			"success"))
+		_body.add_child(UIKit.small("It made no assumptions — you were specific.", "success"))
 	else:
 		var heading := UIKit.small("It had to decide these for you:", "warning")
 		_body.add_child(heading)
@@ -141,12 +148,18 @@ func _on_proposal(proposal: Proposal) -> void:
 	# A suggestion that does not assemble should look broken rather than
 	# mysterious.
 	if not proposal.assembles():
-		_body.add_child(UIKit.small(
-			"This does not assemble: %s" % proposal.program.first_error_text(), "danger"))
+		_body.add_child(
+			UIKit.small(
+				"This does not assemble: %s" % proposal.program.first_error_text(), "danger"
+			)
+		)
 
 	var actions := UIKit.hbox(Tokens.SPACE_2)
-	var apply := UIKit.button("Replace my program", "secondary",
-		"Put this in the editor. Nothing is flown until you say so.")
+	var apply := UIKit.button(
+		"Replace my program",
+		"secondary",
+		"Put this in the editor. Nothing is flown until you say so."
+	)
 	apply.pressed.connect(func(): apply_requested.emit(proposal.to_source()))
 	actions.add_child(apply)
 	var dismiss := UIKit.button("Ignore", "ghost", "Leave your program alone")

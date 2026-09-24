@@ -61,9 +61,12 @@ static func source_for(provider: String) -> int:
 
 static func source_name(source: int) -> String:
 	match source:
-		Source.ENVIRONMENT: return "environment variable"
-		Source.KEYCHAIN: return "system keychain"
-		Source.FILE: return "local file (not encrypted)"
+		Source.ENVIRONMENT:
+			return "environment variable"
+		Source.KEYCHAIN:
+			return "system keychain"
+		Source.FILE:
+			return "local file (not encrypted)"
 	return "not set"
 
 
@@ -90,22 +93,42 @@ static func set_key(provider: String, key: String, use_file: bool = false) -> Di
 
 	if not use_file and keychain_available():
 		if _keychain_write(provider, key):
-			return {"ok": true, "stored_in": Source.KEYCHAIN,
-				"message": "Stored in the system keychain."}
-		return {"ok": false, "stored_in": Source.NONE,
-			"message": "The system keychain refused to store the key."}
+			return {
+				"ok": true,
+				"stored_in": Source.KEYCHAIN,
+				"message": "Stored in the system keychain."
+			}
+		return {
+			"ok": false,
+			"stored_in": Source.NONE,
+			"message": "The system keychain refused to store the key."
+		}
 
 	if not use_file:
-		return {"ok": false, "stored_in": Source.NONE,
-			"message": "No system keychain is available on this platform. "
-				+ "Set %s in your environment, or tick the box to store it in a "
-				% env_var_for(provider)
-				+ "local file — which is not encrypted."}
+		return {
+			"ok": false,
+			"stored_in": Source.NONE,
+			"message":
+			(
+				"No system keychain is available on this platform. "
+				+ (
+					"Set %s in your environment, or tick the box to store it in a "
+					% env_var_for(provider)
+				)
+				+ "local file — which is not encrypted."
+			)
+		}
 
 	if _file_write(provider, key):
-		return {"ok": true, "stored_in": Source.FILE,
-			"message": "Stored in %s. This file is obfuscated, not encrypted."
-				% ProjectSettings.globalize_path(FILE_PATH)}
+		return {
+			"ok": true,
+			"stored_in": Source.FILE,
+			"message":
+			(
+				"Stored in %s. This file is obfuscated, not encrypted."
+				% ProjectSettings.globalize_path(FILE_PATH)
+			)
+		}
 	return {"ok": false, "stored_in": Source.NONE, "message": "Could not write the file."}
 
 
@@ -139,18 +162,45 @@ static func _keychain_read(provider: String) -> String:
 		"macOS":
 			if not _has_command("security"):
 				return ""
-			var code := OS.execute("security", [
-				"find-generic-password", "-s", SERVICE_NAME, "-a", provider, "-w",
-			], out, false, false)
+			var code := (
+				OS
+				. execute(
+					"security",
+					[
+						"find-generic-password",
+						"-s",
+						SERVICE_NAME,
+						"-a",
+						provider,
+						"-w",
+					],
+					out,
+					false,
+					false
+				)
+			)
 			if code != 0 or out.is_empty():
 				return ""
 			return String(out[0]).strip_edges()
 		"Linux", "FreeBSD", "NetBSD", "OpenBSD", "BSD":
 			if not _has_command("secret-tool"):
 				return ""
-			var code2 := OS.execute("secret-tool", [
-				"lookup", "service", SERVICE_NAME, "account", provider,
-			], out, false, false)
+			var code2 := (
+				OS
+				. execute(
+					"secret-tool",
+					[
+						"lookup",
+						"service",
+						SERVICE_NAME,
+						"account",
+						provider,
+					],
+					out,
+					false,
+					false
+				)
+			)
 			if code2 != 0 or out.is_empty():
 				return ""
 			return String(out[0]).strip_edges()
@@ -162,16 +212,38 @@ static func _keychain_write(provider: String, key: String) -> bool:
 	match OS.get_name():
 		"macOS":
 			# -U updates in place if the item already exists.
-			return OS.execute("security", [
-				"add-generic-password", "-U", "-s", SERVICE_NAME, "-a", provider,
-				"-w", key,
-			], out, false, false) == 0
+			return (
+				(
+					OS
+					. execute(
+						"security",
+						[
+							"add-generic-password",
+							"-U",
+							"-s",
+							SERVICE_NAME,
+							"-a",
+							provider,
+							"-w",
+							key,
+						],
+						out,
+						false,
+						false
+					)
+				)
+				== 0
+			)
 		"Linux", "FreeBSD", "NetBSD", "OpenBSD", "BSD":
 			# secret-tool reads the secret from stdin, which keeps it off the
 			# process table where `ps` would show it.
-			var script := "printf '%%s' \"$APHELION_TMP_KEY\" | secret-tool store " \
-				+ "--label='Aphelion Mission Control' service %s account %s" \
-				% [SERVICE_NAME, provider]
+			var script := (
+				"printf '%%s' \"$APHELION_TMP_KEY\" | secret-tool store "
+				+ (
+					"--label='Aphelion Mission Control' service %s account %s"
+					% [SERVICE_NAME, provider]
+				)
+			)
 			OS.set_environment("APHELION_TMP_KEY", key)
 			var code := OS.execute("/bin/sh", ["-c", script], out, false, false)
 			OS.set_environment("APHELION_TMP_KEY", "")
@@ -183,11 +255,21 @@ static func _keychain_delete(provider: String) -> void:
 	var out: Array = []
 	match OS.get_name():
 		"macOS":
-			OS.execute("security", ["delete-generic-password", "-s", SERVICE_NAME,
-				"-a", provider], out, false, false)
+			OS.execute(
+				"security",
+				["delete-generic-password", "-s", SERVICE_NAME, "-a", provider],
+				out,
+				false,
+				false
+			)
 		"Linux", "FreeBSD", "NetBSD", "OpenBSD", "BSD":
-			OS.execute("secret-tool", ["clear", "service", SERVICE_NAME,
-				"account", provider], out, false, false)
+			OS.execute(
+				"secret-tool",
+				["clear", "service", SERVICE_NAME, "account", provider],
+				out,
+				false,
+				false
+			)
 
 
 # --- local file -------------------------------------------------------------

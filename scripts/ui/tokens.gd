@@ -51,6 +51,7 @@ const DUR_SLOW := 0.25
 const EASE_OUT := Tween.EASE_OUT
 const TRANS_DEFAULT := Tween.TRANS_CUBIC
 
+
 ## Duration, adjusted for the reduced-motion setting. Every animation in the
 ## game goes through this, so the switch actually reaches all of them.
 static func duration(base: float) -> float:
@@ -62,42 +63,42 @@ static func duration(base: float) -> float:
 ## Dark theme. The background is a very dark blue rather than black: pure black
 ## against a starfield loses the sense of depth, and on OLED it smears.
 const DARK := {
-	"bg":            Color("0b0d14"),
-	"surface":       Color("141824"),
-	"surface_high":  Color("1d2230"),
-	"overlay":       Color("262c3c"),
-	"border":        Color("333b50"),
+	"bg": Color("0b0d14"),
+	"surface": Color("141824"),
+	"surface_high": Color("1d2230"),
+	"overlay": Color("262c3c"),
+	"border": Color("333b50"),
 	"border_strong": Color("6c7690"),
-	"text":          Color("e8ecf5"),
-	"text_muted":    Color("a3adc2"),
-	"text_faint":    Color("6f7a91"),
-	"accent":        Color("4cc2ff"),
-	"accent_text":   Color("06121c"),
-	"success":       Color("5fd38d"),
-	"warning":       Color("ffb454"),
-	"danger":        Color("ff6b6b"),
-	"focus":         Color("ffd166"),
+	"text": Color("e8ecf5"),
+	"text_muted": Color("a3adc2"),
+	"text_faint": Color("6f7a91"),
+	"accent": Color("4cc2ff"),
+	"accent_text": Color("06121c"),
+	"success": Color("5fd38d"),
+	"warning": Color("ffb454"),
+	"danger": Color("ff6b6b"),
+	"focus": Color("ffd166"),
 }
 
 ## Light theme. Not an inversion — the greys are warmed slightly so that a
 ## bright screen does not read as blue-grey, and the accent is darkened to keep
 ## its contrast against white above 4.5:1.
 const LIGHT := {
-	"bg":            Color("f6f7fa"),
-	"surface":       Color("ffffff"),
-	"surface_high":  Color("eef1f6"),
-	"overlay":       Color("e2e7ef"),
-	"border":        Color("c8cfdb"),
+	"bg": Color("f6f7fa"),
+	"surface": Color("ffffff"),
+	"surface_high": Color("eef1f6"),
+	"overlay": Color("e2e7ef"),
+	"border": Color("c8cfdb"),
 	"border_strong": Color("798395"),
-	"text":          Color("141824"),
-	"text_muted":    Color("4a5265"),
-	"text_faint":    Color("6f7a91"),
-	"accent":        Color("00629b"),
-	"accent_text":   Color("ffffff"),
-	"success":       Color("1c7a4a"),
-	"warning":       Color("8a5300"),
-	"danger":        Color("b3261e"),
-	"focus":         Color("9a6b00"),
+	"text": Color("141824"),
+	"text_muted": Color("4a5265"),
+	"text_faint": Color("6f7a91"),
+	"accent": Color("00629b"),
+	"accent_text": Color("ffffff"),
+	"success": Color("1c7a4a"),
+	"warning": Color("8a5300"),
+	"danger": Color("b3261e"),
+	"focus": Color("9a6b00"),
 }
 
 ## Trajectory colours.
@@ -108,32 +109,32 @@ const LIGHT := {
 ## style (solid, dashed, dotted) and an always-visible text label, so the map is
 ## readable in greyscale.
 const TRAJECTORY_DEFAULT := {
-	"current":   Color("4cc2ff"),
+	"current": Color("4cc2ff"),
 	"projected": Color("9d8cff"),
-	"target":    Color("ffb454"),
-	"transfer":  Color("5fd38d"),
-	"danger":    Color("ff6b6b"),
-	"past":      Color("6f7a91"),
+	"target": Color("ffb454"),
+	"transfer": Color("5fd38d"),
+	"danger": Color("ff6b6b"),
+	"past": Color("6f7a91"),
 }
 
 const TRAJECTORY_COLORBLIND := {
-	"current":   Color("56b4e9"),  # sky blue
+	"current": Color("56b4e9"),  # sky blue
 	"projected": Color("cc79a7"),  # reddish purple
-	"target":    Color("e69f00"),  # orange
-	"transfer":  Color("0072b2"),  # deep blue
-	"danger":    Color("d55e00"),  # vermilion
-	"past":      Color("999999"),  # grey
+	"target": Color("e69f00"),  # orange
+	"transfer": Color("0072b2"),  # deep blue
+	"danger": Color("d55e00"),  # vermilion
+	"past": Color("999999"),  # grey
 }
 
 ## Line styles, paired with the colours above so hue is never load-bearing.
 ## Values are dash patterns in pixels; an empty array means solid.
 const TRAJECTORY_DASH := {
-	"current":   [],
+	"current": [],
 	"projected": [10.0, 6.0],
-	"target":    [2.0, 6.0],
-	"transfer":  [16.0, 5.0, 3.0, 5.0],
-	"danger":    [6.0, 4.0],
-	"past":      [3.0, 7.0],
+	"target": [2.0, 6.0],
+	"transfer": [16.0, 5.0, 3.0, 5.0],
+	"danger": [6.0, 4.0],
+	"past": [3.0, 7.0],
 }
 
 
@@ -143,7 +144,11 @@ static func palette() -> Dictionary:
 	if Settings.theme == "system":
 		# Godot does not report the OS theme on every platform; dark is the
 		# better default for a game that is mostly starfield.
-		return LIGHT if DisplayServer.is_dark_mode_supported() and not DisplayServer.is_dark_mode() else DARK
+		return (
+			LIGHT
+			if DisplayServer.is_dark_mode_supported() and not DisplayServer.is_dark_mode()
+			else DARK
+		)
 	return DARK
 
 
@@ -153,8 +158,9 @@ static func color(name: String) -> Color:
 
 
 static func trajectory_color(role: String) -> Color:
-	var p: Dictionary = TRAJECTORY_COLORBLIND if Settings.palette == "colorblind" \
-		else TRAJECTORY_DEFAULT
+	var p: Dictionary = (
+		TRAJECTORY_COLORBLIND if Settings.palette == "colorblind" else TRAJECTORY_DEFAULT
+	)
 	return p.get(role, color("text"))
 
 

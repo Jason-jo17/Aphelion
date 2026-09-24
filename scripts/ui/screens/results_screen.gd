@@ -21,8 +21,7 @@ func _ready() -> void:
 	var margin := MarginContainer.new()
 	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	for side in ["left", "right", "top", "bottom"]:
-		margin.add_theme_constant_override("margin_" + side,
-			int(Tokens.space(Tokens.SPACE_7)))
+		margin.add_theme_constant_override("margin_" + side, int(Tokens.space(Tokens.SPACE_7)))
 	add_child(margin)
 
 	var columns := UIKit.hbox(Tokens.SPACE_6)
@@ -51,10 +50,10 @@ func _verdict() -> Control:
 	var column := UIKit.vbox(Tokens.SPACE_2)
 	card.add_child(column)
 
-	var headline := UIKit.heading(
-		"Objective complete" if _result.success else "Mission failed", 1)
-	headline.add_theme_color_override("font_color",
-		Tokens.color("success" if _result.success else "danger"))
+	var headline := UIKit.heading("Objective complete" if _result.success else "Mission failed", 1)
+	headline.add_theme_color_override(
+		"font_color", Tokens.color("success" if _result.success else "danger")
+	)
 	column.add_child(headline)
 	column.add_child(UIKit.heading(_mission.title, 3))
 
@@ -75,9 +74,15 @@ func _verdict() -> Control:
 	if _result.spin_ticks > 0 and _result.vm_ticks > 0:
 		var fraction := float(_result.spin_ticks) / float(_result.vm_ticks)
 		if fraction > 0.5:
-			column.add_child(UIKit.small(
-				"Your program hit its per-tick instruction budget on most ticks. "
-				+ "That usually means a loop with no WAIT in it.", "warning"))
+			column.add_child(
+				UIKit.small(
+					(
+						"Your program hit its per-tick instruction budget on most ticks. "
+						+ "That usually means a loop with no WAIT in it."
+					),
+					"warning"
+				)
+			)
 	return card
 
 
@@ -91,13 +96,11 @@ func _metrics() -> Control:
 		var block := UIKit.vbox(Tokens.SPACE_1)
 		var header := UIKit.hbox(Tokens.SPACE_2)
 		var earned := bool(row["earned"])
-		header.add_child(UIKit.small("★" if earned else "☆",
-			"warning" if earned else "text_faint"))
+		header.add_child(UIKit.small("★" if earned else "☆", "warning" if earned else "text_faint"))
 		var label := UIKit.body(String(row["label"]))
 		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		header.add_child(label)
-		var value := UIKit.small(String(row["value_text"]),
-			"success" if earned else "text")
+		var value := UIKit.small(String(row["value_text"]), "success" if earned else "text")
 		header.add_child(value)
 		header.add_child(UIKit.small("/ %s" % row["target_text"], "text_faint"))
 		block.add_child(header)
@@ -115,8 +118,9 @@ func _metrics() -> Control:
 		if not earned and _result.success:
 			var over := float(row["over_fraction"])
 			if over > 0.0:
-				block.add_child(UIKit.small("%d%% over the target" % int(over * 100.0),
-					"text_faint"))
+				block.add_child(
+					UIKit.small("%d%% over the target" % int(over * 100.0), "text_faint")
+				)
 		column.add_child(block)
 	return card
 
@@ -130,12 +134,14 @@ func _flight_facts() -> Control:
 	column.add_child(UIKit.stat_row("Propellant left", Fmt.mass(_result.fuel_remaining)))
 	column.add_child(UIKit.stat_row("Highest point", Fmt.distance(_result.max_altitude)))
 	if _result.max_dynamic_pressure > 0.0:
-		column.add_child(UIKit.stat_row("Peak dynamic pressure",
-			Fmt.pressure(_result.max_dynamic_pressure)))
+		column.add_child(
+			UIKit.stat_row("Peak dynamic pressure", Fmt.pressure(_result.max_dynamic_pressure))
+		)
 	if _result.touchdown_speed >= 0.0:
 		column.add_child(UIKit.stat_row("Touchdown", Fmt.speed(_result.touchdown_speed)))
-	column.add_child(UIKit.stat_row("Instructions executed",
-		Fmt.number(float(_result.instructions_executed))))
+	column.add_child(
+		UIKit.stat_row("Instructions executed", Fmt.number(float(_result.instructions_executed)))
+	)
 	column.add_child(UIKit.stat_row("Flight computer", _result.vm_status))
 	return card
 
@@ -145,9 +151,15 @@ func _personal_bests() -> Control:
 	var column := UIKit.vbox(Tokens.SPACE_2)
 	card.add_child(column)
 	column.add_child(UIKit.heading("Your records", 3))
-	column.add_child(UIKit.small(
-		"A fuel record and a speed record are rarely the same flight, so all "
-		+ "three are kept.", "text_faint"))
+	column.add_child(
+		UIKit.small(
+			(
+				"A fuel record and a speed record are rarely the same flight, so all "
+				+ "three are kept."
+			),
+			"text_faint"
+		)
+	)
 
 	var any := false
 	for metric in [Scoring.METRIC_FUEL, Scoring.METRIC_TIME, Scoring.METRIC_INSTRUCTIONS]:
@@ -157,13 +169,20 @@ func _personal_bests() -> Control:
 		any = true
 		var text := ""
 		match metric:
-			Scoring.METRIC_FUEL: text = Fmt.mass(best.fuel_used)
-			Scoring.METRIC_TIME: text = Fmt.duration(best.elapsed)
-			_: text = "%d instructions" % best.instruction_count
+			Scoring.METRIC_FUEL:
+				text = Fmt.mass(best.fuel_used)
+			Scoring.METRIC_TIME:
+				text = Fmt.duration(best.elapsed)
+			_:
+				text = "%d instructions" % best.instruction_count
 		var is_now := best.state_hash == _result.state_hash
-		column.add_child(UIKit.stat_row(
-			metric.capitalize() + (" (new)" if is_now else ""), text,
-			"success" if is_now else "text"))
+		column.add_child(
+			UIKit.stat_row(
+				metric.capitalize() + (" (new)" if is_now else ""),
+				text,
+				"success" if is_now else "text"
+			)
+		)
 	if not any:
 		column.add_child(UIKit.small("No successful flights recorded yet.", "text_faint"))
 	return card
@@ -181,10 +200,14 @@ func _history() -> Control:
 	for i in mini(history.size(), 10):
 		var r := history[i]
 		var row := UIKit.hbox(Tokens.SPACE_2)
-		row.add_child(UIKit.small("★%d" % r.stars if r.success else "—",
-			"warning" if r.success else "text_faint"))
-		var text := UIKit.small(r.summary() if r.success else r.outcome,
-			"text" if r.success else "text_faint")
+		row.add_child(
+			UIKit.small(
+				"★%d" % r.stars if r.success else "—", "warning" if r.success else "text_faint"
+			)
+		)
+		var text := UIKit.small(
+			r.summary() if r.success else r.outcome, "text" if r.success else "text_faint"
+		)
 		text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		row.add_child(text)
@@ -195,13 +218,15 @@ func _history() -> Control:
 func _actions() -> Control:
 	var row := UIKit.hbox(Tokens.SPACE_2)
 
-	var again := UIKit.button("Back to the workshop", "primary",
-		"Change the ship or the program and try again")
+	var again := UIKit.button(
+		"Back to the workshop", "primary", "Change the ship or the program and try again"
+	)
 	again.pressed.connect(func(): App.instance.go_to(App.Screen.EDITOR))
 	row.add_child(again)
 
-	var export_button := UIKit.button("Export this solution", "secondary",
-		"Save a file that reproduces this exact flight")
+	var export_button := UIKit.button(
+		"Export this solution", "secondary", "Save a file that reproduces this exact flight"
+	)
 	export_button.pressed.connect(_export)
 	row.add_child(export_button)
 
@@ -209,8 +234,7 @@ func _actions() -> Control:
 
 	var next := MissionDB.next_mission(_mission.id)
 	if _result.success and next != null:
-		var go := UIKit.button("Next: %s" % next.title, "primary",
-			"Start the next mission")
+		var go := UIKit.button("Next: %s" % next.title, "primary", "Start the next mission")
 		go.pressed.connect(func(): App.instance.start_mission(next))
 		row.add_child(go)
 
@@ -223,8 +247,9 @@ func _actions() -> Control:
 
 
 func _export() -> void:
-	var solution := SolutionFile.from_run(_mission, App.instance.active_ship,
-		App.instance.active_program, _result)
+	var solution := SolutionFile.from_run(
+		_mission, App.instance.active_ship, App.instance.active_program, _result
+	)
 	var dialog := FileDialog.new()
 	dialog.file_mode = FileDialog.FILE_MODE_SAVE_FILE
 	dialog.access = FileDialog.ACCESS_FILESYSTEM
@@ -232,12 +257,14 @@ func _export() -> void:
 	dialog.current_file = solution.suggested_filename()
 	dialog.title = "Export solution"
 	add_child(dialog)
-	dialog.file_selected.connect(func(path: String):
-		var err := solution.save_to(path)
-		if err == OK:
-			App.instance.toast("Saved %s" % path.get_file(), "success")
-		else:
-			App.instance.toast("Could not write that file (error %d)." % err, "danger"))
+	dialog.file_selected.connect(
+		func(path: String):
+			var err := solution.save_to(path)
+			if err == OK:
+				App.instance.toast("Saved %s" % path.get_file(), "success")
+			else:
+				App.instance.toast("Could not write that file (error %d)." % err, "danger")
+	)
 	dialog.popup_centered_ratio(0.7)
 
 
@@ -255,9 +282,12 @@ func palette_commands() -> Array[Dictionary]:
 
 func on_palette_command(id: String) -> void:
 	match id:
-		"workshop": App.instance.go_to(App.Screen.EDITOR)
-		"export": _export()
-		"menu": App.instance.go_to(App.Screen.MENU)
+		"workshop":
+			App.instance.go_to(App.Screen.EDITOR)
+		"export":
+			_export()
+		"menu":
+			App.instance.go_to(App.Screen.MENU)
 		"next":
 			var next := MissionDB.next_mission(_mission.id)
 			if next != null:

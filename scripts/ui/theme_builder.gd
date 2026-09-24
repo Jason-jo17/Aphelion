@@ -7,6 +7,7 @@ extends RefCounted
 ## rebuilt whenever the player changes the theme, the palette or the UI scale —
 ## a checked-in resource would have to be duplicated once per combination.
 
+
 static func build() -> Theme:
 	var t := Theme.new()
 	var p := Tokens.palette()
@@ -22,8 +23,9 @@ static func build() -> Theme:
 	return t
 
 
-static func _flat(bg: Color, radius: float, border: Color = Color.TRANSPARENT,
-		border_w: float = 0.0) -> StyleBoxFlat:
+static func _flat(
+	bg: Color, radius: float, border: Color = Color.TRANSPARENT, border_w: float = 0.0
+) -> StyleBoxFlat:
 	var s := StyleBoxFlat.new()
 	s.bg_color = bg
 	s.set_corner_radius_all(int(radius))
@@ -36,13 +38,16 @@ static func _flat(bg: Color, radius: float, border: Color = Color.TRANSPARENT,
 
 
 static func _panels(t: Theme, p: Dictionary) -> void:
-	t.set_stylebox("panel", "Panel", _flat(p["surface"], Tokens.RADIUS_MD, p["border"],
-		Tokens.BORDER_THIN))
-	t.set_stylebox("panel", "PanelContainer", _flat(p["surface"], Tokens.RADIUS_MD,
-		p["border"], Tokens.BORDER_THIN))
+	t.set_stylebox(
+		"panel", "Panel", _flat(p["surface"], Tokens.RADIUS_MD, p["border"], Tokens.BORDER_THIN)
+	)
+	t.set_stylebox(
+		"panel",
+		"PanelContainer",
+		_flat(p["surface"], Tokens.RADIUS_MD, p["border"], Tokens.BORDER_THIN)
+	)
 
-	var popup := _flat(p["surface_high"], Tokens.RADIUS_MD, p["border_strong"],
-		Tokens.BORDER_THIN)
+	var popup := _flat(p["surface_high"], Tokens.RADIUS_MD, p["border_strong"], Tokens.BORDER_THIN)
 	t.set_stylebox("panel", "PopupMenu", popup)
 	t.set_stylebox("panel", "PopupPanel", popup)
 
@@ -96,8 +101,9 @@ static func _inputs(t: Theme, p: Dictionary) -> void:
 	for cls in ["LineEdit", "TextEdit", "CodeEdit", "SpinBox"]:
 		t.set_stylebox("normal", cls, normal)
 		t.set_stylebox("focus", cls, focus)
-		t.set_stylebox("read_only", cls, _flat(p["surface"], Tokens.RADIUS_SM,
-			p["border"], Tokens.BORDER_THIN))
+		t.set_stylebox(
+			"read_only", cls, _flat(p["surface"], Tokens.RADIUS_SM, p["border"], Tokens.BORDER_THIN)
+		)
 		t.set_color("font_color", cls, p["text"])
 		t.set_color("font_placeholder_color", cls, p["text_faint"])
 		t.set_color("caret_color", cls, p["accent"])
@@ -119,10 +125,14 @@ static func _labels(t: Theme, p: Dictionary) -> void:
 
 static func _lists(t: Theme, p: Dictionary) -> void:
 	for cls in ["ItemList", "Tree"]:
-		t.set_stylebox("panel", cls, _flat(p["bg"], Tokens.RADIUS_SM, p["border"],
-			Tokens.BORDER_THIN))
-		t.set_stylebox("focus", cls, _flat(Color.TRANSPARENT, Tokens.RADIUS_SM,
-			p["focus"], Tokens.BORDER_FOCUS))
+		t.set_stylebox(
+			"panel", cls, _flat(p["bg"], Tokens.RADIUS_SM, p["border"], Tokens.BORDER_THIN)
+		)
+		t.set_stylebox(
+			"focus",
+			cls,
+			_flat(Color.TRANSPARENT, Tokens.RADIUS_SM, p["focus"], Tokens.BORDER_FOCUS)
+		)
 		t.set_color("font_color", cls, p["text"])
 		t.set_color("font_selected_color", cls, p["accent_text"])
 		t.set_stylebox("selected", cls, _flat(p["accent"], Tokens.RADIUS_SM))
@@ -140,12 +150,21 @@ static func _misc(t: Theme, p: Dictionary) -> void:
 	t.set_stylebox("grabber_area", "HSlider", _flat(p["accent"], Tokens.RADIUS_SM))
 	t.set_stylebox("grabber_area_highlight", "HSlider", _flat(p["accent"], Tokens.RADIUS_SM))
 
-	t.set_stylebox("tab_selected", "TabContainer", _flat(p["surface"], Tokens.RADIUS_SM,
-		p["accent"], Tokens.BORDER_FOCUS))
-	t.set_stylebox("tab_unselected", "TabContainer", _flat(p["bg"], Tokens.RADIUS_SM,
-		p["border"], Tokens.BORDER_THIN))
-	t.set_stylebox("panel", "TabContainer", _flat(p["surface"], Tokens.RADIUS_MD,
-		p["border"], Tokens.BORDER_THIN))
+	t.set_stylebox(
+		"tab_selected",
+		"TabContainer",
+		_flat(p["surface"], Tokens.RADIUS_SM, p["accent"], Tokens.BORDER_FOCUS)
+	)
+	t.set_stylebox(
+		"tab_unselected",
+		"TabContainer",
+		_flat(p["bg"], Tokens.RADIUS_SM, p["border"], Tokens.BORDER_THIN)
+	)
+	t.set_stylebox(
+		"panel",
+		"TabContainer",
+		_flat(p["surface"], Tokens.RADIUS_MD, p["border"], Tokens.BORDER_THIN)
+	)
 	t.set_color("font_selected_color", "TabContainer", p["text"])
 	t.set_color("font_unselected_color", "TabContainer", p["text_muted"])
 

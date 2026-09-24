@@ -4,6 +4,7 @@ extends RefCounted
 ## Shared number formatting. One place, so a distance reads the same in the
 ## objectives panel, the instrument strip, the results screen and a tooltip.
 
+
 ## Distance with a sensible unit. 1234.0 -> "1.23 km".
 static func distance(m: float) -> String:
 	if is_inf(m):
@@ -113,7 +114,10 @@ static func sensor_value(sensor: int, v: float) -> String:
 			return speed(v)
 		ISA.Sensor.TAPO, ISA.Sensor.TPERI, ISA.Sensor.T:
 			return duration(v)
-		ISA.Sensor.HDG, ISA.Sensor.PRO, ISA.Sensor.RETRO, ISA.Sensor.RAD, \
+		# The angles, split over two arms only because the list of them does
+		# not fit on one line and a match pattern cannot be wrapped.
+		ISA.Sensor.HDG, ISA.Sensor.PRO, ISA.Sensor.RETRO, ISA.Sensor.RAD:
+			return degrees(v)
 		ISA.Sensor.ANTIRAD, ISA.Sensor.PITCH, ISA.Sensor.TGTA:
 			return degrees(v)
 		ISA.Sensor.FUEL, ISA.Sensor.MASS:

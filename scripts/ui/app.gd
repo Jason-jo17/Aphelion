@@ -96,7 +96,7 @@ func go_to(screen: int, animate: bool = true) -> void:
 	node.set_script(load(script_path))
 	node.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(node)
-	move_child(node, 1)   # above the background, below toasts and the palette
+	move_child(node, 1)  # above the background, below toasts and the palette
 	_screen_node = node
 	if animate:
 		UIKit.fade_in(node)
@@ -110,8 +110,11 @@ func start_mission(mission: Mission) -> void:
 		active_ship = Ship.from_dict(draft["ship"], PartCatalog.shared())
 	if active_ship == null:
 		active_ship = MissionDB.stock_ship("sparrow")
-	active_program = Program.from_dict(draft.get("program", {})) if draft.has("program") \
+	active_program = (
+		Program.from_dict(draft.get("program", {}))
+		if draft.has("program")
 		else Assembler.assemble(_starter_program(mission))
+	)
 	go_to(Screen.BRIEFING)
 
 
@@ -180,8 +183,12 @@ func open_reference() -> void:
 func _toggle_fullscreen() -> void:
 	var mode := DisplayServer.window_get_mode()
 	DisplayServer.window_set_mode(
-		DisplayServer.WINDOW_MODE_WINDOWED if mode == DisplayServer.WINDOW_MODE_FULLSCREEN
-		else DisplayServer.WINDOW_MODE_FULLSCREEN)
+		(
+			DisplayServer.WINDOW_MODE_WINDOWED
+			if mode == DisplayServer.WINDOW_MODE_FULLSCREEN
+			else DisplayServer.WINDOW_MODE_FULLSCREEN
+		)
+	)
 
 
 ## The palette's contents. Screens add their own by overriding
@@ -191,20 +198,30 @@ func _commands() -> Array[Dictionary]:
 	if _screen_node != null and _screen_node.has_method("palette_commands"):
 		out.append_array(_screen_node.call("palette_commands"))
 
-	out.append_array([
-		{"id": "menu", "title": "Go to mission list", "hint": "Esc"},
-		{"id": "theme", "title": "Switch theme (currently %s)" % Settings.theme},
-		{"id": "palette", "title": "Switch trajectory palette (currently %s)"
-			% Settings.palette},
-		{"id": "motion", "title": "%s reduced motion"
-			% ("Disable" if Settings.reduced_motion else "Enable")},
-		{"id": "scale_up", "title": "Larger interface"},
-		{"id": "scale_down", "title": "Smaller interface"},
-		{"id": "settings", "title": "Settings"},
-		{"id": "fullscreen", "title": "Toggle fullscreen", "hint": "F11"},
-		{"id": "reference", "title": "Instruction reference", "hint": "F1"},
-		{"id": "quit", "title": "Quit Aphelion"},
-	])
+	(
+		out
+		. append_array(
+			[
+				{"id": "menu", "title": "Go to mission list", "hint": "Esc"},
+				{"id": "theme", "title": "Switch theme (currently %s)" % Settings.theme},
+				{
+					"id": "palette",
+					"title": "Switch trajectory palette (currently %s)" % Settings.palette
+				},
+				{
+					"id": "motion",
+					"title":
+					"%s reduced motion" % ("Disable" if Settings.reduced_motion else "Enable")
+				},
+				{"id": "scale_up", "title": "Larger interface"},
+				{"id": "scale_down", "title": "Smaller interface"},
+				{"id": "settings", "title": "Settings"},
+				{"id": "fullscreen", "title": "Toggle fullscreen", "hint": "F11"},
+				{"id": "reference", "title": "Instruction reference", "hint": "F1"},
+				{"id": "quit", "title": "Quit Aphelion"},
+			]
+		)
+	)
 	return out
 
 
@@ -216,9 +233,13 @@ func _reference_entries() -> Array[Dictionary]:
 	for name in ISA.sensor_names_ordered():
 		var s: Dictionary = ISA.SENSORS[name]
 		var unit := String(s["unit"])
-		out.append({"id": "", "title": "%s%s" % [name,
-			(" (%s)" % unit) if not unit.is_empty() else ""],
-			"hint": String(s["summary"])})
+		out.append(
+			{
+				"id": "",
+				"title": "%s%s" % [name, (" (%s)" % unit) if not unit.is_empty() else ""],
+				"hint": String(s["summary"])
+			}
+		)
 	return out
 
 

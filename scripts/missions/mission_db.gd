@@ -13,7 +13,7 @@ const MISSIONS_DIR := "res://missions"
 
 var universe: Dictionary = {}
 var missions: Array[Mission] = []
-var stock_ships: Dictionary = {}     ## id -> Dictionary as stored in ships.json
+var stock_ships: Dictionary = {}  ## id -> Dictionary as stored in ships.json
 
 var load_errors: PackedStringArray = PackedStringArray()
 
@@ -96,4 +96,3 @@ func stock_ship_ids() -> PackedStringArray:
 ## Builds the world a mission is flown in.
 func world_for(mission: Mission) -> SimWorld:
 	return mission.build_world(universe)
-

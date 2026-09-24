@@ -29,7 +29,7 @@ var active_target_id: String = ""
 var time_limit: float = DEFAULT_TIME_LIMIT
 
 var success: Predicate = null
-var failures: Array[Dictionary] = []   ## {predicate: Predicate, message: String}
+var failures: Array[Dictionary] = []  ## {predicate: Predicate, message: String}
 
 ## Thresholds for the three stars. A metric at or below its threshold earns one.
 var star_fuel: float = INF
@@ -94,8 +94,12 @@ func build_world(universe: Dictionary) -> SimWorld:
 		var parent_id := String(td.get("body", primary_id))
 		var pi := world.body_index_by_id(parent_id)
 		if pi < 0:
-			errors.append("Target '%s' orbits '%s', which this mission does not include."
-				% [String(td.get("id", "?")), parent_id])
+			errors.append(
+				(
+					"Target '%s' orbits '%s', which this mission does not include."
+					% [String(td.get("id", "?")), parent_id]
+				)
+			)
 			continue
 		world.targets.append(OrbitTarget.from_dict(td, world.bodies[pi], pi))
 
@@ -157,9 +161,9 @@ func initial_state(world: SimWorld, profile: ShipProfile) -> ShipState:
 			var theta := arg + nu
 
 			var sc := DetMath.sincos(theta)
-			var ux := sc[1]   # radial unit vector
+			var ux := sc[1]  # radial unit vector
 			var uy := sc[0]
-			var tx := -sc[0] * dir   # tangential unit vector, in the direction of travel
+			var tx := -sc[0] * dir  # tangential unit vector, in the direction of travel
 			var ty := sc[1] * dir
 
 			var sqrt_mu_p := sqrt(body.mu / p) if p > 0.0 else 0.0
@@ -181,7 +185,7 @@ func initial_state(world: SimWorld, profile: ShipProfile) -> ShipState:
 			# Standing on a rotating body means already moving with it.
 			st.vx = body.vel_x(0.0) + body.surface_vel_x(body.radius * sc2[1], body.radius * sc2[0])
 			st.vy = body.vel_y(0.0) + body.surface_vel_y(body.radius * sc2[1], body.radius * sc2[0])
-			st.angle = ang   # nose up
+			st.angle = ang  # nose up
 			st.landed = true
 
 	st.soi_index = world.dominant_body_index(0.0, st.px, st.py)
@@ -226,10 +230,16 @@ static func from_dict(d: Dictionary) -> Mission:
 
 	for f in d.get("failure", []):
 		var fd: Dictionary = f
-		m.failures.append({
-			"predicate": Predicate.from_dict(fd.get("when", {}), m.errors),
-			"message": String(fd.get("message", "Mission failed.")),
-		})
+		(
+			m
+			. failures
+			. append(
+				{
+					"predicate": Predicate.from_dict(fd.get("when", {}), m.errors),
+					"message": String(fd.get("message", "Mission failed.")),
+				}
+			)
+		)
 
 	var stars: Dictionary = d.get("stars", {})
 	m.star_fuel = float(stars.get("fuel", INF))

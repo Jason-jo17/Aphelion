@@ -14,7 +14,7 @@ var outcome_detail: String = ""
 # --- the three scored metrics ---
 var fuel_used: float = 0.0
 var ticks: int = 0
-var instruction_count: int = 0      ## static program size; the scored number
+var instruction_count: int = 0  ## static program size; the scored number
 
 # --- supporting numbers ---
 var instructions_executed: int = 0
@@ -71,9 +71,14 @@ func sample(i: int) -> Dictionary:
 	if o < 0 or o + TRAJECTORY_STRIDE > trajectory.size():
 		return {}
 	return {
-		"t": trajectory[o], "px": trajectory[o + 1], "py": trajectory[o + 2],
-		"vx": trajectory[o + 3], "vy": trajectory[o + 4], "fuel": trajectory[o + 5],
-		"angle": trajectory[o + 6], "throttle": trajectory[o + 7],
+		"t": trajectory[o],
+		"px": trajectory[o + 1],
+		"py": trajectory[o + 2],
+		"vx": trajectory[o + 3],
+		"vy": trajectory[o + 4],
+		"fuel": trajectory[o + 5],
+		"angle": trajectory[o + 6],
+		"throttle": trajectory[o + 7],
 	}
 
 
@@ -81,8 +86,10 @@ func sample(i: int) -> Dictionary:
 func summary() -> String:
 	if not success:
 		return "Failed — %s" % outcome
-	return "%s fuel · %s · %d instructions" % [
-		Fmt.mass(fuel_used), Fmt.duration(elapsed), instruction_count]
+	return (
+		"%s fuel · %s · %d instructions"
+		% [Fmt.mass(fuel_used), Fmt.duration(elapsed), instruction_count]
+	)
 
 
 func to_dict(include_trajectory: bool = false) -> Dictionary:

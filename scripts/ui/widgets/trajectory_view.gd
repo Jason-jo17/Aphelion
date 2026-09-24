@@ -42,7 +42,7 @@ var trail_fraction: float = 1.0
 var target_index: int = -1
 
 var _log_scale := -6.0
-var _centre := Vector2.ZERO      ## world metres, as a float32 pair for panning only
+var _centre := Vector2.ZERO  ## world metres, as a float32 pair for panning only
 var _follow_ship := true
 var _dragging := false
 var _pulse := 0.0
@@ -53,8 +53,10 @@ func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	custom_minimum_size = Vector2(320, 240)
 	set_process(true)
-	tooltip_text = ("Orbital map. Scroll or +/- to zoom, drag or arrow keys to pan, "
-		+ "F to follow the ship, Home to frame everything.")
+	tooltip_text = (
+		"Orbital map. Scroll or +/- to zoom, drag or arrow keys to pan, "
+		+ "F to follow the ship, Home to frame everything."
+	)
 
 
 func _process(delta: float) -> void:
@@ -79,8 +81,11 @@ func frame_all() -> void:
 	if extent <= 0.0:
 		extent = 1.0e6
 	var shortest := minf(size.x, size.y)
-	_log_scale = clampf(log(maxf(1.0, shortest * 0.45) / extent) / log(2.718281828459045),
-		MIN_LOG_SCALE, MAX_LOG_SCALE)
+	_log_scale = clampf(
+		log(maxf(1.0, shortest * 0.45) / extent) / log(2.718281828459045),
+		MIN_LOG_SCALE,
+		MAX_LOG_SCALE
+	)
 	_centre = Vector2.ZERO
 	_follow_ship = false
 	queue_redraw()
@@ -96,8 +101,11 @@ func frame_ship() -> void:
 	var r := DetMath.hypot(state.px - body.pos_x(t), state.py - body.pos_y(t))
 	var extent := maxf(body.radius * 1.5, r * 1.3)
 	var shortest := minf(size.x, size.y)
-	_log_scale = clampf(log(maxf(1.0, shortest * 0.45) / extent) / log(2.718281828459045),
-		MIN_LOG_SCALE, MAX_LOG_SCALE)
+	_log_scale = clampf(
+		log(maxf(1.0, shortest * 0.45) / extent) / log(2.718281828459045),
+		MIN_LOG_SCALE,
+		MAX_LOG_SCALE
+	)
 	_follow_ship = true
 	queue_redraw()
 
@@ -210,8 +218,12 @@ func _draw() -> void:
 	_draw_legend()
 
 	if has_focus():
-		draw_rect(Rect2(Vector2.ONE, size - Vector2.ONE * 2.0),
-			Tokens.color("focus"), false, Tokens.BORDER_FOCUS)
+		draw_rect(
+			Rect2(Vector2.ONE, size - Vector2.ONE * 2.0),
+			Tokens.color("focus"),
+			false,
+			Tokens.BORDER_FOCUS
+		)
 
 
 func _draw_body(body: CelestialBody, t: float) -> void:
@@ -235,11 +247,15 @@ func _draw_body(body: CelestialBody, t: float) -> void:
 		var parent := _to_screen(0.0, 0.0)
 		var orbit_r := body.orbit_radius * scale_factor()
 		if orbit_r > 8.0 and orbit_r < 20000.0:
-			_draw_dashed_arc(parent, orbit_r, Color(body.color, 0.28),
-				1.0, PackedFloat32Array([6.0, 10.0]))
+			_draw_dashed_arc(
+				parent, orbit_r, Color(body.color, 0.28), 1.0, PackedFloat32Array([6.0, 10.0])
+			)
 
-	_label(centre + Vector2(maxf(r, 4.0) + 6.0, -6.0), body.display_name,
-		Color(body.color.lightened(0.4), 0.95))
+	_label(
+		centre + Vector2(maxf(r, 4.0) + 6.0, -6.0),
+		body.display_name,
+		Color(body.color.lightened(0.4), 0.95)
+	)
 
 
 func _draw_targets(t: float) -> void:
@@ -252,9 +268,15 @@ func _draw_targets(t: float) -> void:
 
 		# A diamond, so it is not just "the orange dot".
 		var half := 6.0 if active else 4.0
-		var points := PackedVector2Array([
-			p + Vector2(0, -half), p + Vector2(half, 0),
-			p + Vector2(0, half), p + Vector2(-half, 0), p + Vector2(0, -half)])
+		var points := PackedVector2Array(
+			[
+				p + Vector2(0, -half),
+				p + Vector2(half, 0),
+				p + Vector2(0, half),
+				p + Vector2(-half, 0),
+				p + Vector2(0, -half)
+			]
+		)
 		draw_polyline(points, colour, 2.0 if active else 1.0, true)
 		if active:
 			draw_arc(p, 12.0, 0.0, TAU, 32, Color(colour, 0.5), 1.0, true)
@@ -292,9 +314,9 @@ func _draw_predicted_orbit(t: float) -> void:
 	var body := world.bodies[soi]
 	var bx := body.pos_x(t)
 	var by := body.pos_y(t)
-	var el := Orbital.elements(body.mu,
-		state.px - bx, state.py - by,
-		state.vx - body.vel_x(t), state.vy - body.vel_y(t))
+	var el := Orbital.elements(
+		body.mu, state.px - bx, state.py - by, state.vx - body.vel_x(t), state.vy - body.vel_y(t)
+	)
 
 	var ecc: float = el[Orbital.K_ECC]
 	var a: float = el[Orbital.K_SMA]
@@ -333,7 +355,9 @@ func _draw_predicted_orbit(t: float) -> void:
 		var r := p / denom
 		if r > 1.0e11:
 			continue
-		var sc := DetMath.sincos(arg + (theta if float(el[Orbital.K_ANG_MOMENTUM]) >= 0.0 else -theta))
+		var sc := DetMath.sincos(
+			arg + (theta if float(el[Orbital.K_ANG_MOMENTUM]) >= 0.0 else -theta)
+		)
 		points.append(_to_screen(bx + r * sc[1], by + r * sc[0]))
 
 	if points.size() >= 2:
@@ -342,8 +366,9 @@ func _draw_predicted_orbit(t: float) -> void:
 	_draw_apsis_markers(el, bx, by, arg, body, colour)
 
 
-func _draw_apsis_markers(el: Dictionary, bx: float, by: float, arg: float,
-		body: CelestialBody, colour: Color) -> void:
+func _draw_apsis_markers(
+	el: Dictionary, bx: float, by: float, arg: float, body: CelestialBody, colour: Color
+) -> void:
 	var ecc: float = el[Orbital.K_ECC]
 	if ecc < 1.0:
 		var ra: float = el[Orbital.K_APOAPSIS]
@@ -356,8 +381,11 @@ func _draw_apsis_markers(el: Dictionary, bx: float, by: float, arg: float,
 		var sc2 := DetMath.sincos(arg)
 		var p2 := _to_screen(bx + rp * sc2[1], by + rp * sc2[0])
 		var underground := rp < body.radius
-		_apsis(p2, "Pe %s" % Fmt.distance_coarse(rp - body.radius),
-			Tokens.trajectory_color("danger") if underground else colour)
+		_apsis(
+			p2,
+			"Pe %s" % Fmt.distance_coarse(rp - body.radius),
+			Tokens.trajectory_color("danger") if underground else colour
+		)
 
 
 func _apsis(at: Vector2, text: String, colour: Color) -> void:
@@ -366,7 +394,7 @@ func _apsis(at: Vector2, text: String, colour: Color) -> void:
 	_label(at + Vector2(7, -4), text, colour)
 
 
-func _draw_ship(t: float) -> void:
+func _draw_ship(_t: float) -> void:
 	var p := _to_screen(state.px, state.py)
 	var colour := Tokens.trajectory_color("current")
 	if state.crashed:
@@ -378,9 +406,16 @@ func _draw_ship(t: float) -> void:
 	var forward := Vector2(float(sc[1]), float(-sc[0]))
 	var right := Vector2(-forward.y, forward.x)
 	var nose := p + forward * 9.0
-	draw_colored_polygon(PackedVector2Array([
-		nose, p - forward * 5.0 + right * 5.0, p - forward * 5.0 - right * 5.0,
-	]), colour)
+	draw_colored_polygon(
+		PackedVector2Array(
+			[
+				nose,
+				p - forward * 5.0 + right * 5.0,
+				p - forward * 5.0 - right * 5.0,
+			]
+		),
+		colour
+	)
 
 	if not Settings.reduced_motion:
 		var radius := 12.0 + 4.0 * sin(_pulse * TAU)
@@ -419,8 +454,11 @@ func _draw_scale_bar() -> void:
 ## it names every colour so hue is never the only thing carrying meaning.
 func _draw_legend() -> void:
 	var entries := [
-		["current", "ship"], ["projected", "predicted orbit"],
-		["past", "flown"], ["transfer", "engine lit"], ["danger", "impact"],
+		["current", "ship"],
+		["projected", "predicted orbit"],
+		["past", "flown"],
+		["transfer", "engine lit"],
+		["danger", "impact"],
 	]
 	if target_index >= 0:
 		entries.append(["target", "target"])
@@ -446,13 +484,15 @@ func _label(at: Vector2, text: String, colour: Color) -> void:
 		return
 	var size_px := Tokens.font_size(Tokens.FONT_XS)
 	# A dark halo keeps small text legible over a bright planet.
-	draw_string(font, at + Vector2(1, 1), text, HORIZONTAL_ALIGNMENT_LEFT, -1, size_px,
-		Color(0, 0, 0, 0.7))
+	draw_string(
+		font, at + Vector2(1, 1), text, HORIZONTAL_ALIGNMENT_LEFT, -1, size_px, Color(0, 0, 0, 0.7)
+	)
 	draw_string(font, at, text, HORIZONTAL_ALIGNMENT_LEFT, -1, size_px, colour)
 
 
-func _draw_dashed_polyline(points: PackedVector2Array, colour: Color, width: float,
-		pattern: PackedFloat32Array) -> void:
+func _draw_dashed_polyline(
+	points: PackedVector2Array, colour: Color, width: float, pattern: PackedFloat32Array
+) -> void:
 	if pattern.is_empty():
 		draw_polyline(points, colour, width, true)
 		return
@@ -470,8 +510,9 @@ func _draw_dashed_polyline(points: PackedVector2Array, colour: Color, width: flo
 		while travelled < length:
 			var step := minf(remaining, length - travelled)
 			if drawing:
-				draw_line(from + dir * travelled, from + dir * (travelled + step),
-					colour, width, true)
+				draw_line(
+					from + dir * travelled, from + dir * (travelled + step), colour, width, true
+				)
 			travelled += step
 			remaining -= step
 			if remaining <= 0.0:
@@ -480,8 +521,9 @@ func _draw_dashed_polyline(points: PackedVector2Array, colour: Color, width: flo
 				drawing = not drawing
 
 
-func _draw_dashed_arc(centre: Vector2, radius: float, colour: Color, width: float,
-		pattern: PackedFloat32Array) -> void:
+func _draw_dashed_arc(
+	centre: Vector2, radius: float, colour: Color, width: float, pattern: PackedFloat32Array
+) -> void:
 	var points := PackedVector2Array()
 	for i in 97:
 		var a := TAU * float(i) / 96.0

@@ -130,39 +130,63 @@ func describe() -> String:
 
 func _sensor_label() -> String:
 	match sensor:
-		ISA.Sensor.APO: return "apoapsis"
-		ISA.Sensor.PERI: return "periapsis"
-		ISA.Sensor.ALT: return "altitude"
-		ISA.Sensor.ECC: return "eccentricity"
-		ISA.Sensor.VEL: return "speed"
-		ISA.Sensor.VVEL: return "vertical speed"
-		ISA.Sensor.HVEL: return "horizontal speed"
-		ISA.Sensor.FUEL: return "fuel"
-		ISA.Sensor.TGTD: return "distance to target"
-		ISA.Sensor.TGTV: return "speed relative to target"
-		ISA.Sensor.SOI: return "sphere of influence"
-		ISA.Sensor.T: return "mission time"
-		_: return ISA.sensor_name(sensor).to_lower()
+		ISA.Sensor.APO:
+			return "apoapsis"
+		ISA.Sensor.PERI:
+			return "periapsis"
+		ISA.Sensor.ALT:
+			return "altitude"
+		ISA.Sensor.ECC:
+			return "eccentricity"
+		ISA.Sensor.VEL:
+			return "speed"
+		ISA.Sensor.VVEL:
+			return "vertical speed"
+		ISA.Sensor.HVEL:
+			return "horizontal speed"
+		ISA.Sensor.FUEL:
+			return "fuel"
+		ISA.Sensor.TGTD:
+			return "distance to target"
+		ISA.Sensor.TGTV:
+			return "speed relative to target"
+		ISA.Sensor.SOI:
+			return "sphere of influence"
+		ISA.Sensor.T:
+			return "mission time"
+		_:
+			return ISA.sensor_name(sensor).to_lower()
 
 
 func _cmp_word() -> String:
 	match cmp:
-		ISA.Cmp.LT: return "below"
-		ISA.Cmp.LE: return "at most"
-		ISA.Cmp.GT: return "above"
-		ISA.Cmp.GE: return "at least"
-		ISA.Cmp.EQ: return "exactly"
-		ISA.Cmp.NE: return "not"
+		ISA.Cmp.LT:
+			return "below"
+		ISA.Cmp.LE:
+			return "at most"
+		ISA.Cmp.GT:
+			return "above"
+		ISA.Cmp.GE:
+			return "at least"
+		ISA.Cmp.EQ:
+			return "exactly"
+		ISA.Cmp.NE:
+			return "not"
 	return "?"
 
 
 func _flag_label() -> String:
 	match flag:
-		"landed": return "touched down safely"
-		"crashed": return "destroyed"
-		"out_of_fuel": return "tanks empty"
-		"program_done": return "program finished"
-		"escaped": return "on an escape trajectory"
+		"landed":
+			return "touched down safely"
+		"crashed":
+			return "destroyed"
+		"out_of_fuel":
+			return "tanks empty"
+		"program_done":
+			return "program finished"
+		"escaped":
+			return "on an escape trajectory"
 	return flag
 
 

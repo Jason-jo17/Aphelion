@@ -19,8 +19,7 @@ func _ready() -> void:
 	var margin := MarginContainer.new()
 	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	for side in ["left", "right", "top", "bottom"]:
-		margin.add_theme_constant_override("margin_" + side,
-			int(Tokens.space(Tokens.SPACE_7)))
+		margin.add_theme_constant_override("margin_" + side, int(Tokens.space(Tokens.SPACE_7)))
 	add_child(margin)
 
 	var columns := UIKit.hbox(Tokens.SPACE_6)
@@ -66,8 +65,7 @@ func _ready() -> void:
 	back.pressed.connect(func(): App.instance.go_to(App.Screen.MENU))
 	actions.add_child(back)
 	actions.add_child(UIKit.spacer())
-	var go := UIKit.button("Open the workshop", "primary",
-		"Build the ship and write the program")
+	var go := UIKit.button("Open the workshop", "primary", "Build the ship and write the program")
 	go.pressed.connect(func(): App.instance.go_to(App.Screen.EDITOR))
 	actions.add_child(go)
 	right.add_child(actions)
@@ -94,8 +92,7 @@ func _objectives(mission: Mission) -> Control:
 		for f in mission.failures:
 			column.add_child(UIKit.small("• " + String(f["message"]), "danger"))
 
-	column.add_child(UIKit.small("Time limit: %s" % Fmt.duration(mission.time_limit),
-		"text_faint"))
+	column.add_child(UIKit.small("Time limit: %s" % Fmt.duration(mission.time_limit), "text_faint"))
 	return card
 
 
@@ -116,8 +113,11 @@ func _ship_card(mission: Mission) -> Control:
 	column.add_child(UIKit.stat_row("Thrust", Fmt.force(profile.max_thrust)))
 	column.add_child(UIKit.stat_row("Burn time", Fmt.duration(profile.burn_time())))
 	if mission.start_fuel_fraction < 1.0:
-		column.add_child(UIKit.stat_row("Tanks",
-			"%d%% full" % int(mission.start_fuel_fraction * 100.0), "warning"))
+		column.add_child(
+			UIKit.stat_row(
+				"Tanks", "%d%% full" % int(mission.start_fuel_fraction * 100.0), "warning"
+			)
+		)
 	return card
 
 
@@ -126,13 +126,17 @@ func _stars_card(mission: Mission) -> Control:
 	var column := UIKit.vbox(Tokens.SPACE_2)
 	card.add_child(column)
 	column.add_child(UIKit.heading("Three stars", 3))
-	column.add_child(UIKit.small(
-		"One per target met. They pull against each other on purpose: the "
-		+ "cheapest flight is slow, and the shortest program is neither."))
+	column.add_child(
+		UIKit.small(
+			(
+				"One per target met. They pull against each other on purpose: the "
+				+ "cheapest flight is slow, and the shortest program is neither."
+			)
+		)
+	)
 	column.add_child(UIKit.stat_row("Fuel", "at most " + Fmt.mass(mission.star_fuel)))
 	column.add_child(UIKit.stat_row("Time", "at most " + Fmt.duration(mission.star_time)))
-	column.add_child(UIKit.stat_row("Instructions",
-		"at most %d" % mission.star_instructions))
+	column.add_child(UIKit.stat_row("Instructions", "at most %d" % mission.star_instructions))
 
 	var best := Profile.best_for(mission.id)
 	if best != null and best.success:
@@ -146,18 +150,19 @@ func _hints(mission: Mission) -> Control:
 	_hint_box = UIKit.vbox(Tokens.SPACE_2)
 	card.add_child(_hint_box)
 	_hint_box.add_child(UIKit.heading("Stuck?", 3))
-	var reveal := UIKit.button("Show a hint", "secondary",
-		"Reveal the next hint for this mission")
-	reveal.pressed.connect(func():
-		if _hints_shown < mission.hints.size():
-			_hint_box.add_child(UIKit.body("• " + mission.hints[_hints_shown], true))
-			_hints_shown += 1
-		if _hints_shown >= mission.hints.size():
-			reveal.disabled = true
-			reveal.text = "That is every hint"
-		else:
-			var left := mission.hints.size() - _hints_shown
-			reveal.text = "Show another hint (%d left)" % left)
+	var reveal := UIKit.button("Show a hint", "secondary", "Reveal the next hint for this mission")
+	reveal.pressed.connect(
+		func():
+			if _hints_shown < mission.hints.size():
+				_hint_box.add_child(UIKit.body("• " + mission.hints[_hints_shown], true))
+				_hints_shown += 1
+			if _hints_shown >= mission.hints.size():
+				reveal.disabled = true
+				reveal.text = "That is every hint"
+			else:
+				var left := mission.hints.size() - _hints_shown
+				reveal.text = "Show another hint (%d left)" % left
+	)
 	_hint_box.add_child(reveal)
 	return card
 

@@ -1,0 +1,32 @@
+# Godot
+.godot/
+.import/
+export/
+build/
+*.translation
+
+# Third-party addons are fetched, not vendored (see tools/fetch_gut.sh)
+addons/gut/
+
+# Exported builds
+dist/
+
+# Local user data / secrets — never commit an API key
+*.key
+.env
+.env.*
+!.env.example
+user://
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+!.vscode/extensions.json
+
+# Reference-sim scratch
+tools/refsim/__pycache__/
+tools/refsim/.pytest_cache/
+*.pyc

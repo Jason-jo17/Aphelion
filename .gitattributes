@@ -1,0 +1,10 @@
+* text=auto eol=lf
+*.gd text eol=lf
+*.tscn text eol=lf
+*.tres text eol=lf
+*.json text eol=lf
+*.png binary
+*.svg text eol=lf
+*.ttf binary
+*.wav binary
+*.ogg binary

@@ -26,6 +26,11 @@ var max_dynamic_pressure: float = 0.0
 var touchdown_speed: float = -1.0
 var spin_ticks: int = 0
 
+## Ticks in which the flight computer ran at all. `spin_ticks` is a fraction of
+## this, not of `ticks` — step scaling means one tick of the VM can cover many
+## ticks of the clock.
+var vm_ticks: int = 0
+
 # --- stars ---
 var stars: int = 0
 var star_fuel: bool = false
@@ -97,6 +102,7 @@ func to_dict(include_trajectory: bool = false) -> Dictionary:
 		"max_dynamic_pressure": max_dynamic_pressure,
 		"touchdown_speed": touchdown_speed,
 		"spin_ticks": spin_ticks,
+		"vm_ticks": vm_ticks,
 		"stars": stars,
 		"star_fuel": star_fuel,
 		"star_time": star_time,
@@ -134,6 +140,7 @@ static func from_dict(d: Dictionary) -> RunResult:
 	r.max_dynamic_pressure = float(d.get("max_dynamic_pressure", 0.0))
 	r.touchdown_speed = float(d.get("touchdown_speed", -1.0))
 	r.spin_ticks = int(d.get("spin_ticks", 0))
+	r.vm_ticks = int(d.get("vm_ticks", 0))
 	r.stars = int(d.get("stars", 0))
 	r.star_fuel = bool(d.get("star_fuel", false))
 	r.star_time = bool(d.get("star_time", false))

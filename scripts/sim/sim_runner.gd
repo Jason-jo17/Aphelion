@@ -271,6 +271,7 @@ func _finalise() -> void:
 		- profile.delta_v(state.fuel)
 	result.instructions_executed = vm.instructions_executed
 	result.spin_ticks = vm.spin_ticks
+	result.vm_ticks = vm.total_ticks
 	result.vm_status = vm.status_text()
 	result.fault_code = vm.fault_code
 	result.fault_message = vm.fault_message

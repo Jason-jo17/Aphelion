@@ -1,5 +1,10 @@
 # Aphelion
 
+[![ci](https://github.com/Jason-jo17/Aphelion/actions/workflows/ci.yml/badge.svg)](https://github.com/Jason-jo17/Aphelion/actions/workflows/ci.yml)
+[![code: MIT](https://img.shields.io/badge/code-MIT-blue.svg)](LICENSE)
+[![assets: CC0](https://img.shields.io/badge/assets-CC0-blue.svg)](ASSETS-LICENSE.md)
+[![Godot 4.7](https://img.shields.io/badge/Godot-4.7-478cbf.svg)](https://godotengine.org/)
+
 **Design a spacecraft, program its flight computer, and let real orbital
 mechanics decide what happens next.**
 
@@ -9,6 +14,11 @@ is what happens. Fifteen missions take you from a three-instruction hop to a
 hands-off flight from the launch pad to a moon.
 
 Free, open source, offline by default, no telemetry, no account.
+
+> **Status: pre-release.** The simulation, the language, all fifteen missions
+> and the interface are built and tested — 176 tests, and every mission's
+> three-star reference solution is re-flown on each push. There is no tagged
+> release yet, so for now it is a build-from-source project.
 
 ```
 ; First Light — straight up, ten kilometres.
@@ -74,7 +84,8 @@ three instructions that work. That gap is the lesson.
 
 ### Play
 
-Grab a build from [Releases](../../releases). Verify it with
+Builds appear under [Releases](../../releases) once a version is tagged; there
+is none yet. When there is, verify the download with
 `sha256sum -c SHA256SUMS.txt`.
 
 On macOS the build is ad-hoc signed rather than notarised, so Gatekeeper will
@@ -202,5 +213,21 @@ the fixtures in the same commit.
 
 ## Licence
 
-Code is [MIT](LICENSE). Assets, missions and data are
-[CC0](ASSETS-LICENSE.md) — a puzzle should be free to remix.
+Code is [MIT](LICENSE). Assets, missions and data are [CC0](ASSETS-LICENSE.md) —
+a puzzle should be free to remix.
+
+Aphelion vendors nothing, but a released build embeds the Godot engine and its
+default theme fonts, which carry their own terms.
+[THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) sets out all four third-party
+components, whether each reaches the repository or only the binaries, and
+carries the fdlibm notice that the constants in `DetMath` come with.
+
+## Also here
+
+- [CONTRIBUTING.md](CONTRIBUTING.md) — how to add a mission, and the rules that
+  are not negotiable
+- [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) — be decent, and what happens if
+  someone is not
+- [SECURITY.md](SECURITY.md) — what the attack surface actually is, and how to
+  report something privately
+- [CHANGELOG.md](CHANGELOG.md) — what changed, and when

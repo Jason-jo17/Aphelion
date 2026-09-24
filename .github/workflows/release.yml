@@ -64,8 +64,11 @@ jobs:
         run: |
           cd dist
           DIRNAME="$(basename "$(dirname "../${{ matrix.out }}")")"
-          cp ../LICENSE ../README.md "$DIRNAME/"
-          [ -f ../ASSETS-LICENSE.md ] && cp ../ASSETS-LICENSE.md "$DIRNAME/"
+          # THIRD-PARTY-NOTICES.md is not optional: an exported build embeds the
+          # engine and its default theme fonts, and both carry licences that
+          # require their notice to travel with the binary.
+          cp ../LICENSE ../README.md ../ASSETS-LICENSE.md \
+             ../THIRD-PARTY-NOTICES.md "$DIRNAME/"
           tar -czf "../${{ matrix.artifact }}.tar.gz" "$DIRNAME"
 
       - name: Checksum

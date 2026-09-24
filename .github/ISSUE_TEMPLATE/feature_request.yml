@@ -1,0 +1,47 @@
+name: Feature request
+description: An idea for something the game does not do yet
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Worth two minutes first: **What we will say no to** in
+        [CONTRIBUTING.md](https://github.com/Jason-jo17/Aphelion/blob/HEAD/CONTRIBUTING.md) lists the things that
+        are settled, and why. Saves you writing a good proposal for something
+        that was decided against on purpose.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: >
+        What were you trying to do when you wanted this? The problem tends to
+        have better solutions than the one that first comes to mind.
+    validations:
+      required: true
+
+  - type: textarea
+    id: idea
+    attributes:
+      label: What you have in mind
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: What else could work
+      description: Including "nothing, and here is why the game is worse for it".
+
+  - type: checkboxes
+    id: constraints
+    attributes:
+      label: Does it fit the constraints?
+      description: >
+        Tick what you have thought about. Unticked boxes are fine — this is a
+        prompt, not a gate.
+      options:
+        - label: It keeps the same inputs producing the same trajectory everywhere
+        - label: It works with the keyboard alone, and does not rely on colour alone
+        - label: It does not add a network request to a game that makes none
+        - label: It does not need a dependency the project does not already have

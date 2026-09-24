@@ -163,3 +163,15 @@ much like to know.
 
 Be decent. Assume the other person is trying. If someone is not, tell a
 maintainer rather than the thread.
+
+That is the whole rule. [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) says what
+happens in the cases where it is not enough, and how to report something
+privately.
+
+## Security
+
+Found something that looks like a vulnerability? Do not open a public issue —
+[SECURITY.md](SECURITY.md) has the private channel, and sets out what is in
+scope. The short version is that the game makes no network requests at all
+unless you configure a co-pilot, so the surface is your API key, the files the
+game parses, and the release pipeline.

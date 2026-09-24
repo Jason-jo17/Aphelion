@@ -1,0 +1,55 @@
+name: Mission proposal
+description: A new puzzle for the campaign
+labels: ["mission"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The most valuable thing you can add, and it needs no GDScript — a
+        mission is a JSON file. [docs/MISSIONS.md](https://github.com/Jason-jo17/Aphelion/blob/HEAD/docs/MISSIONS.md)
+        is the format; you do not have to have written it yet to open this.
+
+  - type: input
+    id: title
+    attributes:
+      label: Title
+      placeholder: "The Long Way Down"
+    validations:
+      required: true
+
+  - type: input
+    id: teaches
+    attributes:
+      label: What it teaches
+      description: >
+        One line. If you cannot write it, the mission is doing too much — that
+        is the single most common reason a proposal gets sent back.
+      placeholder: "That a retrograde burn at apoapsis is cheaper than one anywhere else."
+    validations:
+      required: true
+
+  - type: textarea
+    id: setup
+    attributes:
+      label: The situation
+      description: Where the ship starts, what counts as winning, which stock ship.
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: A solution that wins it
+      render: text
+      description: >
+        Every mission ships with a reference solution that earns three stars, and
+        CI re-flies it on every push, so the thresholds cannot drift away from
+        being reachable. `python3 tools/refsim/author_missions.py` will tell you
+        whether yours flies.
+
+  - type: input
+    id: order
+    attributes:
+      label: Where it goes in the campaign
+      description: After which existing mission, and why there.
+      placeholder: "After 6 — Higher Ground, because it needs the Hohmann transfer."

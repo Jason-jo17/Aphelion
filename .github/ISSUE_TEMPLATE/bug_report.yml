@@ -1,0 +1,77 @@
+name: Bug report
+description: Something behaves differently than it should
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        If the same ship and program gave you a **different result on a
+        different machine**, say so prominently — that is the one bug class
+        this project treats as an emergency.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: And what you expected instead.
+      placeholder: |
+        The ascent in mission 4 flips end over end at about 12 km. I expected
+        the gravity turn to hold, because it does at 0.5 throttle.
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: How to reproduce it
+      description: >
+        Numbered steps. If you can attach an exported solution file, do — it
+        records the ship, the program and the seed, so it reproduces the run
+        exactly and saves everyone guessing.
+      placeholder: |
+        1. Open mission 4
+        2. Load the attached solution
+        3. Fly
+    validations:
+      required: true
+
+  - type: input
+    id: mission
+    attributes:
+      label: Mission
+      placeholder: "4 — Insertion"
+
+  - type: textarea
+    id: program
+    attributes:
+      label: The program, if it is short
+      render: text
+      placeholder: |
+        THROTTLE 1
+        BURN UNTIL ALT > 10000
+        HALT
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Platform
+      options: [Windows, macOS, Linux, More than one — see below]
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Build
+      description: The release tag, or the commit if you built from source.
+      placeholder: "v0.1.0, or 3df55c1"
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: determinism
+    attributes:
+      label: Determinism
+      options:
+        - label: The same inputs gave a different result on a different machine, or on a different run
+          required: false

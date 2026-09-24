@@ -13,8 +13,10 @@ anything, commercial or not, with or without credit.
 | --- | --- | --- |
 | `assets/art/icon.svg` | application icon | Aphelion contributors, CC0 |
 
-`assets/fonts/` and `assets/sfx/` are currently empty. The game uses Godot's
-built-in font, which is licensed under the MIT terms of the engine itself.
+`assets/fonts/` and `assets/sfx/` are empty: the interface uses Godot's default
+theme font, which is **not** ours and **not** covered by the engine's MIT
+licence — Godot bundles Open Sans and Noto Sans under their own terms. See
+[THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
 
 ## Mission and ship data
 
@@ -23,11 +25,15 @@ CC0 as well. A mission is a puzzle, and puzzles should be free to remix.
 
 ## Third-party
 
-| what | licence | note |
-| --- | --- | --- |
-| Godot Engine | MIT | not vendored; see [godotengine.org][godot] |
-| GUT (test framework) | MIT | not vendored; fetched by `tools/fetch_gut.sh` |
-| fdlibm polynomial constants | Sun Microsystems freely-redistributable | the numeric constants in `scripts/core/det_math.gd`; the implementation is ours |
+Summarised here, set out in full — including the notices a release build has to
+carry — in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
+
+| what | licence | in the repo? | in a build? |
+| --- | --- | --- | --- |
+| Godot Engine | MIT | no | yes |
+| Godot's default theme fonts | SIL OFL 1.1 / Apache 2.0 | no | yes |
+| GUT (test framework) | MIT | no, fetched | no |
+| fdlibm polynomial constants | freely redistributable, notice preserved | yes | yes |
 
 ## Contributing assets
 
@@ -37,4 +43,3 @@ make yourself, or whose provenance you cannot state — a game that cannot say
 where its art came from is a game nobody can safely fork.
 
 [cc0]: https://creativecommons.org/publicdomain/zero/1.0/
-[godot]: https://godotengine.org/license/

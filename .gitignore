@@ -30,3 +30,9 @@ Thumbs.db
 tools/refsim/__pycache__/
 tools/refsim/.pytest_cache/
 *.pyc
+
+# Determinism reports are CI artifacts, not source
+determinism-*.json
+determinism-*.txt
+gut.log
+gut-results.xml

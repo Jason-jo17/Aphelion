@@ -1,0 +1,66 @@
+{
+  "id": "reaching_lyra",
+  "order": 11,
+  "title": "Reaching Lyra",
+  "teaches": "transfer windows \u2014 the target has to be somewhere else when you leave",
+  "brief": "Lyra is twelve thousand kilometres out and takes nearly thirty-eight hours to go round. A transfer from your orbit takes seven and a quarter hours, during which Lyra moves seventy degrees.\n\nSo you do not aim at Lyra. You aim at where Lyra will be \u2014 which means leaving when it is about 110 degrees ahead of you, and not a moment else. Windows come round every thirty-nine minutes.\n\nGet inside Lyra's sphere of influence. The SOI sensor will read 1 when you are.",
+  "primary": "halcyon",
+  "bodies": [
+    "halcyon",
+    "lyra"
+  ],
+  "ship": {
+    "policy": "stock",
+    "id": "wren"
+  },
+  "start": {
+    "kind": "orbit",
+    "body": "halcyon",
+    "altitude": 150000,
+    "true_anomaly": 0
+  },
+  "targets": [
+    {
+      "id": "lyra_marker",
+      "name": "Lyra",
+      "body": "halcyon",
+      "orbit_radius": 12000000.0,
+      "orbit_phase0": 0.0,
+      "orbit_direction": 1
+    }
+  ],
+  "active_target": "lyra_marker",
+  "time_limit": 200000,
+  "success": {
+    "sensor": "SOI",
+    "op": ">=",
+    "value": 1
+  },
+  "failure": [
+    {
+      "when": {
+        "flag": "crashed"
+      },
+      "message": "The Wren did not survive."
+    }
+  ],
+  "hints": [
+    "TGTA is the heading toward Lyra. RAD is the heading straight up, which is also where you are in your own orbit. The difference between them is the phase angle.",
+    "Wait until that difference is about 110 degrees, then burn prograde until APO reaches Lyra's orbit \u2014 12 000 km.",
+    "Put a WAIT inside your polling loop. It costs nothing and lets the simulation skip ahead between checks."
+  ],
+  "stars": {
+    "fuel": 356,
+    "time": 22386,
+    "instructions": 15
+  },
+  "reference": {
+    "solution": "; Reaching Lyra \u2014 wait for the window, then one long prograde burn.\n        ORIENT  PROGRADE\nwindow: WAIT    2\n        SET     R0, TGTA\n        SUB     R0, RAD\n        IF      R0 < 0\n        ADD     R0, 360\n        IF      R0 > 112\n        JMP     window\n        IF      R0 < 108\n        JMP     window\n        THROTTLE 1\n        BURN    UNTIL APO > 11900000\n        THROTTLE 0\n        WAIT    UNTIL SOI >= 1\n        HALT",
+    "fuel_used": 348.588,
+    "elapsed": 21946.688,
+    "ticks": 1404588,
+    "instructions": 15,
+    "state_hash": "23a37c97e489ef59",
+    "program_hash": "87a407aedaa68ec7"
+  }
+}

@@ -1,0 +1,77 @@
+{
+  "id": "long_way_round",
+  "order": 9,
+  "title": "The Long Way Round",
+  "teaches": "phasing \u2014 waiting is a manoeuvre",
+  "brief": "Relay Six is in your orbit, but a third of the way around it. You cannot simply fly there; you have to change how fast you go round.\n\nDrop into a lower, faster orbit, let it carry you around until the relay is close, then climb back up to meet it. The waiting is not wasted time, it is the manoeuvre.\n\nWithin a kilometre, under 5 m/s, held for ten seconds.",
+  "primary": "halcyon",
+  "bodies": [
+    "halcyon"
+  ],
+  "ship": {
+    "policy": "stock",
+    "id": "wren"
+  },
+  "start": {
+    "kind": "orbit",
+    "body": "halcyon",
+    "altitude": 300000,
+    "true_anomaly": 0
+  },
+  "targets": [
+    {
+      "id": "relay6",
+      "name": "Relay Six",
+      "body": "halcyon",
+      "orbit_radius": 940000.0,
+      "orbit_phase0": 2.0944,
+      "orbit_direction": 1
+    }
+  ],
+  "active_target": "relay6",
+  "time_limit": 43200,
+  "success": {
+    "sustain": 10.0,
+    "of": {
+      "all": [
+        {
+          "sensor": "TGTD",
+          "op": "<=",
+          "value": 1000
+        },
+        {
+          "sensor": "TGTV",
+          "op": "<=",
+          "value": 5
+        }
+      ]
+    }
+  },
+  "failure": [
+    {
+      "when": {
+        "flag": "crashed"
+      },
+      "message": "The Wren did not survive."
+    }
+  ],
+  "hints": [
+    "Each lap of a lower orbit gains a fixed slice of angle. Three laps with periapsis at 165 km is about a third of the way round.",
+    "Laps are coarse \u2014 one is worth hundreds of kilometres. You will not land on the relay by counting them.",
+    "So finish with a second, much smaller phasing lap, and let the flight computer size it. To gain s metres in one lap from a 300 km orbit, drop periapsis by about 0.19*s. SENSE the gap, do the arithmetic, and BURN UNTIL PERI reaches the register you worked out."
+  ],
+  "stars": {
+    "fuel": 86,
+    "time": 15731,
+    "instructions": 28
+  },
+  "reference": {
+    "solution": "; The Long Way Round \u2014 three coarse laps, then one the computer sizes itself.\n        ORIENT  RETROGRADE\n        THROTTLE 1\n        BURN    UNTIL PERI < 165000\n        THROTTLE 0\n        ORIENT  PROGRADE\n        SET     R0, 3\nlap:    WAIT    30\n        WAIT    UNTIL TAPO < 6\n        SUB     R0, 1\n        IF      R0 > 0\n        JMP     lap\n        THROTTLE 0.4\n        BURN    UNTIL ECC < 0.0008\n        THROTTLE 0\n; whatever gap is left, size the final phasing lap from it\n        SENSE   R1, TGTD\n        MUL     R1, 0.19\n        SET     R2, PERI\n        SUB     R2, R1\n        ORIENT  RETROGRADE\n        THROTTLE 0.2\n        BURN    UNTIL PERI < R2\n        THROTTLE 0\n        ORIENT  PROGRADE\n        WAIT    30\n        WAIT    UNTIL TAPO < 4\n        THROTTLE 0.2\n        BURN    UNTIL ECC < 0.0005\n        HALT",
+    "fuel_used": 83.462,
+    "elapsed": 15422.344,
+    "ticks": 987030,
+    "instructions": 28,
+    "state_hash": "0a4f8d04b92b7eda",
+    "program_hash": "cf74cafeae9d85c9"
+  }
+}

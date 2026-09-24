@@ -1,0 +1,54 @@
+{
+  "id": "slip_the_leash",
+  "order": 10,
+  "title": "Slip the Leash",
+  "teaches": "escape velocity, and what eccentricity 1 means",
+  "brief": "Every closed orbit has an eccentricity below 1. At exactly 1 the orbit stops being closed \u2014 the apoapsis runs off to infinity and you never come back.\n\nFrom a 150 km orbit, that takes about 900 m/s. Go and get it.\n\nWatch APO as you burn. It climbs, then it climbs faster, and then there is no number left for it to show.",
+  "primary": "halcyon",
+  "bodies": [
+    "halcyon"
+  ],
+  "ship": {
+    "policy": "stock",
+    "id": "wren"
+  },
+  "start": {
+    "kind": "orbit",
+    "body": "halcyon",
+    "altitude": 150000,
+    "true_anomaly": 0
+  },
+  "time_limit": 7200,
+  "success": {
+    "sensor": "ECC",
+    "op": ">=",
+    "value": 1.0
+  },
+  "failure": [
+    {
+      "when": {
+        "flag": "crashed"
+      },
+      "message": "The Wren did not survive."
+    }
+  ],
+  "hints": [
+    "Prograde, at full throttle, is the whole answer. The interesting part is knowing when to stop.",
+    "`BURN UNTIL ECC >= 1` stops at exactly the right moment.",
+    "INF is a value you can compare against: `IF APO == INF` works."
+  ],
+  "stars": {
+    "fuel": 392,
+    "time": 34,
+    "instructions": 4
+  },
+  "reference": {
+    "solution": "; Slip the Leash \u2014 burn prograde until the orbit stops being an orbit.\n        ORIENT  PROGRADE\n        THROTTLE 1\n        BURN    UNTIL ECC >= 1\n        HALT",
+    "fuel_used": 383.687,
+    "elapsed": 32.453,
+    "ticks": 2077,
+    "instructions": 4,
+    "state_hash": "91b81e12a8190f82",
+    "program_hash": "15ea02cac47b6f28"
+  }
+}

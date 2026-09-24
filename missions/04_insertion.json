@@ -1,0 +1,62 @@
+{
+  "id": "insertion",
+  "order": 4,
+  "title": "Insertion",
+  "teaches": "the two-part ascent: raise apoapsis, then circularise at it",
+  "brief": "A real orbit. Both ends of it have to clear the atmosphere, or the air will drag you back down within a few hours.\n\nGet periapsis above ninety kilometres.\n\nThe shape of it: burn to raise your apoapsis where you want the orbit to be, coast up to that apoapsis with the engine off, and burn again there to raise the other side to match. TAPO tells you how long until apoapsis.",
+  "primary": "halcyon",
+  "bodies": [
+    "halcyon"
+  ],
+  "ship": {
+    "policy": "stock",
+    "id": "sparrow"
+  },
+  "start": {
+    "kind": "surface",
+    "body": "halcyon",
+    "surface_angle": 0
+  },
+  "time_limit": 3600,
+  "success": {
+    "all": [
+      {
+        "sensor": "PERI",
+        "op": ">=",
+        "value": 90000
+      },
+      {
+        "sensor": "APO",
+        "op": "<=",
+        "value": 400000
+      }
+    ]
+  },
+  "failure": [
+    {
+      "when": {
+        "flag": "crashed"
+      },
+      "message": "The Sparrow did not survive."
+    }
+  ],
+  "hints": [
+    "Stop the ascent burn once APO is where you want it \u2014 more is wasted.",
+    "`WAIT UNTIL TAPO < 20` coasts you to just before apoapsis.",
+    "Burn prograde at apoapsis and watch PERI climb to meet it."
+  ],
+  "stars": {
+    "fuel": 4463,
+    "time": 364,
+    "instructions": 17
+  },
+  "reference": {
+    "solution": "; Insertion \u2014 gravity turn to a 100 km apoapsis, coast, circularise.\n        THROTTLE 1\n        POINT   RAD\n        BURN    UNTIL ALT > 600\nturn:   SENSE   R0, ALT\n        DIV     R0, 20000\n        MIN     R0, 1\n        MUL     R0, 84\n        SET     R1, RAD\n        SUB     R1, R0\n        POINT   R1\n        BURN    0.25\n        IF      APO < 105000\n        JMP     turn\n        ORIENT  PROGRADE\n        WAIT    UNTIL TAPO < 22\n        BURN    UNTIL PERI > 95000\n        HALT",
+    "fuel_used": 4375.22,
+    "elapsed": 355.891,
+    "ticks": 22777,
+    "instructions": 17,
+    "state_hash": "d9f5c0640b9b34e4",
+    "program_hash": "ed7c64b43fda9c40"
+  }
+}

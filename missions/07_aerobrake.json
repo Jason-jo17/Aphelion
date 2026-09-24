@@ -1,0 +1,75 @@
+{
+  "id": "aerobrake",
+  "order": 7,
+  "title": "Thick Air",
+  "teaches": "aerobraking \u2014 spending atmosphere instead of propellant",
+  "brief": "The Petrel carries an ablative shield and almost no propellant. Its orbit dips to 62 km on every pass, which is inside the atmosphere.\n\nEvery pass through the air takes energy out of the orbit, and the air is free. Ride it down until apoapsis is under 215 km, then raise periapsis back above 72 km so the decay stops, and hold that.\n\nDecide at apoapsis. Periapsis is the one place you cannot raise periapsis from, and an orbit that has collapsed into the air comes apart very quickly indeed.\n\nPoint the shield into the airflow. That means retrograde.",
+  "primary": "halcyon",
+  "bodies": [
+    "halcyon"
+  ],
+  "ship": {
+    "policy": "stock",
+    "id": "petrel",
+    "fuel_fraction": 0.4
+  },
+  "start": {
+    "kind": "orbit",
+    "body": "halcyon",
+    "periapsis": 60000,
+    "apoapsis": 800000,
+    "true_anomaly": 180
+  },
+  "time_limit": 60000,
+  "success": {
+    "sustain": 30.0,
+    "of": {
+      "all": [
+        {
+          "sensor": "APO",
+          "op": "<=",
+          "value": 215000
+        },
+        {
+          "sensor": "PERI",
+          "op": ">=",
+          "value": 72000
+        }
+      ]
+    }
+  },
+  "failure": [
+    {
+      "when": {
+        "flag": "crashed"
+      },
+      "message": "The Petrel came apart in the atmosphere."
+    },
+    {
+      "when": {
+        "flag": "out_of_fuel"
+      },
+      "message": "Out of propellant with the orbit still decaying."
+    }
+  ],
+  "hints": [
+    "ORIENT RETROGRADE once, at the start. The shield only works facing the airflow.",
+    "Check your apoapsis *at* apoapsis, not whenever. Loop: coast to apoapsis, look, and either go round again or burn.",
+    "When apoapsis is low enough, burn prograde there to lift periapsis clear of the air \u2014 otherwise you keep braking until you hit the ground.",
+    "Once apoapsis drops into the atmosphere too, the orbit collapses inside one pass and periapsis can no longer be raised. Leave early."
+  ],
+  "stars": {
+    "fuel": 7,
+    "time": 26251,
+    "instructions": 11
+  },
+  "reference": {
+    "solution": "; Thick Air \u2014 brake on the shield, decide at apoapsis, then lift clear.\n        ORIENT  RETROGRADE\ncheck:  WAIT    UNTIL TAPO < 6\n        IF      APO > 200000\n        JMP     again\n        JMP     lift\nagain:  WAIT    120\n        JMP     check\nlift:   ORIENT  PROGRADE\n        THROTTLE 1\n        BURN    UNTIL PERI > 74000\n        HALT",
+    "fuel_used": 5.911,
+    "elapsed": 25736.047,
+    "ticks": 1647107,
+    "instructions": 11,
+    "state_hash": "89a04019d161a270",
+    "program_hash": "6ef03e924cf87408"
+  }
+}

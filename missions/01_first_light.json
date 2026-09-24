@@ -1,0 +1,53 @@
+{
+  "id": "first_light",
+  "order": 1,
+  "title": "First Light",
+  "teaches": "THROTTLE, BURN, HALT",
+  "brief": "Everything starts here. The Sparrow is on the pad, pointed at the sky, and the flight computer is empty.\n\nOpen the throttle, light the engine, and keep it lit until you are ten kilometres up. Three instructions will do it.",
+  "primary": "halcyon",
+  "bodies": [
+    "halcyon"
+  ],
+  "ship": {
+    "policy": "stock",
+    "id": "sparrow"
+  },
+  "start": {
+    "kind": "surface",
+    "body": "halcyon",
+    "surface_angle": 0
+  },
+  "time_limit": 600,
+  "success": {
+    "sensor": "ALT",
+    "op": ">=",
+    "value": 10000
+  },
+  "failure": [
+    {
+      "when": {
+        "flag": "crashed"
+      },
+      "message": "The Sparrow did not survive."
+    }
+  ],
+  "hints": [
+    "THROTTLE 1 opens the throttle all the way. It does not light the engine.",
+    "BURN is what lights it. `BURN UNTIL ALT > 10000` burns until you are there.",
+    "Finish with HALT so the flight computer knows it is done."
+  ],
+  "stars": {
+    "fuel": 1746,
+    "time": 43,
+    "instructions": 3
+  },
+  "reference": {
+    "solution": "; First Light \u2014 straight up, ten kilometres.\n        THROTTLE 1\n        BURN    UNTIL ALT > 10000\n        HALT",
+    "fuel_used": 1711.211,
+    "elapsed": 41.953,
+    "ticks": 2685,
+    "instructions": 3,
+    "state_hash": "245f2aa56009d2c7",
+    "program_hash": "15fef7615c8a400a"
+  }
+}

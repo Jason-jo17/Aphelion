@@ -1,0 +1,76 @@
+{
+  "id": "circular_reasoning",
+  "order": 5,
+  "title": "Circular Reasoning",
+  "teaches": "eccentricity, and holding a shape rather than hitting a number",
+  "brief": "An orbit is not just a height, it is a shape. Eccentricity measures how far from circular it is: zero is a perfect circle.\n\nPut yourself in a circular orbit at 150 km \u2014 eccentricity below 0.01, both apsides within five kilometres of 150 \u2014 and hold it for a minute.\n\nYou start already in orbit, so this is about precision, not power.",
+  "primary": "halcyon",
+  "bodies": [
+    "halcyon"
+  ],
+  "ship": {
+    "policy": "stock",
+    "id": "wren"
+  },
+  "start": {
+    "kind": "orbit",
+    "body": "halcyon",
+    "periapsis": 100000,
+    "apoapsis": 220000,
+    "true_anomaly": 0
+  },
+  "time_limit": 7200,
+  "success": {
+    "sustain": 60.0,
+    "of": {
+      "all": [
+        {
+          "sensor": "ECC",
+          "op": "<=",
+          "value": 0.01
+        },
+        {
+          "sensor": "APO",
+          "between": [
+            145000,
+            155000
+          ]
+        },
+        {
+          "sensor": "PERI",
+          "between": [
+            145000,
+            155000
+          ]
+        }
+      ]
+    }
+  },
+  "failure": [
+    {
+      "when": {
+        "flag": "crashed"
+      },
+      "message": "The Wren did not survive."
+    }
+  ],
+  "hints": [
+    "Two burns: raise the low side at apoapsis, then trim the high side at periapsis.",
+    "A burn prograde at apoapsis raises periapsis. Retrograde at periapsis lowers apoapsis.",
+    "Small corrections are cheap. Overshooting and coming back is not."
+  ],
+  "stars": {
+    "fuel": 40,
+    "time": 2512,
+    "instructions": 10
+  },
+  "reference": {
+    "solution": "; Circular Reasoning \u2014 raise periapsis at apoapsis, then trim apoapsis.\n        ORIENT  PROGRADE\n        WAIT    UNTIL TAPO < 6\n        THROTTLE 0.35\n        BURN    UNTIL PERI > 149500\n        THROTTLE 0\n        ORIENT  RETROGRADE\n        WAIT    UNTIL TPERI < 6\n        THROTTLE 0.35\n        BURN    UNTIL APO < 150500\n        HALT",
+    "fuel_used": 38.406,
+    "elapsed": 2461.781,
+    "ticks": 157554,
+    "instructions": 10,
+    "state_hash": "be37c0347cf11dc0",
+    "program_hash": "2cf7e61911ca9d64"
+  }
+}

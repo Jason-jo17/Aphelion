@@ -1,0 +1,62 @@
+{
+  "id": "sideways",
+  "order": 3,
+  "title": "Sideways",
+  "teaches": "ORIENT and POINT, and that orbit is a sideways problem",
+  "brief": "Going up is easy. Going up is also not orbit.\n\nWhat keeps a ship in orbit is horizontal speed \u2014 enough that the ground curves away as fast as you fall toward it. Get above fifty kilometres with at least 1200 m/s of horizontal speed.\n\nPOINT aims the ship without waiting. ORIENT aims it and waits until you are there.",
+  "primary": "halcyon",
+  "bodies": [
+    "halcyon"
+  ],
+  "ship": {
+    "policy": "stock",
+    "id": "sparrow"
+  },
+  "start": {
+    "kind": "surface",
+    "body": "halcyon",
+    "surface_angle": 0
+  },
+  "time_limit": 900,
+  "success": {
+    "all": [
+      {
+        "sensor": "ALT",
+        "op": ">=",
+        "value": 50000
+      },
+      {
+        "sensor": "HVEL",
+        "op": ">=",
+        "value": 1200
+      }
+    ]
+  },
+  "failure": [
+    {
+      "when": {
+        "flag": "crashed"
+      },
+      "message": "The Sparrow did not survive."
+    }
+  ],
+  "hints": [
+    "RAD is the heading straight up. Subtracting from it tilts you over.",
+    "Tilting too early fights the atmosphere; too late wastes the climb.",
+    "A gravity turn pitches over gradually as you gain altitude."
+  ],
+  "stars": {
+    "fuel": 3679,
+    "time": 103,
+    "instructions": 14
+  },
+  "reference": {
+    "solution": "; Sideways \u2014 climb, then tip over into a gravity turn.\n        THROTTLE 1\n        POINT   RAD\n        BURN    UNTIL ALT > 1200\nturn:   SENSE   R0, ALT\n        DIV     R0, 30000\n        MIN     R0, 1\n        MUL     R0, 80\n        SET     R1, RAD\n        SUB     R1, R0\n        POINT   R1\n        BURN    0.25\n        IF      HVEL < 1250\n        JMP     turn\n        HALT",
+    "fuel_used": 3605.971,
+    "elapsed": 100.203,
+    "ticks": 6413,
+    "instructions": 14,
+    "state_hash": "86756b0c2ceac605",
+    "program_hash": "15d788579717f0c9"
+  }
+}

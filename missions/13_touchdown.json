@@ -1,0 +1,55 @@
+{
+  "id": "touchdown",
+  "order": 13,
+  "title": "Touchdown",
+  "teaches": "powered descent \u2014 no air, no parachutes, nothing but the engine",
+  "brief": "Lyra has no atmosphere. There is nothing to slow you down but the thing you brought with you.\n\nYou are in a 50 km circular orbit in the Heron, whose legs are rated for 12 m/s. Put it on the ground under that.\n\nThe orbit is worth 544 m/s of sideways motion. All of it has to go.",
+  "primary": "halcyon",
+  "bodies": [
+    "halcyon",
+    "lyra"
+  ],
+  "ship": {
+    "policy": "stock",
+    "id": "heron"
+  },
+  "start": {
+    "kind": "orbit",
+    "body": "lyra",
+    "altitude": 50000,
+    "true_anomaly": 0
+  },
+  "time_limit": 14400,
+  "success": {
+    "flag": "landed"
+  },
+  "failure": [
+    {
+      "when": {
+        "flag": "crashed"
+      },
+      "message": "The Heron did not survive the landing."
+    }
+  ],
+  "hints": [
+    "Kill the orbital velocity first, retrograde, then deal with falling.",
+    "Below a kilometre, point RADIAL \u2014 straight up \u2014 so all your thrust fights gravity instead of half of it.",
+    "A descent loop that keeps VVEL proportional to ALT lands softly and wastes very little: fast when high, slow when low.",
+    "Do not bang the throttle between 0 and 1 \u2014 compute it. What you need is GRAV plus a correction for the speed error, divided by TWR*GRAV, which is the most acceleration this ship has.",
+    "Lyra is tidally locked but not still: its surface moves at about 9 m/s. You are landing on something that is already going somewhere."
+  ],
+  "stars": {
+    "fuel": 545,
+    "time": 567,
+    "instructions": 26
+  },
+  "reference": {
+    "solution": "; Touchdown \u2014 cancel the orbit, then fly a computed throttle all the way down.\n        ORIENT  RETROGRADE\n        THROTTLE 1\n        BURN    UNTIL VEL < 8\n        THROTTLE 0\n        POINT   RADIAL\n        WAIT    UNTIL ALT < 15000\ndescend:\n        SENSE   R0, ALT\n        MUL     R0, 0.09          ; descend at 9% of your altitude per second\n        MIN     R0, 55\n        MAX     R0, 3\n        NEG     R0                ; ...downward\n        SUB     R0, VVEL          ; error\n        MUL     R0, 0.6           ; gain\n        ADD     R0, GRAV          ; plus enough to hover\n        SET     R1, TWR\n        MUL     R1, GRAV          ; the most acceleration this ship has\n        DIV     R0, R1            ; -> throttle\n        MAX     R0, 0\n        MIN     R0, 1\n        THROTTLE R0\n        BURN    0.1\n        IF      ALT > 3\n        JMP     descend\n        THROTTLE 0\n        WAIT    UNTIL LANDED == 1\n        HALT",
+    "fuel_used": 533.926,
+    "elapsed": 555.516,
+    "ticks": 35553,
+    "instructions": 26,
+    "state_hash": "85e3012baf74f2ed",
+    "program_hash": "7be428aa1ddb2e72"
+  }
+}

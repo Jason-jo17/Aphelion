@@ -161,6 +161,28 @@ static func elements(mu: float, rx: float, ry: float, vx: float, vy: float) -> D
 			var m := DetMath.wrap_tau(ea - ecc * DetMath.sin(ea))
 			out[K_TIME_TO_PERI] = (DetMath.TAU_D - m) / n if m > 0.0 else 0.0
 			out[K_TIME_TO_APO] = DetMath.wrap_tau(DetMath.PI_D - m) / n
+	elif ecc > 1.0 and a < 0.0:
+		# A hyperbola has no apoapsis, but it very much has a periapsis — and
+		# arriving at one is the whole of a capture burn. Without this, TPERI
+		# would read INF at exactly the moment a program needs it most.
+		#
+		# Hyperbolic Kepler: tanh(H/2) = sqrt((e-1)/(e+1)) * tan(nu/2),
+		# M = e*sinh(H) - H, and time from periapsis is M/n.
+		var n_h := sqrt(mu / (-a * -a * -a))
+		if n_h > 0.0:
+			var half_h := DetMath.wrap_angle(nu) * 0.5
+			var c := DetMath.cos(half_h)
+			if absf(c) > 1.0e-300:
+				var tan_half := DetMath.sin(half_h) / c
+				var k := sqrt((ecc - 1.0) / (ecc + 1.0)) * tan_half
+				if absf(k) < 1.0:
+					# H = 2*atanh(k), expanded so only log() is needed.
+					var h_anom := DetMath.log((1.0 + k) / (1.0 - k))
+					var sinh_h := 0.5 * (DetMath.exp(h_anom) - DetMath.exp(-h_anom))
+					var m_h := ecc * sinh_h - h_anom
+					# m_h is negative before periapsis and positive after it.
+					out[K_TIME_TO_PERI] = (-m_h / n_h) if m_h < 0.0 else INF
+		out[K_TIME_TO_APO] = INF
 
 	return out
 

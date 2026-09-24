@@ -1,0 +1,62 @@
+{
+  "id": "thin_air",
+  "order": 2,
+  "title": "Thin Air",
+  "teaches": "coasting \u2014 an engine you have switched off is not costing you anything",
+  "brief": "Halcyon's atmosphere gives out at seventy kilometres. Get above it, and arrive with at least 2 tonnes still in the tanks.\n\nYou could hold the engine lit the whole way up. It would work, and it would cost you nearly everything you have. A ship on a ballistic arc is still climbing with the engine off \u2014 so burn until the *apoapsis* is where you want it, then stop and let go.",
+  "primary": "halcyon",
+  "bodies": [
+    "halcyon"
+  ],
+  "ship": {
+    "policy": "stock",
+    "id": "sparrow"
+  },
+  "start": {
+    "kind": "surface",
+    "body": "halcyon",
+    "surface_angle": 0
+  },
+  "time_limit": 900,
+  "success": {
+    "all": [
+      {
+        "sensor": "ALT",
+        "op": ">=",
+        "value": 75000
+      },
+      {
+        "sensor": "FUEL",
+        "op": ">=",
+        "value": 2000
+      }
+    ]
+  },
+  "failure": [
+    {
+      "when": {
+        "flag": "crashed"
+      },
+      "message": "The Sparrow did not survive."
+    }
+  ],
+  "hints": [
+    "APO is where you *will* end up, not where you are. Burn until it reads high enough and you have already won; the rest is falling upward.",
+    "Burning all the way up to 75 km leaves 0.8 t in the tanks. Burning to a 78 km apoapsis and coasting leaves 2.2 t. Same altitude.",
+    "The Q sensor reads dynamic pressure. Watching it teaches you where the air actually hurts."
+  ],
+  "stars": {
+    "fuel": 2631,
+    "time": 162,
+    "instructions": 3
+  },
+  "reference": {
+    "solution": "; Thin Air \u2014 burn until the apoapsis clears the air, then stop and coast.\n        THROTTLE 1\n        BURN    UNTIL APO > 78000\n        HALT",
+    "fuel_used": 2578.607,
+    "elapsed": 158.016,
+    "ticks": 10113,
+    "instructions": 3,
+    "state_hash": "f24d1b6f84ebda25",
+    "program_hash": "d6eda60f8b8a9127"
+  }
+}

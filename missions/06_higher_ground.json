@@ -1,0 +1,75 @@
+{
+  "id": "higher_ground",
+  "order": 6,
+  "title": "Higher Ground",
+  "teaches": "the Hohmann transfer \u2014 two burns, half an orbit apart",
+  "brief": "Moving between two circular orbits takes exactly two burns.\n\nThe first raises your apoapsis to the height you want. Then you coast half an orbit, doing nothing, all the way up to that apoapsis. The second burn, there, raises the other side to match.\n\nYou are in a 150 km circular orbit. Be in a 500 km circular one, eccentricity under 0.02, and hold it for half a minute.\n\nIt is the cheapest way to move between two orbits, and the slowest. Both of those facts are on the scoreboard.",
+  "primary": "halcyon",
+  "bodies": [
+    "halcyon"
+  ],
+  "ship": {
+    "policy": "stock",
+    "id": "wren"
+  },
+  "start": {
+    "kind": "orbit",
+    "body": "halcyon",
+    "altitude": 150000,
+    "true_anomaly": 0
+  },
+  "time_limit": 14400,
+  "success": {
+    "sustain": 30.0,
+    "of": {
+      "all": [
+        {
+          "sensor": "APO",
+          "between": [
+            490000,
+            512000
+          ]
+        },
+        {
+          "sensor": "PERI",
+          "between": [
+            488000,
+            510000
+          ]
+        },
+        {
+          "sensor": "ECC",
+          "op": "<=",
+          "value": 0.02
+        }
+      ]
+    }
+  },
+  "failure": [
+    {
+      "when": {
+        "flag": "crashed"
+      },
+      "message": "The Wren did not survive."
+    }
+  ],
+  "hints": [
+    "Burn prograde until APO reads 500 km. Then stop \u2014 really stop.",
+    "WAIT UNTIL TAPO < 10 will take you to the top of the transfer.",
+    "The second burn is prograde again, and raises PERI to meet APO."
+  ],
+  "stars": {
+    "fuel": 170,
+    "time": 1625,
+    "instructions": 8
+  },
+  "reference": {
+    "solution": "; Higher Ground \u2014 raise apoapsis, coast to it, raise periapsis to match.\n        ORIENT  PROGRADE\n        THROTTLE 1\n        BURN    UNTIL APO > 500000\n        THROTTLE 0\n        WAIT    UNTIL TAPO < 8\n        THROTTLE 0.5\n        BURN    UNTIL PERI > 498000\n        HALT",
+    "fuel_used": 166.073,
+    "elapsed": 1592.672,
+    "ticks": 101931,
+    "instructions": 8,
+    "state_hash": "b8c4bccbd582a0cd",
+    "program_hash": "fe7f95b3c1bf7da4"
+  }
+}

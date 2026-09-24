@@ -64,8 +64,8 @@
         4
       ],
       "mass": 300.0,
-      "fuel_capacity": 4000.0,
-      "description": "4 tonnes of propellant, and the best dry-to-wet ratio in the bay. Enough to reach orbit and argue about it afterwards."
+      "fuel_capacity": 4800.0,
+      "description": "4.8 tonnes of propellant, and the best dry-to-wet ratio in the bay. Enough to reach orbit with room to be wrong once."
     },
     {
       "id": "engine_main",

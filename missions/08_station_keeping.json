@@ -1,0 +1,78 @@
+{
+  "id": "station_keeping",
+  "order": 8,
+  "title": "Station Keeping",
+  "teaches": "that to catch something ahead of you, you go down",
+  "brief": "Anchor Station is in the same 200 km orbit you are, about six kilometres ahead. Get within 500 metres of it with less than 5 m/s between you, and stay there for ten seconds.\n\nThe obvious move is to burn toward it. The obvious move is wrong: thrusting prograde raises your orbit, which slows you down, which makes you fall further behind.\n\nTo catch something ahead, drop below it. Lower orbits move faster.",
+  "primary": "halcyon",
+  "bodies": [
+    "halcyon"
+  ],
+  "ship": {
+    "policy": "stock",
+    "id": "wren"
+  },
+  "start": {
+    "kind": "orbit",
+    "body": "halcyon",
+    "altitude": 200000,
+    "true_anomaly": 0
+  },
+  "targets": [
+    {
+      "id": "anchor",
+      "name": "Anchor Station",
+      "body": "halcyon",
+      "orbit_radius": 840000.0,
+      "orbit_phase0": 0.00714,
+      "orbit_direction": 1
+    }
+  ],
+  "active_target": "anchor",
+  "time_limit": 21600,
+  "success": {
+    "sustain": 10.0,
+    "of": {
+      "all": [
+        {
+          "sensor": "TGTD",
+          "op": "<=",
+          "value": 500
+        },
+        {
+          "sensor": "TGTV",
+          "op": "<=",
+          "value": 5
+        }
+      ]
+    }
+  },
+  "failure": [
+    {
+      "when": {
+        "flag": "crashed"
+      },
+      "message": "The Wren did not survive."
+    }
+  ],
+  "hints": [
+    "TGTD is the distance to the station; TGTV is how fast you are moving relative to it. Both have to be small at the same time.",
+    "A short retrograde burn drops you into a slightly lower, faster orbit. You will start gaining on the station.",
+    "A lower orbit is a shorter one. Drop periapsis, coast exactly one lap, and you return to the same place having gained on the station.",
+    "Re-circularise where you first burned, with the mirror image of that burn. `BURN UNTIL ECC < 0.0005` finds the moment precisely."
+  ],
+  "stars": {
+    "fuel": 1,
+    "time": 2047,
+    "instructions": 9
+  },
+  "reference": {
+    "solution": "; Station Keeping \u2014 drop periapsis, coast one lap, re-circularise there.\n        ORIENT  RETROGRADE\n        THROTTLE 0.05\n        BURN    UNTIL PERI < 198700\n        THROTTLE 0\n        ORIENT  PROGRADE\n        WAIT    UNTIL TAPO < 4\n        THROTTLE 0.05\n        BURN    UNTIL ECC < 0.0005\n        HALT",
+    "fuel_used": 0.397,
+    "elapsed": 2006.0,
+    "ticks": 128384,
+    "instructions": 9,
+    "state_hash": "e82bc554f2c802c1",
+    "program_hash": "ae42ebe3b796f930"
+  }
+}

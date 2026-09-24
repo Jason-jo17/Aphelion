@@ -1,0 +1,93 @@
+{
+  "id": "lyra_capture",
+  "order": 12,
+  "title": "Tightening the Knot",
+  "teaches": "capture \u2014 you arrive too fast by definition, and have one good place to fix it",
+  "brief": "You are falling toward Lyra at 370 m/s, sixteen hundred kilometres out, on a hyperbola. Left alone it will whip you past and throw you away.\n\nThere is exactly one efficient place to fix that: periapsis, where you are moving fastest. A burn there buys more change in orbital energy per kilogram than the same burn anywhere else.\n\nEnd up in a Lyra orbit: periapsis between 20 and 200 km, eccentricity under 0.4, held for a minute.",
+  "primary": "halcyon",
+  "bodies": [
+    "halcyon",
+    "lyra"
+  ],
+  "ship": {
+    "policy": "stock",
+    "id": "wren"
+  },
+  "start": {
+    "kind": "state",
+    "px": 11627722.772,
+    "py": -1556087.936,
+    "vx": 245.3259,
+    "vy": 887.5207,
+    "angle": 0.0
+  },
+  "time_limit": 60000,
+  "success": {
+    "sustain": 60.0,
+    "of": {
+      "all": [
+        {
+          "sensor": "SOI",
+          "op": ">=",
+          "value": 1
+        },
+        {
+          "sensor": "PERI",
+          "between": [
+            20000,
+            260000
+          ]
+        },
+        {
+          "sensor": "ECC",
+          "op": "<=",
+          "value": 0.4
+        }
+      ]
+    }
+  },
+  "failure": [
+    {
+      "when": {
+        "flag": "crashed"
+      },
+      "message": "The Wren hit Lyra."
+    },
+    {
+      "when": {
+        "all": [
+          {
+            "sensor": "SOI",
+            "op": "<",
+            "value": 1
+          },
+          {
+            "sensor": "T",
+            "op": ">",
+            "value": 20000
+          }
+        ]
+      },
+      "message": "Lyra threw you back out. Nothing to burn against now."
+    }
+  ],
+  "hints": [
+    "Your sensors already report your orbit about Lyra, not about Halcyon \u2014 SOI reads 1 and APO, PERI and TPERI are all Lyra-relative.",
+    "TPERI counts down to periapsis. Coast to it before you do anything.",
+    "Retrograde at periapsis. Stop when ECC comes under 0.4 \u2014 burning past that just costs propellant."
+  ],
+  "stars": {
+    "fuel": 96,
+    "time": 3602,
+    "instructions": 6
+  },
+  "reference": {
+    "solution": "; Tightening the Knot \u2014 coast to periapsis, then brake there.\n        ORIENT  RETROGRADE\n        WAIT    UNTIL TPERI < 25\n        THROTTLE 1\n        BURN    UNTIL ECC < 0.25\n        THROTTLE 0\n        HALT",
+    "fuel_used": 94.028,
+    "elapsed": 3531.219,
+    "ticks": 225998,
+    "instructions": 6,
+    "state_hash": "d210ff40735f85be",
+    "program_hash": "efdd9383dc3de35b"
+  }
+}

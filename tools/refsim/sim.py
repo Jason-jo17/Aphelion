@@ -287,6 +287,20 @@ def elements(mu, rx, ry, vx, vy):
             m = dm.wrap_tau(ea - ecc * dm.sin(ea))
             out["t_peri"] = (dm.TAU_D - m) / n if m > 0.0 else 0.0
             out["t_apo"] = dm.wrap_tau(dm.PI_D - m) / n
+    elif ecc > 1.0 and a < 0.0:
+        n_h = math.sqrt(mu / ((-a) ** 3))
+        if n_h > 0.0:
+            half_h = dm.wrap_angle(nu) * 0.5
+            c = dm.cos(half_h)
+            if abs(c) > 1.0e-300:
+                tan_half = dm.sin(half_h) / c
+                k = math.sqrt((ecc - 1.0) / (ecc + 1.0)) * tan_half
+                if abs(k) < 1.0:
+                    h_anom = dm.log((1.0 + k) / (1.0 - k))
+                    sinh_h = 0.5 * (dm.exp(h_anom) - dm.exp(-h_anom))
+                    m_h = ecc * sinh_h - h_anom
+                    out["t_peri"] = (-m_h / n_h) if m_h < 0.0 else INF
+        out["t_apo"] = INF
     return out
 
 

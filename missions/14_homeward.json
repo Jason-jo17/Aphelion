@@ -1,0 +1,75 @@
+{
+  "id": "homeward",
+  "order": 14,
+  "title": "Homeward",
+  "teaches": "aerocapture \u2014 arriving too fast to stop, and stopping anyway",
+  "brief": "You have left Lyra. You are twelve thousand kilometres up, falling home, and there is nowhere near enough propellant left to brake into orbit with the engine.\n\nSo you will not use the engine. A thirty-metre-per-second nudge here at apoapsis is enough to drag your periapsis down into the atmosphere, and one pass through it will take twelve thousand kilometres off the far side of your orbit for free.\n\nToo shallow and it barely touches you. Too deep and the Petrel does not come out the other side. Finish with apoapsis under 1000 km and periapsis back above 72 km, held for half a minute.",
+  "primary": "halcyon",
+  "bodies": [
+    "halcyon",
+    "lyra"
+  ],
+  "ship": {
+    "policy": "stock",
+    "id": "petrel",
+    "fuel_fraction": 0.85
+  },
+  "start": {
+    "kind": "orbit",
+    "body": "halcyon",
+    "periapsis": 300000,
+    "apoapsis": 12000000,
+    "true_anomaly": 180
+  },
+  "time_limit": 120000,
+  "success": {
+    "sustain": 30.0,
+    "of": {
+      "all": [
+        {
+          "sensor": "SOI",
+          "op": "==",
+          "value": 0
+        },
+        {
+          "sensor": "APO",
+          "op": "<=",
+          "value": 1000000
+        },
+        {
+          "sensor": "PERI",
+          "op": ">=",
+          "value": 72000
+        }
+      ]
+    }
+  },
+  "failure": [
+    {
+      "when": {
+        "flag": "crashed"
+      },
+      "message": "The Petrel came apart on the way down."
+    }
+  ],
+  "hints": [
+    "You are at apoapsis now. That is the cheapest place in the whole orbit to move the *other* end of it, and moving the other end is the job.",
+    "Aim for a periapsis around 44 km. Lyra tugs on you during the long fall and will deepen it a little, so leave yourself some room.",
+    "Point retrograde before you get there and stay that way. The shield only works facing the airflow, and there is no second attempt.",
+    "Check at apoapsis, not whenever \u2014 and once apoapsis is low enough, burn prograde there to lift periapsis clear of the air."
+  ],
+  "stars": {
+    "fuel": 35,
+    "time": 29873,
+    "instructions": 15
+  },
+  "reference": {
+    "solution": "; Homeward \u2014 aim the shield at the air and let Halcyon catch you.\n        ORIENT  RETROGRADE\n        THROTTLE 0.2\n        BURN    UNTIL PERI < 44000\n        THROTTLE 0\n        WAIT    600\nbrake:  WAIT    UNTIL TAPO < 8\n        IF      APO > 900000\n        JMP     again\n        JMP     lift\nagain:  WAIT    120\n        JMP     brake\nlift:   ORIENT  PROGRADE\n        THROTTLE 0.5\n        BURN    UNTIL PERI > 74000\n        HALT",
+    "fuel_used": 33.676,
+    "elapsed": 29286.719,
+    "ticks": 1874350,
+    "instructions": 15,
+    "state_hash": "4af8702a9a4ddc6b",
+    "program_hash": "a39ff843a43e09b0"
+  }
+}

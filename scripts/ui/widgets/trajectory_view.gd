@@ -26,6 +26,35 @@ const ZOOM_STEP := 0.25
 ## zoom without costing anything measurable.
 const CONIC_SAMPLES := 180
 
+
+## The pulsing ring around the ship marker, on its own node.
+##
+## It used to be drawn by the map, which meant animating it redrew the map —
+## planet, atmosphere, a 4096-point trail, a 180-point conic and every label —
+## sixty times a second, for ever, including while the flight was paused. All of
+## that to move one circle. Here it costs one arc.
+class ShipPulse:
+	extends Control
+
+	var colour := Color.WHITE
+
+	var _pulse := 0.0
+
+	func _init() -> void:
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
+		set_process(true)
+
+	func _process(delta: float) -> void:
+		if Settings.reduced_motion:
+			return
+		_pulse = fmod(_pulse + delta, 1.0)
+		queue_redraw()
+
+	func _draw() -> void:
+		var radius := 13.0 if Settings.reduced_motion else 12.0 + 4.0 * sin(_pulse * TAU)
+		draw_arc(Vector2.ZERO, radius, 0.0, TAU, 24, Color(colour, 0.35), 1.0, true)
+
+
 var world: SimWorld = null
 var profile: ShipProfile = null
 
@@ -45,30 +74,51 @@ var _log_scale := -6.0
 var _centre := Vector2.ZERO  ## world metres, as a float32 pair for panning only
 var _follow_ship := true
 var _dragging := false
-var _pulse := 0.0
+var _pulse_ring: ShipPulse = null
+
+## Which framing the view was last *asked* for, so that it can be re-applied
+## when the control's size changes. Empty once the player zooms or pans, since
+## after that the framing is theirs and re-fitting it would fight them.
+##
+## This exists because the zoom is computed from `size`, and `size` is zero
+## until the layout pass has run — so framing from a screen's _ready() produced
+## a scale derived from nothing. Every flight opened zoomed a factor of three
+## too far out, with the planet a small disc in a sea of black, and it looked
+## enough like a deliberate "you are a long way from home" choice that it
+## survived until someone rendered a frame and measured the scale bar.
+var _frame_mode := ""
 
 
 func _ready() -> void:
 	focus_mode = Control.FOCUS_ALL
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	custom_minimum_size = Vector2(320, 240)
-	set_process(true)
+	_pulse_ring = ShipPulse.new()
+	add_child(_pulse_ring)
+	# The first real size arrives after the layout pass, and the window can be
+	# resized at any time after that. Both need the framing recomputed.
+	resized.connect(_on_resized)
 	tooltip_text = (
 		"Orbital map. Scroll or +/- to zoom, drag or arrow keys to pan, "
 		+ "F to follow the ship, Home to frame everything."
 	)
 
 
-func _process(delta: float) -> void:
-	if not Settings.reduced_motion:
-		_pulse = fmod(_pulse + delta, 1.0)
-		queue_redraw()
+func _on_resized() -> void:
+	match _frame_mode:
+		"orbit":
+			frame_orbit()
+		"ship":
+			frame_ship()
+		"all":
+			frame_all()
 
 
 ## Frames the whole flight: every body that matters and the recorded path.
 func frame_all() -> void:
 	if world == null:
 		return
+	_frame_mode = "all"
 	var extent := 0.0
 	if state != null:
 		extent = maxf(extent, DetMath.hypot(state.px, state.py))
@@ -80,13 +130,44 @@ func frame_all() -> void:
 			extent = maxf(extent, b.orbit_radius * 1.1)
 	if extent <= 0.0:
 		extent = 1.0e6
-	var shortest := minf(size.x, size.y)
-	_log_scale = clampf(
-		log(maxf(1.0, shortest * 0.45) / extent) / log(2.718281828459045),
-		MIN_LOG_SCALE,
-		MAX_LOG_SCALE
-	)
+	_apply_extent(extent)
 	_centre = Vector2.ZERO
+	_follow_ship = false
+	queue_redraw()
+
+
+## Frames the body the ship is bound to, with room for the ship's orbit.
+##
+## This is what a flight opens on, and it is deliberately not frame_ship(): that
+## one keeps the ship in the middle of the screen, which for a launch means the
+## planet sits against one edge and half the map is empty sky. An orbital map
+## wants the thing being orbited as its anchor — the ship is a dot either way,
+## and where that dot is *relative to the planet* is the whole information.
+func frame_orbit() -> void:
+	if world == null or state == null:
+		return
+	_frame_mode = "orbit"
+	var t := SimWorld.time_for_tick(state.tick)
+	var soi := world.dominant_body_index(t, state.px, state.py)
+	var body := world.bodies[soi]
+	var r := DetMath.hypot(state.px - body.pos_x(t), state.py - body.pos_y(t))
+
+	# Room for where the orbit goes, not just where the ship is now, so the view
+	# does not have to rescale the moment the first burn raises the apoapsis.
+	var elems := Orbital.elements(
+		body.mu,
+		state.px - body.pos_x(t),
+		state.py - body.pos_y(t),
+		state.vx - body.vel_x(t),
+		state.vy - body.vel_y(t)
+	)
+	var apo := float(elems.get("apoapsis", r))
+	if not is_finite(apo) or apo <= 0.0:
+		apo = r
+	var extent := maxf(body.radius * 1.25, maxf(r, minf(apo, body.radius * 12.0)) * 1.15)
+
+	_apply_extent(extent)
+	_centre = Vector2(float(body.pos_x(t)), float(body.pos_y(t)))
 	_follow_ship = false
 	queue_redraw()
 
@@ -95,19 +176,26 @@ func frame_all() -> void:
 func frame_ship() -> void:
 	if world == null or state == null:
 		return
+	_frame_mode = "ship"
 	var t := SimWorld.time_for_tick(state.tick)
 	var soi := world.dominant_body_index(t, state.px, state.py)
 	var body := world.bodies[soi]
 	var r := DetMath.hypot(state.px - body.pos_x(t), state.py - body.pos_y(t))
 	var extent := maxf(body.radius * 1.5, r * 1.3)
+	_apply_extent(extent)
+	_follow_ship = true
+	queue_redraw()
+
+
+## Sets the zoom so that `extent` metres reach 45% of the shorter side — the
+## content then spans 90% of it, leaving a margin rather than touching the edge.
+func _apply_extent(extent: float) -> void:
 	var shortest := minf(size.x, size.y)
 	_log_scale = clampf(
-		log(maxf(1.0, shortest * 0.45) / extent) / log(2.718281828459045),
+		log(maxf(1.0, shortest * 0.45) / maxf(1.0, extent)) / log(2.718281828459045),
 		MIN_LOG_SCALE,
 		MAX_LOG_SCALE
 	)
-	_follow_ship = true
-	queue_redraw()
 
 
 func scale_factor() -> float:
@@ -185,11 +273,13 @@ func _gui_input(event: InputEvent) -> void:
 
 
 func _zoom(delta: float) -> void:
+	_frame_mode = ""
 	_log_scale = clampf(_log_scale + delta, MIN_LOG_SCALE, MAX_LOG_SCALE)
 	queue_redraw()
 
 
 func _pan(by: Vector2) -> void:
+	_frame_mode = ""
 	if _follow_ship and state != null:
 		_centre = Vector2(float(state.px), float(state.py))
 	_follow_ship = false
@@ -202,6 +292,10 @@ func _pan(by: Vector2) -> void:
 
 func _draw() -> void:
 	draw_rect(Rect2(Vector2.ZERO, size), Tokens.color("bg"))
+	# _draw_ship() turns it back on and places it; anything that returns before
+	# reaching the ship leaves it off rather than orbiting nothing.
+	if _pulse_ring != null:
+		_pulse_ring.visible = false
 	if world == null:
 		return
 
@@ -290,21 +384,46 @@ func _draw_trail() -> void:
 		return
 	var upto := clampi(int(float(count) * clampf(trail_fraction, 0.0, 1.0)), 2, count)
 
+	# Sized up front rather than appended to. The trail is capped at 4096
+	# samples and this runs on every frame of every flight, so growing the array
+	# one point at a time was reallocating it thousands of times a second.
 	var points := PackedVector2Array()
-	var thrusting := PackedVector2Array()
+	points.resize(upto)
+	var lit := PackedInt32Array()
 	for i in upto:
 		var o := i * RunResult.TRAJECTORY_STRIDE
-		var p := _to_screen(trail[o + 1], trail[o + 2])
-		points.append(p)
-		# Powered flight is drawn over the coast in the "transfer" colour, so a
-		# player can see at a glance where the engine was lit.
+		points[i] = _to_screen(trail[o + 1], trail[o + 2])
 		if trail[o + 7] > 0.0:
-			thrusting.append(p)
+			lit.append(i)
 
 	if points.size() >= 2:
 		draw_polyline(points, Color(Tokens.trajectory_color("past"), 0.85), 1.5, true)
-	for p in thrusting:
-		draw_circle(p, 2.0, Tokens.trajectory_color("transfer"))
+
+	# Powered flight is drawn over the coast in the "transfer" colour, so a
+	# player can see at a glance where the engine was lit. As runs of connected
+	# path, not a scatter of dots: a burn *is* a stretch of the trajectory, and
+	# one draw call per lit sample meant up to four thousand of them per frame.
+	var run_start := -1
+	var previous := -2
+	for i in lit:
+		if i != previous + 1:
+			_draw_lit_run(points, run_start, previous)
+			run_start = i
+		previous = i
+	_draw_lit_run(points, run_start, previous)
+
+
+## Draws samples `from`..`to` of the trail as one lit segment. Starts a point
+## early where it can, so that a burn joins the coast it came out of rather than
+## floating beside it, and so a single-sample burn is still a visible mark.
+func _draw_lit_run(points: PackedVector2Array, from: int, to: int) -> void:
+	if from < 0 or to < from:
+		return
+	var first := maxi(0, from - 1)
+	if to - first < 1:
+		draw_circle(points[to], 2.0, Tokens.trajectory_color("transfer"))
+		return
+	draw_polyline(points.slice(first, to + 1), Tokens.trajectory_color("transfer"), 2.5, true)
 
 
 ## The conic the ship is currently on, drawn from its elements rather than by
@@ -417,11 +536,10 @@ func _draw_ship(_t: float) -> void:
 		colour
 	)
 
-	if not Settings.reduced_motion:
-		var radius := 12.0 + 4.0 * sin(_pulse * TAU)
-		draw_arc(p, radius, 0.0, TAU, 24, Color(colour, 0.35), 1.0, true)
-	else:
-		draw_arc(p, 13.0, 0.0, TAU, 24, Color(colour, 0.35), 1.0, true)
+	if _pulse_ring != null:
+		_pulse_ring.position = p
+		_pulse_ring.colour = colour
+		_pulse_ring.visible = true
 
 	_label(p + Vector2(12, 6), "Ship", colour)
 

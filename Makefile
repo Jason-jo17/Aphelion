@@ -29,6 +29,8 @@ help:
 	@echo '  make format        gdformat the tree in place'
 	@echo '  make lint          gdformat --check and gdlint'
 	@echo '  make screenshots   regenerate the README images (needs a display or xvfb)'
+	@echo '                     AUDIT=1 also writes every theme, palette and scale'
+	@echo '                     to the user directory, for looking at while changing the UI'
 	@echo '  make determinism   fly all fifteen reference solutions, write a report'
 	@echo '  make clean         remove the import cache and generated reports'
 	@echo
@@ -82,7 +84,8 @@ check: refsim fixtures lint test
 # Godot cannot render headless, so this needs a display. xvfb-run supplies a
 # virtual one; on a desktop, drop the xvfb-run prefix.
 screenshots:
-	xvfb-run -a -s "-screen 0 1600x900x24" \
+	@# AUDIT=1 also writes every theme/palette/scale combination to user://audit/
+	AUDIT="$(AUDIT)" xvfb-run -a -s "-screen 0 1600x900x24" \
 		$(GODOT) --path . --rendering-driver opengl3 res://tools/capture_screens.tscn
 
 determinism:

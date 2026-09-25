@@ -50,7 +50,7 @@ func _ready() -> void:
 	_map.world = world
 	_map.state = runner.state
 	_map.target_index = _mission.active_target_index(world)
-	_map.frame_ship()
+	_map.frame_orbit()
 	set_process(true)
 
 

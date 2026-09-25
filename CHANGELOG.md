@@ -93,6 +93,63 @@ headless run.
   somebody measured rather than a number the mission author typed. Briefings and
   the in-flight objective list are coarse now; instruments still are not.
 
+### Fixed — layout and framing
+
+Found by capturing every screen at each theme, palette and interface scale and
+looking at all of them.
+
+- **The orbital map was zoomed three times too far out on every flight.** The
+  zoom is derived from the control's size, and the size is zero until the layout
+  pass has run — so framing from a screen's `_ready()` computed a scale from
+  nothing. The planet was a small disc in a sea of black, which looked enough
+  like a deliberate "you are a long way from home" choice to survive unnoticed.
+  The view now re-applies its framing whenever it is resized, which also fixes
+  the map staying wrongly zoomed after a window resize.
+- **A flight now opens centred on the body it is orbiting**, sized to fit the
+  orbit, rather than centred on the ship — which put the planet against one edge
+  with half the map empty sky.
+- **Three screens clipped their content and could not be scrolled to it.** The
+  briefing lost 165 px at 130% and 428 px at 160%; the results screen 107 px at
+  160%; the editor overflowed even at 100%, so the delta-v readout and the
+  validation warnings — the two things most needed while building a ship — were
+  off the bottom with no way to reach them. Every screen is a scrollable page
+  now, and `follow_focus` means tabbing to something off-screen brings it into
+  view instead of moving focus somewhere invisible.
+- The editor screen was 14 px over the canvas at the default scale, so every
+  player got a scrollbar to reveal fourteen pixels of nothing. It is a dense
+  working screen and now uses tighter top and bottom margins than the reading
+  screens.
+- The campaign progress indicator drew **one glyph per star**, which is right
+  for a mission's three and unreadable for the campaign's forty-five: the menu
+  header was a row of forty-five tiny stars that read as corruption rather than
+  progress. Past a handful, one star is an icon and the fraction does the work.
+- The screenshot tool pinned neither theme nor interface scale, so the README
+  images came out at whatever the last person to run the game had left in their
+  settings file — which is how they were once captured at 160%.
+
+CI now fails if any screen clips content it cannot scroll to, at 80%, 100%,
+130% or 160%. The check was verified by reverting one of the fixes and watching
+it fail.
+
+### Changed — what the map costs to draw
+
+- The trail was drawing **one `draw_circle` per powered sample, every frame**.
+  The trail is capped at 4096 samples, so a flight that spends most of its time
+  under thrust was issuing thousands of draw calls per frame for what is
+  conceptually a few line segments. Powered flight is now drawn as runs of
+  connected path, which is both far cheaper and a better picture: a burn is a
+  stretch of the trajectory, not a scatter of dots.
+- The points array behind the trail is sized once instead of grown a point at a
+  time, so it is no longer reallocated thousands of times a second.
+- The pulsing ring around the ship marker has its own node. Animating it used
+  to redraw the entire map — planet, atmosphere, trail, predicted conic and
+  every label — sixty times a second for ever, including while paused. It now
+  costs one arc, and the map redraws only when something on it has moved.
+- `anti_aliasing/quality/msaa_2d` is gone from `project.godot`. The renderer is
+  Compatibility, which does not implement 2D MSAA, so the setting logged
+  "2D MSAA is not yet supported for GLES3" on every launch and changed nothing.
+  The map asks for antialiasing on each draw call instead, which does work.
+
 ### Fixed
 
 - `NodeGraph` emitted a `HALT` landing pad nothing jumped to, so every

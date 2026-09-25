@@ -39,7 +39,10 @@ theme/default_font_subpixel_positioning=1
 
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
-anti_aliasing/quality/msaa_2d=2
+; No msaa_2d here on purpose. The Compatibility renderer does not implement it,
+; so setting it only logged "2D MSAA is not yet supported for GLES3" on every
+; launch while changing nothing. The one thing that needs smooth edges is the
+; orbital map, and it asks for antialiasing on each draw call, which does work.
 environment/defaults/default_clear_color=Color(0.043, 0.051, 0.078, 1)
 
 [physics]

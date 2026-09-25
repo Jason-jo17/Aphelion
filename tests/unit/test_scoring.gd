@@ -3,6 +3,30 @@ extends GutTest
 ## Scoring, personal bests, predicates and the design tokens' contrast.
 
 
+func test_the_star_label_does_not_print_forty_five_glyphs() -> void:
+	# A mission has three stars and shows them individually. The campaign total
+	# is forty-five, and a row of forty-five tiny glyphs on the menu reads as
+	# corruption rather than progress.
+	assert_eq(_stars_text(2, 3), "★★☆  2/3")
+	assert_eq(_stars_text(0, 3), "☆☆☆  0/3")
+	assert_eq(_stars_text(0, 45), "★  0/45")
+	assert_eq(_stars_text(12, 45), "★  12/45")
+
+	var label := UIKit.stars_label(12, 45)
+	assert_eq(
+		label.tooltip_text, "12 of 45 stars", "the tooltip still spells it out, however it is drawn"
+	)
+	label.free()
+
+
+## Labels are not added to the tree here, so nothing else will free them.
+func _stars_text(earned: int, total: int) -> String:
+	var label := UIKit.stars_label(earned, total)
+	var text := label.text
+	label.free()
+	return text
+
+
 func _result(success: bool, fuel: float, elapsed: float, instructions: int) -> RunResult:
 	var r := RunResult.new()
 	r.success = success

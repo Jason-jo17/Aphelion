@@ -198,6 +198,17 @@ jobs:
             grep -B2 -A6 'SCRIPT ERROR' ui.log
             exit 1
           fi
+
+          # Interface scale is advertised from 80% to 160%. A screen that does
+          # not fit must at least be scrollable, or the content is simply gone.
+          if grep -q 'LAYOUT FAIL' ui.log; then
+            echo "::error::a screen clips its content and cannot be scrolled"
+            grep 'LAYOUT FAIL' ui.log
+            exit 1
+          fi
+          grep -q 'every screen fits or scrolls' ui.log \
+            || { echo "::error::the layout check did not run"; exit 1; }
+
           test "$(ls assets/screenshots/*.png | wc -l)" -eq 5
 
       - uses: actions/upload-artifact@v4

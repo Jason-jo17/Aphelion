@@ -16,11 +16,14 @@ func _ready() -> void:
 		App.instance.go_to(App.Screen.MENU)
 		return
 
+	var page := UIKit.page()
+	add_child(page)
+
 	var margin := MarginContainer.new()
-	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	margin.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	for side in ["left", "right", "top", "bottom"]:
 		margin.add_theme_constant_override("margin_" + side, int(Tokens.space(Tokens.SPACE_7)))
-	add_child(margin)
+	page.add_child(margin)
 
 	var columns := UIKit.hbox(Tokens.SPACE_6)
 	margin.add_child(columns)

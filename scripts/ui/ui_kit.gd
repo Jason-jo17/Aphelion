@@ -7,6 +7,12 @@ extends RefCounted
 ## palette and the UI scale slider reach the whole game rather than the bits
 ## somebody remembered to wire up.
 
+## How many stars stars_label() will draw one glyph each for. A mission has
+## three and they read nicely; the campaign has forty-five, and a row of
+## forty-five tiny glyphs on the menu header reads as corruption rather than
+## progress. Past this, one star is an icon and the fraction does the work.
+const STARS_SHOWN_INDIVIDUALLY := 5
+
 
 ## A heading. `level` 1 is a screen title, 2 a section, 3 a label above a group.
 static func heading(text: String, level: int = 2) -> Label:
@@ -54,6 +60,24 @@ static func card(padding: float = Tokens.SPACE_4) -> PanelContainer:
 	style.set_content_margin_all(Tokens.space(padding))
 	p.add_theme_stylebox_override("panel", style)
 	return p
+
+
+## A screen's scrollable body.
+##
+## Every screen puts its content in one of these, because a screen that only
+## fits at one interface scale is a screen that does not support the other
+## scales it claims to. The editor needed 914 logical pixels of a 900-pixel
+## canvas at 100%, and 1462 at 160% — so the delta-v readout and the validation
+## warnings, the two things a player most needs while building a ship, were
+## simply off the bottom with no way to reach them.
+##
+## `follow_focus` is the part that matters for keyboard control: tabbing to a
+## control that is scrolled out of view brings it into view, instead of moving
+## focus somewhere invisible.
+static func page() -> ScrollContainer:
+	var s := scroll()
+	s.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	return s
 
 
 static func vbox(separation: float = Tokens.SPACE_3) -> VBoxContainer:
@@ -160,7 +184,12 @@ static func stat_row(label: String, value: String, role: String = "text") -> HBo
 ## to count at a glance and impossible for a screen reader to describe.
 static func stars_label(earned: int, total: int = 3) -> Label:
 	var l := Label.new()
-	l.text = "%s  %d/%d" % ["★".repeat(earned) + "☆".repeat(maxi(0, total - earned)), earned, total]
+	if total > STARS_SHOWN_INDIVIDUALLY:
+		l.text = "★  %d/%d" % [earned, total]
+	else:
+		l.text = (
+			"%s  %d/%d" % ["★".repeat(earned) + "☆".repeat(maxi(0, total - earned)), earned, total]
+		)
 	l.tooltip_text = "%d of %d stars" % [earned, total]
 	l.add_theme_color_override(
 		"font_color", Tokens.color("warning") if earned > 0 else Tokens.color("text_faint")
@@ -193,6 +222,10 @@ static func scroll() -> ScrollContainer:
 	s.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	s.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	s.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	# Tabbing to a control that is scrolled out of view should bring it into
+	# view rather than move focus somewhere invisible. Everything in Aphelion is
+	# reachable by keyboard, and "reachable" has to mean "and you can see it".
+	s.follow_focus = true
 	return s
 
 

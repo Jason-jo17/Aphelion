@@ -18,11 +18,21 @@ func _ready() -> void:
 		App.instance.go_to(App.Screen.MENU)
 		return
 
+	var page := UIKit.page()
+	add_child(page)
+
 	var margin := MarginContainer.new()
-	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	for side in ["left", "right", "top", "bottom"]:
+	margin.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	# Tighter top and bottom than the reading screens. This is a working screen:
+	# the assembly bay is a fixed grid that has to be visible in full to be
+	# usable, and with a reading screen's margins the content came to 914 of the
+	# 900-pixel canvas — so every player got a scrollbar on the default screen at
+	# the default scale, to reveal fourteen pixels of nothing.
+	for side in ["left", "right"]:
 		margin.add_theme_constant_override("margin_" + side, int(Tokens.space(Tokens.SPACE_5)))
-	add_child(margin)
+	for side in ["top", "bottom"]:
+		margin.add_theme_constant_override("margin_" + side, int(Tokens.space(Tokens.SPACE_4)))
+	page.add_child(margin)
 
 	var column := UIKit.vbox(Tokens.SPACE_3)
 	margin.add_child(column)

@@ -131,6 +131,43 @@ CI now fails if any screen clips content it cannot scroll to, at 80%, 100%,
 130% or 160%. The check was verified by reverting one of the fixes and watching
 it fail.
 
+### Fixed — the map was drawing a path through the planet
+
+The predicted orbit was drawn as a complete conic regardless of where it went.
+On an ascent the periapsis is usually hundreds of kilometres underground, so the
+map showed a dashed ellipse sailing straight through the rock and out the other
+side, with a labelled marker at the bottom of it reading "Pe -205.9 km" —
+pointing at a place on the map that does not exist, for a spot the ship never
+reaches because it hits the ground first.
+
+The conic is now broken wherever it passes below the surface, and where it
+first crosses from sky into ground it is marked **Impact**. The legend has
+carried an "impact" entry since the first version of this map; this is the
+thing it was describing. The underground periapsis marker is gone — the number
+still matters and the instruments panel still shows it, because that negative
+figure is exactly how much periapsis has to come up.
+
+### Changed — parts look like the parts they are
+
+Every part was the same rounded rectangle, so a crew capsule, a propellant
+tank, an engine bell and a reaction wheel differed only by hue and two initials
+— and the three structural parts (a strut, an ablative shield and a set of
+landing legs) did not differ at all, since they share a category. A ship is
+something you look at in order to understand it, so it has to look like the
+thing it is.
+
+Each part now carries a `shape`, defaulting from its category and named
+explicitly in `data/parts.json` where the category cannot say enough. There are
+eight: a tapered capsule with a window, a probe core under an antenna, a banded
+tank, a flared engine bell, a gyro in its housing, a cross-braced strut, an
+ablative dome, and legs braced out to a pair of feet.
+
+The initials stay, because a silhouette is a non-colour signal but not one
+anything can read aloud. They moved to the bottom edge on a dark backing plate
+— centred, they landed on the capsule's window and the reaction wheel's gyro,
+and two marks on top of each other read as neither — and a one-cell part gets
+two letters rather than three, which is all that fits at a size worth drawing.
+
 ### Changed — what the map costs to draw
 
 - The trail was drawing **one `draw_circle` per powered sample, every frame**.

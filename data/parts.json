@@ -23,6 +23,7 @@
       "id": "probe_core",
       "name": "Wren Probe Core",
       "category": "command",
+      "shape": "probe",
       "size": [
         1,
         1
@@ -145,6 +146,7 @@
       "id": "heat_shield",
       "name": "Ablative Shield",
       "category": "structure",
+      "shape": "shield",
       "size": [
         2,
         1
@@ -157,6 +159,7 @@
       "id": "landing_legs",
       "name": "Landing Legs",
       "category": "structure",
+      "shape": "legs",
       "size": [
         1,
         1

@@ -42,6 +42,36 @@ var max_landing_speed: float = 0.0
 ## True for parts that can host the flight computer.
 var is_command: bool = false
 
+## Which silhouette the assembly bay draws this part with.
+##
+## Shape carries the meaning that colour cannot: every part used to be the same
+## rectangle, so a capsule, a tank, an engine bell and a reaction wheel differed
+## only by hue and two initials, and the three structural parts — a strut, an
+## ablative shield and a set of landing legs — did not differ at all. A ship is
+## something you look at to understand, so it has to look like the thing it is.
+##
+## Defaults from the category, which is right for command, fuel, engine and
+## control. `structure` holds three unrelated objects, so those name a shape of
+## their own in data/parts.json.
+var shape: String = SHAPE_BEAM
+
+const SHAPE_CAPSULE := "capsule"
+const SHAPE_PROBE := "probe"
+const SHAPE_TANK := "tank"
+const SHAPE_ENGINE := "engine"
+const SHAPE_WHEEL := "wheel"
+const SHAPE_BEAM := "beam"
+const SHAPE_SHIELD := "shield"
+const SHAPE_LEGS := "legs"
+
+const SHAPE_FOR_CATEGORY := {
+	CAT_COMMAND: SHAPE_CAPSULE,
+	CAT_FUEL: SHAPE_TANK,
+	CAT_ENGINE: SHAPE_ENGINE,
+	CAT_CONTROL: SHAPE_WHEEL,
+	CAT_STRUCTURE: SHAPE_BEAM,
+}
+
 
 func cell_count() -> int:
 	return size_w * size_h
@@ -72,4 +102,5 @@ static func from_dict(d: Dictionary) -> PartDef:
 	p.extra_drag_area = float(d.get("extra_drag_area", 0.0))
 	p.max_landing_speed = float(d.get("max_landing_speed", 0.0))
 	p.is_command = bool(d.get("command", false))
+	p.shape = String(d.get("shape", SHAPE_FOR_CATEGORY.get(p.category, SHAPE_BEAM)))
 	return p

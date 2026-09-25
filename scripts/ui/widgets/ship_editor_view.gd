@@ -13,6 +13,11 @@ signal ship_changed
 
 const CELL := 34.0
 
+## Smallest a part's initials are allowed to shrink to before a letter is
+## dropped instead. Below this the text stops being readable, at which point
+## making it fit is no longer the point.
+const MIN_LABEL_PX := 8
+
 var ship: Ship = null
 var selected_part: String = ""
 
@@ -216,37 +221,71 @@ func _draw() -> void:
 
 func _draw_part(rect: Rect2, def: PartDef, disconnected: bool) -> void:
 	var colour := _category_colour(def.category)
-	draw_rect(rect.grow(-2.0), Color(colour, 0.35))
-	draw_rect(
-		rect.grow(-2.0),
-		colour if not disconnected else Tokens.color("danger"),
-		false,
-		2.0 if disconnected else 1.5
-	)
+	var edge := colour if not disconnected else Tokens.color("danger")
+	var width := 2.0 if disconnected else 1.5
+	var r := rect.grow(-2.0)
+
+	# Shape first, because shape is what says which part this is. Colour repeats
+	# the category for people who can see it, and the initials repeat it again
+	# for people who cannot — but a capsule should read as a capsule before any
+	# of that, the way it would on any drawing of a rocket.
+	match def.shape:
+		PartDef.SHAPE_CAPSULE:
+			_shape_capsule(r, colour, edge, width)
+		PartDef.SHAPE_PROBE:
+			_shape_probe(r, colour, edge, width)
+		PartDef.SHAPE_TANK:
+			_shape_tank(r, colour, edge, width)
+		PartDef.SHAPE_ENGINE:
+			_shape_engine(r, colour, edge, width)
+		PartDef.SHAPE_WHEEL:
+			_shape_wheel(r, colour, edge, width)
+		PartDef.SHAPE_SHIELD:
+			_shape_shield(r, colour, edge, width)
+		PartDef.SHAPE_LEGS:
+			_shape_legs(r, colour, edge, width)
+		_:
+			_shape_beam(r, colour, edge, width)
 
 	var font := get_theme_default_font()
 	if font == null:
 		return
-	# Parts are labelled, never distinguished by colour alone.
-	var initials := _initials(def.display_name)
+
+	# Parts are labelled, never distinguished by colour alone — a shape is a
+	# non-colour signal too, but it is not one anything can read aloud, so the
+	# initials stay. They sit along the bottom edge rather than the middle,
+	# because centred they landed straight on the capsule's window and the
+	# reaction wheel's gyro, and two marks on top of each other read as neither.
+	# Make it fit the part rather than the other way round: three letters at the
+	# body size are wider than a one-cell part, so "HVE" and "WPC" hung over
+	# their neighbours and the backing plate covered cells the part does not
+	# occupy. A narrow part gets two letters; anything still over shrinks, down
+	# to the size where text stops being worth drawing.
+	var initials := _initials(def.display_name, 3 if def.size_w > 1 else 2)
 	var size_px := Tokens.font_size(Tokens.FONT_SM)
 	var text_size := font.get_string_size(initials, HORIZONTAL_ALIGNMENT_LEFT, -1, size_px)
-	draw_string(
-		font,
-		rect.get_center() + Vector2(-text_size.x * 0.5, size_px * 0.35),
-		initials,
-		HORIZONTAL_ALIGNMENT_LEFT,
-		-1,
-		size_px,
-		Tokens.color("text")
+	var avail := r.size.x - 4.0
+	if text_size.x > avail and text_size.x > 0.0:
+		size_px = maxi(MIN_LABEL_PX, int(float(size_px) * avail / text_size.x))
+		text_size = font.get_string_size(initials, HORIZONTAL_ALIGNMENT_LEFT, -1, size_px)
+	var at := Vector2(rect.get_center().x - text_size.x * 0.5, r.end.y - maxf(2.0, r.size.y * 0.06))
+	# A dark backing plate, so the letters hold up over a filled silhouette in
+	# either theme without having to pick a colour that suits both.
+	draw_rect(
+		Rect2(at + Vector2(-2.0, -size_px * 0.88), Vector2(text_size.x + 4.0, size_px * 1.05)),
+		Color(Tokens.color("bg"), 0.72)
 	)
+	draw_string(font, at, initials, HORIZONTAL_ALIGNMENT_LEFT, -1, size_px, Tokens.color("text"))
 
 
-static func _initials(name: String) -> String:
+## Initials, at most `limit` of them. One cell is 34 logical pixels and three
+## letters do not fit in it at a size anybody can read, so a one-cell part gets
+## two. The full name is a hover away, and the silhouette says what it is.
+static func _initials(name: String, limit: int = 3) -> String:
 	var out := ""
 	for word in name.split(" "):
 		var w := String(word)
-		if not w.is_empty() and out.length() < 3:
+		if not w.is_empty() and out.length() < limit:
 			out += w[0].to_upper()
 	return out
 
@@ -262,3 +301,172 @@ static func _category_colour(category: String) -> Color:
 		PartDef.CAT_CONTROL:
 			return Tokens.trajectory_color("projected")
 	return Tokens.trajectory_color("target")
+
+
+# --- part silhouettes ------------------------------------------------------
+#
+# Each of these fills a shape at low alpha and strokes its outline, inside the
+# rect the part occupies. They are schematic rather than pictorial: this is an
+# assembly drawing, not cover art, and a part has to stay readable at a 34-pixel
+# cell in both themes and at 80% interface scale.
+
+
+## Fills a closed outline and strokes it, which is what every shape below wants.
+func _silhouette(points: PackedVector2Array, fill: Color, edge: Color, width: float) -> void:
+	if points.size() < 3:
+		return
+	draw_colored_polygon(points, Color(fill, 0.35))
+	var closed := points.duplicate()
+	closed.append(points[0])
+	draw_polyline(closed, edge, width, true)
+
+
+## A crewed capsule: flat top, flared sides, with a window.
+func _shape_capsule(r: Rect2, fill: Color, edge: Color, width: float) -> void:
+	var inset := r.size.x * 0.22
+	_silhouette(
+		PackedVector2Array(
+			[
+				Vector2(r.position.x + inset, r.position.y),
+				Vector2(r.end.x - inset, r.position.y),
+				Vector2(r.end.x, r.end.y),
+				Vector2(r.position.x, r.end.y),
+			]
+		),
+		fill,
+		edge,
+		width
+	)
+	draw_arc(
+		Vector2(r.get_center().x, r.position.y + r.size.y * 0.3),
+		maxf(2.0, r.size.x * 0.13),
+		0.0,
+		TAU,
+		12,
+		edge,
+		width * 0.8,
+		true
+	)
+
+
+## An uncrewed core: a small box under an antenna.
+func _shape_probe(r: Rect2, fill: Color, edge: Color, width: float) -> void:
+	var body := Rect2(
+		r.position + Vector2(r.size.x * 0.18, r.size.y * 0.34),
+		Vector2(r.size.x * 0.64, r.size.y * 0.58)
+	)
+	draw_rect(body, Color(fill, 0.35))
+	draw_rect(body, edge, false, width)
+	var mast_x := r.get_center().x
+	draw_line(
+		Vector2(mast_x, body.position.y), Vector2(mast_x, r.position.y), edge, width * 0.8, true
+	)
+	draw_line(
+		Vector2(mast_x - r.size.x * 0.16, r.position.y),
+		Vector2(mast_x + r.size.x * 0.16, r.position.y),
+		edge,
+		width * 0.8,
+		true
+	)
+
+
+## A propellant tank: a cylinder, banded so that stacked tanks stay countable.
+func _shape_tank(r: Rect2, fill: Color, edge: Color, width: float) -> void:
+	var body := r.grow_individual(-r.size.x * 0.08, 0.0, -r.size.x * 0.08, 0.0)
+	draw_rect(body, Color(fill, 0.35))
+	draw_rect(body, edge, false, width)
+	for f: float in [0.3, 0.7]:
+		var y := body.position.y + body.size.y * f
+		draw_line(
+			Vector2(body.position.x, y),
+			Vector2(body.end.x, y),
+			Color(edge, 0.55),
+			width * 0.7,
+			true
+		)
+
+
+## An engine: a bell, narrow at the throat and flared at the mouth.
+func _shape_engine(r: Rect2, fill: Color, edge: Color, width: float) -> void:
+	var throat := r.size.x * 0.28
+	var shoulder := r.position.y + r.size.y * 0.3
+	_silhouette(
+		PackedVector2Array(
+			[
+				Vector2(r.get_center().x - throat, r.position.y),
+				Vector2(r.get_center().x + throat, r.position.y),
+				Vector2(r.get_center().x + throat, shoulder),
+				Vector2(r.end.x, r.end.y),
+				Vector2(r.position.x, r.end.y),
+				Vector2(r.get_center().x - throat, shoulder),
+			]
+		),
+		fill,
+		edge,
+		width
+	)
+
+
+## A reaction wheel: a housing around a gyro.
+func _shape_wheel(r: Rect2, fill: Color, edge: Color, width: float) -> void:
+	var body := r.grow(-r.size.x * 0.06)
+	draw_rect(body, Color(fill, 0.35))
+	draw_rect(body, edge, false, width)
+	# The gyro sits above centre, clear of the label strip along the bottom.
+	var hub := Vector2(body.get_center().x, body.position.y + body.size.y * 0.29)
+	var radius := minf(body.size.x, body.size.y) * 0.21
+	draw_arc(hub, radius, 0.0, TAU, 20, edge, width * 0.8, true)
+	draw_line(
+		hub - Vector2(radius, 0.0), hub + Vector2(radius, 0.0), Color(edge, 0.7), width * 0.7, true
+	)
+
+
+## An ablative shield: a dome presented to the airflow.
+func _shape_shield(r: Rect2, fill: Color, edge: Color, width: float) -> void:
+	var points := PackedVector2Array()
+	var steps := 14
+	for i in steps + 1:
+		var f := float(i) / float(steps)
+		points.append(
+			Vector2(
+				r.position.x + r.size.x * f, r.position.y + r.size.y * (0.35 + 0.55 * sin(f * PI))
+			)
+		)
+	points.append(Vector2(r.end.x, r.position.y + r.size.y * 0.2))
+	points.append(Vector2(r.position.x, r.position.y + r.size.y * 0.2))
+	_silhouette(points, fill, edge, width)
+
+
+## Landing legs: struts braced out to a pair of feet.
+func _shape_legs(r: Rect2, fill: Color, edge: Color, width: float) -> void:
+	var top := Rect2(
+		r.position + Vector2(r.size.x * 0.3, 0.0), Vector2(r.size.x * 0.4, r.size.y * 0.3)
+	)
+	draw_rect(top, Color(fill, 0.35))
+	draw_rect(top, edge, false, width)
+	var hip := Vector2(r.get_center().x, top.end.y)
+	for dir: float in [-1.0, 1.0]:
+		var foot := Vector2(r.get_center().x + dir * r.size.x * 0.42, r.end.y)
+		draw_line(hip, foot, edge, width, true)
+		draw_line(
+			foot - Vector2(r.size.x * 0.1, 0.0),
+			foot + Vector2(r.size.x * 0.1, 0.0),
+			edge,
+			width,
+			true
+		)
+
+
+## A strut: open framework, drawn as one because that is all it is.
+func _shape_beam(r: Rect2, fill: Color, edge: Color, width: float) -> void:
+	var body := r.grow_individual(-r.size.x * 0.28, 0.0, -r.size.x * 0.28, 0.0)
+	draw_rect(body, Color(fill, 0.35))
+	draw_rect(body, edge, false, width)
+	draw_line(body.position, body.end, Color(edge, 0.5), width * 0.7, true)
+	draw_line(
+		Vector2(body.end.x, body.position.y),
+		Vector2(body.position.x, body.end.y),
+		Color(edge, 0.5),
+		width * 0.7,
+		true
+	)

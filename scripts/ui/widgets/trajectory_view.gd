@@ -461,7 +461,17 @@ func _draw_predicted_orbit(t: float) -> void:
 		colour = Tokens.trajectory_color("danger")
 		dash = Tokens.trajectory_dash("danger")
 
-	var points := PackedVector2Array()
+	# The conic is drawn in pieces, broken wherever it passes below the surface.
+	# Drawing the whole ellipse was showing a path straight through the planet,
+	# which is the one thing the map must never say: on an ascent the periapsis
+	# is usually hundreds of kilometres underground, and the picture claimed the
+	# ship would sail through the rock and come out the other side.
+	var prograde := float(el[Orbital.K_ANG_MOMENTUM]) >= 0.0
+	var run := PackedVector2Array()
+	var was_above := true
+	var impact := Vector2.ZERO
+	var has_impact := false
+
 	for i in CONIC_SAMPLES + 1:
 		var theta := -DetMath.PI_D + DetMath.TAU_D * float(i) / float(CONIC_SAMPLES)
 		if escaping:
@@ -474,15 +484,39 @@ func _draw_predicted_orbit(t: float) -> void:
 		var r := p / denom
 		if r > 1.0e11:
 			continue
-		var sc := DetMath.sincos(
-			arg + (theta if float(el[Orbital.K_ANG_MOMENTUM]) >= 0.0 else -theta)
-		)
-		points.append(_to_screen(bx + r * sc[1], by + r * sc[0]))
+		var sc := DetMath.sincos(arg + (theta if prograde else -theta))
+		var screen := _to_screen(bx + r * sc[1], by + r * sc[0])
 
-	if points.size() >= 2:
-		_draw_dashed_polyline(points, colour, 1.5, dash)
+		var above := r >= body.radius
+		if above:
+			run.append(screen)
+		else:
+			# First crossing from sky into ground: that is where it lands.
+			if was_above and not run.is_empty():
+				impact = run[run.size() - 1]
+				has_impact = true
+			if run.size() >= 2:
+				_draw_dashed_polyline(run, colour, 1.5, dash)
+			run = PackedVector2Array()
+		was_above = above
+
+	if run.size() >= 2:
+		_draw_dashed_polyline(run, colour, 1.5, dash)
+
+	if has_impact:
+		_draw_impact_marker(impact)
 
 	_draw_apsis_markers(el, bx, by, arg, body, colour)
+
+
+## Where the conic meets the ground. The legend has carried an "impact" entry
+## since the first version of this map; this is the thing it was describing.
+func _draw_impact_marker(p: Vector2) -> void:
+	var colour := Tokens.trajectory_color("danger")
+	draw_arc(p, 6.0, 0.0, TAU, 20, colour, 2.0, true)
+	draw_line(p + Vector2(-4, -4), p + Vector2(4, 4), colour, 2.0, true)
+	draw_line(p + Vector2(-4, 4), p + Vector2(4, -4), colour, 2.0, true)
+	_label(p + Vector2(10, 4), "Impact", colour)
 
 
 func _draw_apsis_markers(
@@ -495,16 +529,16 @@ func _draw_apsis_markers(
 			var sc := DetMath.sincos(arg + DetMath.PI_D)
 			var p := _to_screen(bx + ra * sc[1], by + ra * sc[0])
 			_apsis(p, "Ap %s" % Fmt.distance_coarse(ra - body.radius), colour)
+	# An underground periapsis is not a place the ship ever gets to — it hits the
+	# ground first, and the impact marker says where. Drawing a labelled cross in
+	# the middle of the rock reading "Pe -205.9 km" was pointing at a spot on the
+	# map that does not exist. The number still matters, so the instruments panel
+	# keeps showing it: that negative figure is how much periapsis has to come up.
 	var rp: float = el[Orbital.K_PERIAPSIS]
-	if rp > 0.0:
+	if rp >= body.radius:
 		var sc2 := DetMath.sincos(arg)
 		var p2 := _to_screen(bx + rp * sc2[1], by + rp * sc2[0])
-		var underground := rp < body.radius
-		_apsis(
-			p2,
-			"Pe %s" % Fmt.distance_coarse(rp - body.radius),
-			Tokens.trajectory_color("danger") if underground else colour
-		)
+		_apsis(p2, "Pe %s" % Fmt.distance_coarse(rp - body.radius), colour)
 
 
 func _apsis(at: Vector2, text: String, colour: Color) -> void:

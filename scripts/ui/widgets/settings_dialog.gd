@@ -106,7 +106,7 @@ func _accessibility() -> Control:
 	column.add_child(scale_row)
 
 	column.add_child(
-		UIKit.small(
+		UIKit.note(
 			(
 				"Every screen is fully keyboard-operable. Ctrl+K opens the command palette, "
 				+ "F1 the instruction reference."

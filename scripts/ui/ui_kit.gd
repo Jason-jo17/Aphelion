@@ -41,6 +41,24 @@ static func body(text: String, muted: bool = false) -> Label:
 	return l
 
 
+## Small explanatory prose — the sentence under a heading that says what a
+## panel is for. Wraps, which `small()` deliberately does not.
+##
+## The difference matters more than it looks. A label that wraps has a minimum
+## width of about one word, and one that does not has a minimum width of the
+## whole sentence. Prose needs the first: a paragraph that cannot wrap pushed
+## the results screen to 1973 logical pixels in a 1600-pixel canvas at 160%
+## interface scale, and nothing scrolls sideways. Inline values need the
+## second, or "4.38 t" in a stat row gets squeezed to one character per line —
+## which is what happened when this was briefly the behaviour of `small()`
+## itself.
+static func note(text: String, role: String = "text_muted") -> Label:
+	var l := small(text, role)
+	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	return l
+
+
 static func small(text: String, role: String = "text_muted") -> Label:
 	var l := Label.new()
 	l.text = text
@@ -74,6 +92,31 @@ static func card(padding: float = Tokens.SPACE_4) -> PanelContainer:
 ## `follow_focus` is the part that matters for keyboard control: tabbing to a
 ## control that is scrolled out of view brings it into view, instead of moving
 ## focus somewhere invisible.
+## Gives a screen's keyboard navigation a starting point, without the page
+## chasing it.
+##
+## `follow_focus` is right for navigation — tab to something below the fold and
+## it comes into view — and wrong for the focus a screen puts on itself as it
+## opens. The results screen focuses its primary button, which sits at the
+## bottom of a page that overflows at larger interface scales, so opening the
+## screen scrolled straight past "Objective complete" and the star count to land
+## on a row of buttons. Focus the control, then put the page back to the top.
+##
+## Deferred twice over: the control is usually not in the tree yet when a screen
+## builds itself, and the scroll reset has to land after the scroll that
+## focusing causes.
+static func focus_start(control: Control, page: ScrollContainer) -> void:
+	_focus_start_now.bind(control, page).call_deferred()
+
+
+static func _focus_start_now(control: Control, page: ScrollContainer) -> void:
+	if not is_instance_valid(control):
+		return
+	control.grab_focus()
+	if is_instance_valid(page):
+		page.set_deferred("scroll_vertical", 0)
+
+
 static func page() -> ScrollContainer:
 	var s := scroll()
 	s.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -84,6 +127,22 @@ static func vbox(separation: float = Tokens.SPACE_3) -> VBoxContainer:
 	var v := VBoxContainer.new()
 	v.add_theme_constant_override("separation", int(Tokens.space(separation)))
 	return v
+
+
+## A row that becomes a stack when the row will not fit.
+##
+## Two columns side by side is the right shape on a wide screen and the wrong
+## one at 160% interface scale, where the results screen came to 1973 logical
+## pixels in a 1600-pixel canvas — and since nothing scrolls sideways, the
+## right-hand column was not off-screen so much as gone. A flow container puts
+## the second column underneath instead, which is what a narrow layout wants
+## anyway.
+static func columns(separation: float = Tokens.SPACE_4) -> HFlowContainer:
+	var f := HFlowContainer.new()
+	f.add_theme_constant_override("h_separation", int(Tokens.space(separation)))
+	f.add_theme_constant_override("v_separation", int(Tokens.space(separation)))
+	f.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	return f
 
 
 static func hbox(separation: float = Tokens.SPACE_3) -> HBoxContainer:

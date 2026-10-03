@@ -9,6 +9,8 @@ extends Control
 var _mission: Mission
 var _result: RunResult
 
+var _page: ScrollContainer = null
+
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -18,8 +20,9 @@ func _ready() -> void:
 		App.instance.go_to(App.Screen.MENU)
 		return
 
-	var page := UIKit.page()
-	add_child(page)
+	_page = UIKit.page()
+	add_child(_page)
+	var page := _page
 
 	var margin := MarginContainer.new()
 	margin.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -27,11 +30,13 @@ func _ready() -> void:
 		margin.add_theme_constant_override("margin_" + side, int(Tokens.space(Tokens.SPACE_7)))
 	page.add_child(margin)
 
-	var columns := UIKit.hbox(Tokens.SPACE_6)
+	# Side by side while there is room, stacked when there is not.
+	var columns := UIKit.columns(Tokens.SPACE_6)
 	margin.add_child(columns)
 
 	var left := UIKit.vbox(Tokens.SPACE_4)
 	left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	left.custom_minimum_size = Vector2(Tokens.space(440.0), 0)
 	columns.add_child(left)
 	left.add_child(_verdict())
 	left.add_child(_metrics())
@@ -78,7 +83,7 @@ func _verdict() -> Control:
 		var fraction := float(_result.spin_ticks) / float(_result.vm_ticks)
 		if fraction > 0.5:
 			column.add_child(
-				UIKit.small(
+				UIKit.note(
 					(
 						"Your program hit its per-tick instruction budget on most ticks. "
 						+ "That usually means a loop with no WAIT in it."
@@ -155,7 +160,7 @@ func _personal_bests() -> Control:
 	card.add_child(column)
 	column.add_child(UIKit.heading("Your records", 3))
 	column.add_child(
-		UIKit.small(
+		UIKit.note(
 			(
 				"A fuel record and a speed record are rarely the same flight, so all "
 				+ "three are kept."
@@ -245,11 +250,7 @@ func _actions() -> Control:
 	menu.pressed.connect(func(): App.instance.go_to(App.Screen.MENU))
 	row.add_child(menu)
 
-	# Deferred: _actions() builds this row and returns it, so nothing in it is
-	# in the tree yet and grab_focus() would only push an error and do nothing —
-	# leaving the results screen with no keyboard focus at all, which for a
-	# project that promises full keyboard control is the bug, not the error line.
-	again.grab_focus.call_deferred()
+	UIKit.focus_start(again, _page)
 	return row
 
 

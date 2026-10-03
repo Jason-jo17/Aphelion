@@ -109,12 +109,26 @@ func _check_layout() -> void:
 		App.Screen.RESULTS: "results",
 	}
 	var canvas := _app.get_viewport_rect().size.y
+	var canvas_w := _app.get_viewport_rect().size.x
 	var failures := 0
 	for scale in [0.8, 1.0, 1.3, 1.6]:
 		Settings.ui_scale = scale
 		for id in screens:
 			_app.go_to(id, false)
 			await _settle()
+			# Width as well as height. The first version of this check measured
+			# only height, and passed a results screen whose right-hand column
+			# ran off the edge at 160% — horizontal scrolling is disabled, so
+			# that content was simply gone.
+			var wide := _content_width()
+			if wide > canvas_w:
+				failures += 1
+				print(
+					(
+						"LAYOUT FAIL: %s at %d%% is %d px wide in a %d px canvas"
+						% [screens[id], int(scale * 100.0), int(wide), int(canvas_w)]
+					)
+				)
 			var needs := _content_height()
 			if needs <= canvas or _scrolls():
 				continue
@@ -127,7 +141,19 @@ func _check_layout() -> void:
 			)
 	Settings.ui_scale = 1.0
 	if failures == 0:
-		print("# every screen fits or scrolls, at every interface scale")
+		print("# every screen fits its width and fits or scrolls its height, at every scale")
+
+
+## The widest a screen's content insists on being. Nothing can scroll
+## sideways, so anything past the canvas is unreachable rather than merely
+## off-screen.
+func _content_width() -> float:
+	var screen := _app.get_child(1) as Control
+	var widest := 0.0
+	for c in screen.get_children():
+		if c is Control:
+			widest = maxf(widest, (c as Control).get_combined_minimum_size().x)
+	return widest
 
 
 func _content_height() -> float:

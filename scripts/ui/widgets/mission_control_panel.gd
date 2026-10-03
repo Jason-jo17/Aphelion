@@ -75,7 +75,7 @@ func _refresh_availability() -> void:
 		_body.add_child(open)
 	else:
 		_body.add_child(
-			UIKit.small(
+			UIKit.note(
 				(
 					"It translates what you say, not what you meant. Anything you leave "
 					+ "unstated it decides for itself — and tells you it did."

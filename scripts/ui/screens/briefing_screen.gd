@@ -8,6 +8,8 @@ extends Control
 var _hints_shown := 0
 var _hint_box: VBoxContainer
 
+var _page: ScrollContainer = null
+
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -18,6 +20,7 @@ func _ready() -> void:
 
 	var page := UIKit.page()
 	add_child(page)
+	_page = page
 
 	var margin := MarginContainer.new()
 	margin.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -73,7 +76,7 @@ func _ready() -> void:
 	actions.add_child(go)
 	right.add_child(actions)
 
-	go.grab_focus()
+	UIKit.focus_start(go, _page)
 
 
 func _objectives(mission: Mission) -> Control:
@@ -130,7 +133,7 @@ func _stars_card(mission: Mission) -> Control:
 	card.add_child(column)
 	column.add_child(UIKit.heading("Three stars", 3))
 	column.add_child(
-		UIKit.small(
+		UIKit.note(
 			(
 				"One per target met. They pull against each other on purpose: the "
 				+ "cheapest flight is slow, and the shortest program is neither."

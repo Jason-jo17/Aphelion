@@ -206,7 +206,7 @@ jobs:
             grep 'LAYOUT FAIL' ui.log
             exit 1
           fi
-          grep -q 'every screen fits or scrolls' ui.log \
+          grep -q 'at every scale' ui.log \
             || { echo "::error::the layout check did not run"; exit 1; }
 
           test "$(ls assets/screenshots/*.png | wc -l)" -eq 5

@@ -168,6 +168,30 @@ anything can read aloud. They moved to the bottom edge on a dark backing plate
 and two marks on top of each other read as neither — and a one-cell part gets
 two letters rather than three, which is all that fits at a size worth drawing.
 
+### Fixed — a second layout pass, at width this time
+
+The first layout check measured only height, which is how it passed a results
+screen whose right-hand column ran off the side of the canvas at 130% and 160%.
+Nothing scrolls sideways, so that content was not off-screen, it was gone. The
+check measures both now, and caught each of these:
+
+- **The results screen opened scrolled past its own headline.** Giving every
+  page `follow_focus` was right for navigation and wrong for the focus a screen
+  sets on itself: the results screen focuses its primary button, which sits at
+  the bottom of a page that overflows at larger scales, so opening it scrolled
+  straight past "Objective complete" and the star count. `UIKit.focus_start()`
+  focuses the control and then puts the page back to the top; tabbing still
+  brings things into view. The briefing had the same shape and the same fix.
+- **A paragraph that could not wrap pushed a card wider than the screen.**
+  `UIKit.small()` did not set autowrap, so a sentence's minimum width was the
+  whole sentence. There is now `UIKit.note()` for prose, which wraps, and
+  `small()` stays as it was for inline values — briefly making *everything*
+  wrap squeezed "4.38 t" in a stat row down to one character per line, which is
+  the other half of why these are two functions and not one.
+- **Two columns became one when two will not fit.** The results screen's
+  columns are a flow container now, so at 160% the second sits underneath
+  instead of off the edge.
+
 ### Changed — what the map costs to draw
 
 - The trail was drawing **one `draw_circle` per powered sample, every frame**.
